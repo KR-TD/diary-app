@@ -35,7 +35,7 @@ export function GoogleAd({ adSlot, adFormat = "auto", adLayout, adLayoutKey, sty
       <ins
         className="adsbygoogle"
         style={{ display: "block" }}
-        data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX" // 실제 애드센스 클라이언트 ID로 교체하세요
+        data-ad-client="ca-pub-3964150123386513" // 실제 애드센스 클라이언트 ID로 교체하세요
         data-ad-slot={adSlot}
         data-ad-format={adFormat}
         data-ad-layout={adLayout}
