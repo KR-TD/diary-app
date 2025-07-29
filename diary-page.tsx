@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -15,7 +15,7 @@ export default function Component() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTrack, setCurrentTrack] = useState(0)
   const [volume, setVolume] = useState(0.5)
-  const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const [audioError, setAudioError] = useState(false)
   const [isAudioLoading, setIsAudioLoading] = useState(false)
@@ -60,119 +60,90 @@ export default function Component() {
     mood?: string
   }
 
-  const togglePlay = async () => {
-    if (audioError || !audioSupported) return
-
-    if (audioRef) {
-      try {
-        setIsAudioLoading(true)
-        if (isPlaying) {
-          audioRef.pause()
-          setIsPlaying(false)
-        } else {
-          await audioRef.play()
-          setIsPlaying(true)
-        }
-      } catch (error) {
-        console.error("Audio playback failed:", error)
-        setAudioError(true)
-        setAudioSupported(false)
-        setIsPlaying(false)
-      } finally {
-        setIsAudioLoading(false)
-      }
-    }
-  }
-
-  const changeTrack = async (trackIndex: number) => {
-    if (!audioSupported) return
-
-    setCurrentTrack(trackIndex)
+  // Centralized error handler
+  const handleAudioError = (e: Event | string) => {
+    console.error("Audio error:", e)
+    setAudioError(true)
     setIsPlaying(false)
-    setAudioError(false)
-
-    if (audioRef) {
-      try {
-        setIsAudioLoading(true)
-        audioRef.src = musicTracks[trackIndex].url
-        audioRef.load()
-
-        // 오디오가 로드될 때까지 기다립니다 (타임아웃 포함)
-        await new Promise((resolve, reject) => {
-          const timeout = setTimeout(() => {
-            reject(new Error("Audio loading timeout"))
-          }, 3000)
-
-          audioRef.oncanplaythrough = () => {
-            clearTimeout(timeout)
-            resolve(true)
-          }
-
-          audioRef.onerror = () => {
-            clearTimeout(timeout)
-            reject(new Error("Audio loading failed"))
-          }
-        })
-      } catch (error) {
-        console.error("Audio loading failed:", error)
-        setAudioError(true)
-        setAudioSupported(false)
-      } finally {
-        setIsAudioLoading(false)
-      }
-    }
+    setIsAudioLoading(false)
   }
 
-  const handleVolumeChange = (newVolume: number) => {
-    setVolume(newVolume)
-    if (audioRef) {
-      audioRef.volume = newVolume
-    }
-  }
-
+  // Setup audio element on mount
   useEffect(() => {
-    // 오디오 지원 여부 확인
+    // Check for audio support
     const testAudio = new Audio()
-    const canPlayMP3 = testAudio.canPlayType("audio/mpeg")
-
-    if (!canPlayMP3) {
+    if (typeof testAudio.canPlayType !== "function" || !testAudio.canPlayType("audio/mpeg")) {
       setAudioSupported(false)
       return
     }
 
+    // Create and configure the audio element
     const audio = new Audio()
-    audio.volume = volume
     audio.loop = true
-    audio.preload = "none" // 자동 로딩 방지
+    audio.preload = "auto"
+    audioRef.current = audio
 
-    // 오디오 이벤트 리스너 추가
-    audio.onerror = (e) => {
-      console.error("Audio error occurred:", e)
-      setAudioError(true)
-      setAudioSupported(false)
-      setIsPlaying(false)
-    }
+    // Event listeners
+    audio.addEventListener("error", handleAudioError)
+    audio.addEventListener("play", () => setIsPlaying(true))
+    audio.addEventListener("pause", () => setIsPlaying(false))
+    audio.addEventListener("loadstart", () => setIsAudioLoading(true))
+    audio.addEventListener("canplaythrough", () => setIsAudioLoading(false))
+    audio.addEventListener("ended", () => setIsPlaying(false)) // For non-looping tracks in future
 
-    audio.onended = () => {
-      setIsPlaying(false)
-    }
-
-    audio.onloadstart = () => {
-      setIsAudioLoading(true)
-    }
-
-    audio.oncanplay = () => {
-      setIsAudioLoading(false)
-      setAudioError(false)
-    }
-
-    setAudioRef(audio)
-
+    // Cleanup on unmount
     return () => {
       audio.pause()
-      audio.src = ""
+      audio.removeEventListener("error", handleAudioError)
+      audio.removeEventListener("play", () => setIsPlaying(true))
+      audio.removeEventListener("pause", () => setIsPlaying(false))
+      audio.removeEventListener("loadstart", () => setIsAudioLoading(true))
+      audio.removeEventListener("canplaythrough", () => setIsAudioLoading(false))
+      audio.removeEventListener("ended", () => setIsPlaying(false))
+      audioRef.current = null
     }
   }, [])
+
+  // Update volume when state changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume
+    }
+  }, [volume])
+
+  const togglePlay = () => {
+    const audio = audioRef.current
+    if (!audio || !audioSupported) return
+
+    if (isPlaying) {
+      audio.pause()
+    } else {
+      // If src is not set, it's the first play. Set it.
+      if (!audio.src) {
+        audio.src = musicTracks[currentTrack].url
+        audio.load()
+      }
+      audio.play().catch(handleAudioError)
+    }
+  }
+
+  const changeTrack = (trackIndex: number) => {
+    if (!audioSupported || !audioRef.current) return
+
+    // Update track index and reset error
+    setCurrentTrack(trackIndex)
+    setAudioError(false)
+
+    // Change src, load, and play
+    const audio = audioRef.current
+    audio.src = musicTracks[trackIndex].url
+    audio.load()
+    audio.play().catch(handleAudioError)
+  }
+
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume)
+  }
 
   const handleSave = () => {
     if (diaryContent.trim()) {
@@ -502,8 +473,8 @@ export default function Component() {
               </div>
               <p className={`italic ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
                 {isDarkMode
-                  ? '"밤이 깊어갈수록, 우리의 생각은 더욱 깊어집니다"'
-                  : '"매일 밤, 우리는 하루를 돌아보며 성장합니다"'}
+                  ? "\"밤이 깊어갈수록, 우리의 생각은 더욱 깊어집니다\""
+                  : "\"매일 밤, 우리는 하루를 돌아보며 성장합니다\""}
               </p>
             </CardHeader>
 
@@ -924,7 +895,7 @@ export default function Component() {
                   <p className={`text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-yellow-600"}`}>
                     "하루의 끝"을 사랑해주시고 후원해주신 모든 분들께 진심으로 감사드립니다.
                     <br />
-                    여러분의 소중한 마음 덕분에 더 나은 서비스를 만들어갈 수 있습니다.
+                    여러분의 소중한 마음 덕분에 더 나은 서비스를 만드는 원동력입니다.
                     <br />
                     앞으로도 여러분의 소중한 일상을 아름답게 기록할 수 있도록 최선을 다하겠습니다.
                   </p>
