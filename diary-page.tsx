@@ -23,28 +23,10 @@ export default function Component() {
 
   const musicTracks = [
     {
-      name: "고요한 밤",
-      description: "잔잔한 피아노 선율",
-      url: "/music/quiet-night.mp3",
-      icon: "🌙",
-    },
-    {
-      name: "따뜻한 추억",
-      description: "부드러운 어쿠스틱 기타",
-      url: "/music/warm-memories.mp3",
-      icon: "🎸",
-    },
-    {
       name: "빗소리와 함께",
       description: "자연의 소리와 멜로디",
       url: "/music/rain-sounds.mp3",
       icon: "🌧️",
-    },
-    {
-      name: "별빛 아래",
-      description: "몽환적인 신디사이저",
-      url: "/music/starlight.mp3",
-      icon: "⭐",
     },
   ]
 
