@@ -44,7 +44,7 @@ export function GoogleAd({ adSlot, adFormat = "auto", adLayout, adLayoutKey, sty
   if (!showAd) {
     return (
       <div className={`ad-placeholder ${className}`} style={{ ...style, height: 'auto', backgroundColor: '#f0f0f0' }}>
-        <img src="/광고 대체.png" alt="Advertisement" style={{ width: "100%", height: "auto", display: 'block' }} />
+        <img src="/ad-placeholder.png" alt="Advertisement" style={{ width: "100%", height: "auto", display: 'block' }} />
       </div>
     )
   }
