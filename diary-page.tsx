@@ -10,15 +10,19 @@ import { BannerAd, SquareAd } from "./components/google-ads"
 export default function Component() {
   const [diaryContent, setDiaryContent] = useState("")
   const [isSaved, setIsSaved] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(() => {
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  // Load dark mode preference from localStorage on mount
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedMode = localStorage.getItem('isDarkMode')
-      return savedMode ? JSON.parse(savedMode) : false
+      if (savedMode !== null) {
+        setIsDarkMode(JSON.parse(savedMode))
+      }
     }
-    return false
-  })
+  }, [])
 
-  // Save dark mode preference to localStorage
+  // Save dark mode preference to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('isDarkMode', JSON.stringify(isDarkMode))
