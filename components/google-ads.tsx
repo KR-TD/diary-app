@@ -27,7 +27,7 @@ export function GoogleAd({ adSlot, adFormat = "auto", adLayout, adLayoutKey, sty
       if (adElement && adElement.innerHTML.trim() === "") {
         setShowAd(false)
       }
-    }, 3000) // 3초 후에도 광고가 없으면 대체 이미지 표시
+    }, 3000) // 3초 후에도 광고가 없으면 대체 이미지 표시!!
 
     try {
       if (typeof window !== "undefined" && window.adsbygoogle) {
