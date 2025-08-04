@@ -131,9 +131,7 @@
 }
 
 /* 광고 로딩 상태 */
-.adsbygoogle {
-  background: transparent;
-}
+
 
 /* 명예의 전당 애니메이션 */
 @keyframes goldShimmer {

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music } from "lucide-react"
-import { BannerAd, SquareAd } from "./components/google-ads"
+import { BannerAd, SquareAd } from "./components/kakao-ads"
 
 export default function Component() {
   const [diaryContent, setDiaryContent] = useState("")

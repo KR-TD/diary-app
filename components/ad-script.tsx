@@ -2,15 +2,14 @@
 
 import Script from "next/script"
 
-export function AdSenseScript() {
+export function AdFitScript() {
   return (
     <Script
       async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3964150123386513"
-      crossOrigin="anonymous"
+      src="//t1.daumcdn.net/kas/static/ba.min.js"
       strategy="afterInteractive"
       onError={(e) => {
-        console.error("AdSense script failed to load", e)
+        console.error("AdFit script failed to load", e)
       }}
     />
   )

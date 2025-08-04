@@ -1,8 +1,9 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { AdFitScript } from "../components/ad-script"
 import "./globals.css"
-import { AdSenseScript } from "../components/ad-script"
+
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -20,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        <AdSenseScript />
+        <AdFitScript />
       </head>
       <body className={inter.className}>{children}</body>
     </html>
