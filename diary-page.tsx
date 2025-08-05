@@ -8,23 +8,15 @@ import { Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List, Pencil
 import { TopBannerAd, BottomBannerAd, SquareAd } from "@/components/kakao-ads"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { usePathname } from 'next/navigation'
+import { useTheme } from 'next-themes'
 
 export default function Component() {
   const [diaryContent, setDiaryContent] = useState("")
   const isMobile = useIsMobile()
   const pathname = usePathname()
+  const { theme, setTheme } = useTheme()
+  
   const [isSaved, setIsSaved] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(false)
-
-  
-  
-
-  // Save dark mode preference to localStorage whenever it changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('isDarkMode', JSON.stringify(isDarkMode))
-    }
-  }, [isDarkMode])
 
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTrack, setCurrentTrack] = useState(0)
@@ -200,7 +192,7 @@ export default function Component() {
   return (
     <div
       className={`min-h-screen transition-all duration-500 p-2 sm:p-4 ${
-        isDarkMode
+        theme === 'dark'
           ? "bg-gradient-to-br from-gray-900 via-slate-900 to-black"
           : "bg-gradient-to-br from-rose-100 via-orange-50 to-amber-100"
       }`}
@@ -217,25 +209,25 @@ export default function Component() {
         {/* 기존 별들 */}
         <Star
           className={`absolute top-20 left-10 w-4 h-4 animate-pulse ${
-            isDarkMode ? "text-yellow-300" : "text-rose-300"
+            theme === 'dark' ? "text-yellow-300" : "text-rose-300"
           }`}
         />
         <Star
           className={`absolute top-40 right-20 w-3 h-3 animate-pulse delay-1000 ${
-            isDarkMode ? "text-blue-300" : "text-orange-300"
+            theme === 'dark' ? "text-blue-300" : "text-orange-300"
           }`}
         />
         <Moon
-          className={`absolute top-32 right-10 w-6 h-6 opacity-70 ${isDarkMode ? "text-yellow-200" : "text-amber-300"}`}
+          className={`absolute top-32 right-10 w-6 h-6 opacity-70 ${theme === 'dark' ? "text-yellow-200" : "text-amber-300"}`}
         />
         <Heart
           className={`absolute bottom-40 left-16 w-5 h-5 animate-pulse delay-2000 ${
-            isDarkMode ? "text-pink-300" : "text-rose-400"
+            theme === 'dark' ? "text-pink-300" : "text-rose-400"
           }`}
         />
         <Star
           className={`absolute bottom-60 right-32 w-4 h-4 animate-pulse delay-500 ${
-            isDarkMode ? "text-purple-300" : "text-pink-300"
+            theme === 'dark' ? "text-purple-300" : "text-pink-300"
           }`}
         />
 
@@ -265,7 +257,7 @@ export default function Component() {
               <Button
                 onClick={() => setCurrentView(currentView === "write" ? "list" : "write")}
                 className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
-                  isDarkMode
+                  theme === 'dark'
                     ? "bg-purple-600/20 hover:bg-purple-600/30 text-purple-300"
                     : "bg-rose-500/20 hover:bg-rose-500/30 text-rose-600"
                 }`}
@@ -280,10 +272,10 @@ export default function Component() {
                 onClick={() => setCurrentView("support")}
                 className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
                   currentView === "support"
-                    ? isDarkMode
+                    ? theme === 'dark'
                       ? "bg-pink-600/30 text-pink-300"
                       : "bg-pink-500/30 text-pink-600"
-                    : isDarkMode
+                    : theme === 'dark'
                       ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300"
                       : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600"
                 }`}
@@ -298,10 +290,10 @@ export default function Component() {
                 onClick={() => setCurrentView("hall")}
                 className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
                   currentView === "hall"
-                    ? isDarkMode
+                    ? theme === 'dark'
                       ? "bg-yellow-600/30 text-yellow-300"
                       : "bg-yellow-500/30 text-yellow-600"
-                    : isDarkMode
+                    : theme === 'dark'
                       ? "bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-300"
                       : "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-600"
                 }`}
@@ -314,29 +306,29 @@ export default function Component() {
             </div>
 
             <Button
-              onClick={() => setIsDarkMode(!isDarkMode)}
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className={`p-3 rounded-full transition-all duration-300 ${
-                isDarkMode
+                theme === 'dark'
                   ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300"
                   : "bg-orange-500/20 hover:bg-orange-500/30 text-orange-600"
               }`}
               variant="ghost"
             >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
           </div>
 
           <h1
             className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-2 ${
-              isDarkMode
+              theme === 'dark'
                 ? "bg-gradient-to-r from-yellow-300 via-blue-300 to-purple-300 bg-clip-text text-transparent"
                 : "bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 bg-clip-text text-transparent"
             }`}
           >
             하루의 끝
           </h1>
-          <p className={`text-base sm:text-lg font-medium ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
-            {isDarkMode
+          <p className={`text-base sm:text-lg font-medium ${theme === 'dark' ? "text-gray-300" : "text-rose-700"}`}>
+            {theme === 'dark'
               ? "고요한 밤, 하루를 돌아보며 마음을 정리해보세요"
               : "오늘 하루를 마무리하며, 소중한 순간들을 기록해보세요"}
           </p>
@@ -345,7 +337,7 @@ export default function Component() {
         {/* 음악 플레이어 */}
         <Card
           className={`backdrop-blur-sm border-0 shadow-lg mb-4 sm:mb-6 transition-all duration-500 ${
-            isDarkMode
+            theme === 'dark'
               ? "bg-slate-900/70 shadow-purple-500/20 border border-slate-700/50"
               : "bg-white/80 border border-rose-200/50 shadow-rose-200/20"
           }`}
@@ -353,11 +345,11 @@ export default function Component() {
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 sm:gap-3">
-                <Music className={`w-5 h-5 ${isDarkMode ? "text-purple-400" : "text-rose-500"}`} />
+                <Music className={`w-5 h-5 ${theme === 'dark' ? "text-purple-400" : "text-rose-500"}`} />
                 {!isMobile && (
                   <div>
-                    <h3 className={`font-medium ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>배경음악</h3>
-                    <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
+                    <h3 className={`font-medium ${theme === 'dark' ? "text-gray-200" : "text-rose-800"}`}>배경음악</h3>
+                    <p className={`text-sm ${theme === 'dark' ? "text-gray-400" : "text-rose-600"}`}>
                       {musicTracks[currentTrack].name} - {musicTracks[currentTrack].description}
                     </p>
                   </div>
@@ -376,10 +368,10 @@ export default function Component() {
                         !audioSupported
                           ? "opacity-50 cursor-not-allowed"
                           : currentTrack === index
-                            ? isDarkMode
+                            ? theme === 'dark'
                               ? "bg-purple-600 hover:bg-purple-700"
                               : "bg-purple-500 hover:bg-purple-600"
-                            : isDarkMode
+                            : theme === 'dark'
                               ? "bg-slate-700 hover:bg-slate-600 text-gray-300"
                               : "bg-gray-200 hover:bg-gray-300 text-gray-600"
                       }`}
@@ -392,7 +384,7 @@ export default function Component() {
 
                 {/* 볼륨 조절 */}
                 <div className="hidden sm:flex items-center gap-2">
-                  <Volume2 className={`w-4 h-4 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} />
+                  <Volume2 className={`w-4 h-4 ${theme === 'dark' ? "text-gray-400" : "text-gray-500"}`} />
                   <input
                     type="range"
                     min="0"
@@ -412,10 +404,10 @@ export default function Component() {
                     audioError || !audioSupported
                       ? "bg-gray-400 cursor-not-allowed opacity-50"
                       : isPlaying
-                        ? isDarkMode
+                        ? theme === 'dark'
                           ? "bg-purple-600 hover:bg-purple-700 animate-pulse"
                           : "bg-purple-500 hover:bg-purple-600 animate-pulse"
-                        : isDarkMode
+                        : theme === 'dark'
                           ? "bg-slate-700 hover:bg-slate-600"
                           : "bg-gray-200 hover:bg-gray-300"
                   }`}
@@ -424,11 +416,11 @@ export default function Component() {
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : isPlaying ? (
                     <Pause
-                      className={`w-4 h-4 ${isPlaying ? "text-white" : isDarkMode ? "text-gray-300" : "text-gray-600"}`}
+                      className={`w-4 h-4 ${isPlaying ? "text-white" : theme === 'dark' ? "text-gray-300" : "text-gray-600"}`}
                     />
                   ) : (
                     <Play
-                      className={`w-4 h-4 ${isPlaying ? "text-white" : isDarkMode ? "text-gray-300" : "text-gray-600"}`}
+                      className={`w-4 h-4 ${isPlaying ? "text-white" : theme === 'dark' ? "text-gray-300" : "text-gray-600"}`}
                     />
                   )}
                 </Button>
@@ -438,19 +430,19 @@ export default function Component() {
             {/* 오디오 상태 표시 */}
             {!audioSupported ? (
               <div className="mt-3 text-center">
-                <p className={`text-xs sm:text-sm ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}>
+                <p className={`text-xs sm:text-sm ${theme === 'dark' ? "text-yellow-400" : "text-yellow-600"}`}>
                   🎵 이 브라우저에서는 음악 기능을 지원하지 않습니다
                 </p>
               </div>
             ) : audioError ? (
               <div className="mt-3 text-center">
-                <p className={`text-xs sm:text-sm ${isDarkMode ? "text-red-400" : "text-red-500"}`}>
+                <p className={`text-xs sm:text-sm ${theme === 'dark' ? "text-red-400" : "text-red-500"}`}>
                   🎵 음악을 불러올 수 없습니다. 음악 없이도 일기 작성을 계속하세요
                 </p>
               </div>
             ) : isAudioLoading ? (
               <div className="mt-3 text-center">
-                <p className={`text-xs sm:text-sm ${isDarkMode ? "text-blue-400" : "text-blue-500"}`}>🎵 음악을 불러오는 중...</p>
+                <p className={`text-xs sm:text-sm ${theme === 'dark' ? "text-blue-400" : "text-blue-500"}`}>🎵 음악을 불러오는 중...</p>
               </div>
             ) : isPlaying ? (
               <div className="mt-3 flex justify-center">
@@ -459,7 +451,7 @@ export default function Component() {
                     <div
                       key={i}
                       className={`w-1 bg-gradient-to-t rounded-full animate-pulse ${
-                        isDarkMode ? "from-purple-400 to-blue-400" : "from-purple-500 to-pink-500"
+                        theme === 'dark' ? "from-purple-400 to-blue-400" : "from-purple-500 to-pink-500"
                       }`}
                       style={{
                         height: `${Math.random() * 15 + 8}px`,
@@ -475,7 +467,7 @@ export default function Component() {
         </Card>
 
         {/* 자연스러운 광고 배치 - 음악 플레이어 다음 */}
-        <div className={`text-center mb-4 sm:mb-6 ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
+        <div className={`text-center mb-4 sm:mb-6 ${theme === 'dark' ? "text-gray-400" : "text-rose-600"}`}>
           <p className="text-xs mb-2 opacity-70">✨ 광고 ✨</p>
           <TopBannerAd />
         </div>
@@ -483,21 +475,21 @@ export default function Component() {
         {currentView === "write" ? (
           <Card
             className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
-              isDarkMode
+              theme === 'dark'
                 ? "bg-slate-900/80 shadow-purple-500/30 border border-slate-700/50"
                 : "bg-white/90 border border-rose-200/50 shadow-rose-200/30"
             }`}
           >
             <CardHeader className="text-center pb-4 sm:pb-6">
               <div className="flex items-center justify-center gap-2 mb-4">
-                <Moon className={`w-5 h-5 ${isDarkMode ? "text-yellow-400" : "text-amber-500"}`} />
-                <span className={`text-lg sm:text-xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
+                <Moon className={`w-5 h-5 ${theme === 'dark' ? "text-yellow-400" : "text-amber-500"}`} />
+                <span className={`text-lg sm:text-xl font-semibold ${theme === 'dark' ? "text-gray-200" : "text-rose-800"}`}>
                   {getCurrentDate()}
                 </span>
-                <Star className={`w-5 h-5 ${isDarkMode ? "text-blue-400" : "text-rose-500"}`} />
+                <Star className={`w-5 h-5 ${theme === 'dark' ? "text-blue-400" : "text-rose-500"}`} />
               </div>
-              <p className={`italic text-sm sm:text-base ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
-                {isDarkMode
+              <p className={`italic text-sm sm:text-base ${theme === 'dark' ? "text-gray-400" : "text-rose-600"}`}>
+                {theme === 'dark'
                   ? "\"밤이 깊어갈수록, 우리의 생각은 더욱 깊어집니다\""
                   : "\"매일 밤, 우리는 하루를 돌아보며 성장합니다\""}
               </p>
@@ -506,20 +498,20 @@ export default function Component() {
             <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-6">
               {/* 일기 작성 영역 */}
               <div className="space-y-3">
-                <label className={`text-base sm:text-lg font-medium flex items-center gap-2 ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
-                  <Heart className={`w-5 h-5 ${isDarkMode ? "text-pink-400" : "text-rose-500"}`} />
+                <label className={`text-base sm:text-lg font-medium flex items-center gap-2 ${theme === 'dark' ? "text-gray-200" : "text-rose-800"}`}>
+                  <Heart className={`w-5 h-5 ${theme === 'dark' ? "text-pink-400" : "text-rose-500"}`} />
                   오늘의 이야기
                 </label>
                 <Textarea
                   placeholder={
-                    isDarkMode
+                    theme === 'dark'
                       ? "고요한 밤, 오늘 하루는 어떠셨나요?\n달빛 아래에서 마음속 깊은 이야기를 들려주세요.\n작은 감정들도 소중한 기억이 됩니다..."
                       : "오늘 하루는 어떠셨나요? \n기쁜 일, 힘들었던 일, 감사한 일들을 자유롭게 적어보세요.\n작은 순간들도 소중한 기억이 됩니다..."
                   }
                   value={diaryContent}
                   onChange={(e) => setDiaryContent(e.target.value)}
                   className={`min-h-[250px] sm:min-h-[300px] text-base leading-relaxed resize-none border-2 rounded-xl p-3 sm:p-4 backdrop-blur-sm transition-all duration-300 ${
-                    isDarkMode
+                    theme === 'dark'
                       ? "border-purple-500/30 focus:border-purple-400 bg-slate-700/50 text-gray-200 placeholder:text-gray-400"
                       : "border-rose-200 focus:border-rose-400 bg-white/70 text-rose-900 placeholder:text-rose-500"
                   }`}
@@ -527,7 +519,7 @@ export default function Component() {
               </div>
 
               {/* 글자 수 표시 */}
-              <div className={`text-right text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
+              <div className={`text-right text-xs sm:text-sm ${theme === 'dark' ? "text-gray-400" : "text-rose-600"}`}>
                 {diaryContent.length}자
               </div>
 
@@ -538,7 +530,7 @@ export default function Component() {
                   className={`px-6 sm:px-8 py-3 text-base sm:text-lg font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${
                     isSaved
                       ? "bg-green-500 hover:bg-green-600"
-                      : isDarkMode
+                      : theme === 'dark'
                         ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                         : "bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600"
                   }`}
@@ -549,9 +541,9 @@ export default function Component() {
               </div>
 
               {/* 하단 메시지 */}
-              <div className={`text-center pt-4 sm:pt-6 border-t ${isDarkMode ? "border-purple-500/30" : "border-rose-200"}`}>
-                <p className={`text-xs sm:text-sm italic ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
-                  {isDarkMode
+              <div className={`text-center pt-4 sm:pt-6 border-t ${theme === 'dark' ? "border-purple-500/30" : "border-rose-200"}`}>
+                <p className={`text-xs sm:text-sm italic ${theme === 'dark' ? "text-gray-400" : "text-rose-600"}`}>
+                  {theme === 'dark'
                     ? "별빛 아래에서 당신의 하루가 아름다운 꿈으로 이어지기를 🌙✨"
                     : "따뜻한 햇살처럼 당신의 소중한 하루가 아름다운 추억으로 남기를 바랍니다 🌅✨"}
                 </p>
@@ -561,14 +553,14 @@ export default function Component() {
         ) : currentView === "list" ? (
           <Card
             className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
-              isDarkMode ? "bg-slate-800/80 shadow-purple-500/20" : "bg-white/80"
+              theme === 'dark' ? "bg-slate-800/80 shadow-purple-500/20" : "bg-white/80"
             }`}
           >
             <CardHeader className="text-center pb-4 sm:pb-6">
-              <h2 className={`text-xl sm:text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
+              <h2 className={`text-xl sm:text-2xl font-semibold ${theme === 'dark' ? "text-gray-200" : "text-gray-700"}`}>
                 📖 나의 일기장
               </h2>
-              <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+              <p className={`text-sm ${theme === 'dark' ? "text-gray-400" : "text-gray-500"}`}>
                 총 {diaryEntries.length}개의 소중한 기억들
               </p>
             </CardHeader>
@@ -576,10 +568,10 @@ export default function Component() {
             <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
               {diaryEntries.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                  <p className={`text-base sm:text-lg ${theme === 'dark' ? "text-gray-400" : "text-gray-500"}`}>
                     아직 작성된 일기가 없습니다
                   </p>
-                  <p className={`text-sm mt-2 ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}>
+                  <p className={`text-sm mt-2 ${theme === 'dark' ? "text-gray-500" : "text-gray-400"}`}>
                     첫 번째 일기를 작성해보세요! ✨
                   </p>
                 </div>
@@ -588,28 +580,28 @@ export default function Component() {
                   <div key={entry.id}>
                     <div
                       className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md ${
-                        isDarkMode
+                        theme === 'dark'
                           ? "border-purple-500/30 bg-slate-700/50 hover:bg-slate-700/70"
                           : "border-purple-100 bg-white/50 hover:bg-white/70"
                       }`}
                       onClick={() => setSelectedEntry(entry)}
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>
+                        <span className={`text-xs sm:text-sm font-medium ${theme === 'dark' ? "text-purple-300" : "text-purple-600"}`}>
                           {entry.date}
                         </span>
-                        <span className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                        <span className={`text-xs ${theme === 'dark' ? "text-gray-400" : "text-gray-500"}`}>
                           {entry.content.length}자
                         </span>
                       </div>
-                      <p className={`text-sm sm:text-base line-clamp-3 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                      <p className={`text-sm sm:text-base line-clamp-3 ${theme === 'dark' ? "text-gray-300" : "text-gray-600"}`}>
                         {entry.content}
                       </p>
                     </div>
                     {/* 일기 목록 중간에 자연스러운 광고 삽입 (5개마다) */}
                     {(index + 1) % 5 === 0 && index < diaryEntries.length - 1 && (
                       <div className="my-4 sm:my-6 text-center">
-                        <p className={`text-xs mb-2 opacity-60 ${isDarkMode ? "text-gray-400" : "text-rose-500"}`}>
+                        <p className={`text-xs mb-2 opacity-60 ${theme === 'dark' ? "text-gray-400" : "text-rose-500"}`}>
                           ✨ 추천 ✨
                         </p>
                         <SquareAd />
@@ -624,20 +616,20 @@ export default function Component() {
           // 후원 페이지
           <Card
             className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
-              isDarkMode
+              theme === 'dark'
                 ? "bg-slate-900/80 shadow-pink-500/30 border border-slate-700/50"
                 : "bg-white/90 border border-pink-200/50 shadow-pink-200/30"
             }`}
           >
             <CardHeader className="text-center pb-4 sm:pb-6">
               <div className="flex items-center justify-center gap-2 mb-4">
-                <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
-                <span className={`text-xl sm:text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
+                <Heart className={`w-6 h-6 ${theme === 'dark' ? "text-pink-400" : "text-pink-500"}`} />
+                <span className={`text-xl sm:text-2xl font-semibold ${theme === 'dark' ? "text-gray-200" : "text-rose-800"}`}>
                   개발자 후원하기
                 </span>
                 <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
               </div>
-              <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
+              <p className={`text-base sm:text-lg ${theme === 'dark' ? "text-gray-300" : "text-rose-700"}`}>
                 "하루의 끝"을 사랑해주셔서 감사합니다
               </p>
             </CardHeader>
@@ -645,11 +637,11 @@ export default function Component() {
             <CardContent className="space-y-6 sm:space-y-8 p-3 sm:p-6">
               {/* 후원 메시지 */}
               <div className="text-center space-y-4">
-                <div className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-rose-50/80"}`}>
-                  <h3 className={`text-lg sm:text-xl font-semibold mb-3 ${isDarkMode ? "text-pink-300" : "text-rose-700"}`}>
+                <div className={`p-4 sm:p-6 rounded-xl ${theme === 'dark' ? "bg-slate-800/50" : "bg-rose-50/80"}`}>
+                  <h3 className={`text-lg sm:text-xl font-semibold mb-3 ${theme === 'dark' ? "text-pink-300" : "text-rose-700"}`}>
                     💝 후원을 해주시면 개발자에게 큰 힘이 됩니다
                   </h3>
-                  <p className={`text-sm sm:text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-rose-600"}`}>
+                  <p className={`text-sm sm:text-base leading-relaxed ${theme === 'dark' ? "text-gray-300" : "text-rose-600"}`}>
                     여러분의 소중한 일기를 더 안전하고 아름답게 보관할 수 있도록
                     <br />
                     지속적으로 개발하고 개선해나가겠습니다.
@@ -967,13 +959,13 @@ export default function Component() {
           >
             <CardHeader className="text-center pb-6">
               <div className="flex items-center justify-center gap-2 mb-4">
-                <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
+                <Heart className={`w-6 h-6 ${theme === 'dark' ? "text-pink-400" : "text-pink-500"}`} />
                 <span className={`text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
                   개발자 후원하기
                 </span>
                 <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
               </div>
-              <p className={`text-lg ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
+              <p className={`text-lg ${theme === 'dark' ? "text-gray-300" : "text-rose-700"}`}>
                 "하루의 끝"을 사랑해주셔서 감사합니다
               </p>
             </CardHeader>
@@ -981,11 +973,11 @@ export default function Component() {
             <CardContent className="space-y-8">
               {/* 후원 메시지 */}
               <div className="text-center space-y-4">
-                <div className={`p-6 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-rose-50/80"}`}>
-                  <h3 className={`text-xl font-semibold mb-3 ${isDarkMode ? "text-pink-300" : "text-rose-700"}`}>
+                <div className={`p-6 rounded-xl ${theme === 'dark' ? "bg-slate-800/50" : "bg-rose-50/80"}`}>
+                  <h3 className={`text-xl font-semibold mb-3 ${theme === 'dark' ? "text-pink-300" : "text-rose-700"}`}>
                     💝 후원을 해주시면 개발자에게 큰 힘이 됩니다
                   </h3>
-                  <p className={`text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-rose-600"}`}>
+                  <p className={`text-base leading-relaxed ${theme === 'dark' ? "text-gray-300" : "text-rose-600"}`}>
                     여러분의 소중한 일기를 더 안전하고 아름답게 보관할 수 있도록
                     <br />
                     지속적으로 개발하고 개선해나가겠습니다.
@@ -1063,13 +1055,13 @@ export default function Component() {
         )}
 
         {/* 하단 자연스러운 광고 */}
-        <div className={`text-center mt-8 mb-6 ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
+        <div className={`text-center mt-8 mb-6 text-gray-400`}>
           <p className="text-xs mb-2 opacity-70">✨ 함께 보면 좋은 ✨</p>
           <BottomBannerAd />
         </div>
 
         {/* 푸터 */}
-        <div className={`text-center mt-8 text-sm ${isDarkMode ? "text-gray-500" : "text-rose-500"}`}>
+        <div className={`text-center mt-8 text-sm text-gray-500`}>
           <p>© 2024 하루의 끝. 모든 순간이 소중합니다.</p>
         </div>
       </div>
