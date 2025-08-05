@@ -1,83 +1,45 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useRef } from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { usePathname } from 'next/navigation'
 
-interface KakaoAdProps {
+/**
+ * A "dumb" component that only renders the <ins> tag for an ad.
+ * The actual ad loading and script management is handled by the parent page.
+ */
+interface KakaoAdInsProps {
   adUnit: string
   adWidth: string
   adHeight: string
   className?: string
 }
 
-export function KakaoAd({ adUnit, adWidth, adHeight, className = "" }: KakaoAdProps) {
-  const adRef = useRef<HTMLDivElement>(null)
-  const pathname = usePathname() // Get the current route
-
-  useEffect(() => {
-    const adElement = adRef.current
-    if (!adElement) return
-
-    // Clear previous ad content on path change
-    adElement.innerHTML = ""
-
-    const ins = document.createElement("ins")
-    ins.className = "kakao_ad_area"
-    ins.style.display = "none"
-    ins.setAttribute("data-ad-unit", adUnit)
-    ins.setAttribute("data-ad-width", adWidth)
-    ins.setAttribute("data-ad-height", adHeight)
-    adElement.appendChild(ins)
-
-    // The AdFit script is loaded globally in layout.tsx
-    // We need to re-initialize the ad unit for SPA navigation
-    if (window.kakaoAdFit) {
-        window.kakaoAdFit.display(ins)
-    } else {
-        // Fallback for the first load
-        const script = document.createElement("script")
-        script.type = "text/javascript"
-        script.src = "//t1.daumcdn.net/kas/static/ba.min.js"
-        script.async = true
-        adElement.appendChild(script)
-    }
-
-    // Cleanup function to remove the ad on component unmount
-    return () => {
-      if (adElement) {
-        adElement.innerHTML = ""
-      }
-    }
-  }, [adUnit, adWidth, adHeight, pathname]) // Re-run effect when path changes
-
+function KakaoAdIns({ adUnit, adWidth, adHeight, className = "" }: KakaoAdInsProps) {
   return (
-    <div
-      ref={adRef}
-      className={`ad-container ${className}`}
-      style={{ width: `${adWidth}px`, height: `${adHeight}px`, margin: "0 auto" }}
-    />
+    <div className={`ad-container ${className}`} style={{ width: `${adWidth}px`, height: `${adHeight}px`, margin: "0 auto" }}>
+      <ins
+        className="kakao_ad_area"
+        style={{ display: "none" }}
+        data-ad-unit={adUnit}
+        data-ad-width={adWidth}
+        data-ad-height={adHeight}
+      />
+    </div>
   )
 }
 
-// 반응형 배너 광고
-export function BannerAd({ className = "" }: { className?: string }) {
+// Top Banner Ad
+export function TopBannerAd({ className = "" }: { className?: string }) {
   const isMobile = useIsMobile()
-
-  if (isMobile) {
-    return (
-      <KakaoAd
-        adUnit="DAN-OdbuLQOqVTkMus4q"
-        adWidth="320"
-        adHeight="100"
-        className={`banner-ad-mobile ${className}`}
-      />
-    )
-  }
-
-  return (
-    <KakaoAd
+  return isMobile ? (
+    <KakaoAdIns
+      adUnit="DAN-OdbuLQOqVTkMus4q"
+      adWidth="320"
+      adHeight="100"
+      className={`banner-ad-mobile ${className}`}
+    />
+  ) : (
+    <KakaoAdIns
       adUnit="DAN-4JpNW8o4ndtLhmy8"
       adWidth="728"
       adHeight="90"
@@ -86,45 +48,35 @@ export function BannerAd({ className = "" }: { className?: string }) {
   )
 }
 
-// 사각형 광고 컴포넌트 (반응형)
-export function SquareAd({ className = "" }: { className?: string }) {
+// Bottom Banner Ad
+export function BottomBannerAd({ className = "" }: { className?: string }) {
   const isMobile = useIsMobile()
-
-  if (isMobile) {
-    return (
-      <KakaoAd
-        adUnit="DAN-4JpNW8o4ndtLhmy8" // 모바일용 광고 단위 ID
-        adWidth="320"
-        adHeight="250"
-        className={`square-ad-mobile ${className}`}
-      />
-    )
-  }
-
-  return (
-    <KakaoAd
-      adUnit="DAN-4JpNW8o4ndtLhmy8"
-      adWidth="300"
-      adHeight="250"
-      className={`square-ad-desktop ${className}`}
+  return isMobile ? (
+    <KakaoAdIns
+      adUnit="DAN-yiP4TSU5JEWvwReg"
+      adWidth="320"
+      adHeight="100"
+      className={`banner-ad-mobile ${className}`}
+    />
+  ) : (
+    <KakaoAdIns
+      adUnit="DAN-e1av4mDSH2ie0Ehw"
+      adWidth="728"
+      adHeight="90"
+      className={`banner-ad-desktop ${className}`}
     />
   )
 }
 
-// 사이드바 광고는 모바일에서 숨김
-export function SidebarAd({ className = "" }: { className?: string }) {
+// Square Ad
+export function SquareAd({ className = "" }: { className?: string }) {
   const isMobile = useIsMobile()
-
-  if (isMobile) {
-    return null // 모바일에서는 사이드바 광고를 표시하지 않음
-  }
-
   return (
-    <KakaoAd
-      adUnit="DAN-4JpNW8o4ndtLhmy8"
-      adWidth="160"
-      adHeight="600"
-      className={`sidebar-ad ${className}`}
+    <KakaoAdIns
+      adUnit="DAN-4JpNW8o4ndtLhmy8" // This can be a different ad unit ID
+      adWidth={isMobile ? "320" : "300"}
+      adHeight="250"
+      className={`square-ad ${className}`}
     />
   )
 }

@@ -5,24 +5,19 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List, Pencil, Award, Gem } from "lucide-react"
-import { BannerAd, SquareAd } from "./components/kakao-ads"
+import { TopBannerAd, BottomBannerAd, SquareAd } from "@/components/kakao-ads"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { usePathname } from 'next/navigation'
 
 export default function Component() {
   const [diaryContent, setDiaryContent] = useState("")
   const isMobile = useIsMobile()
+  const pathname = usePathname()
   const [isSaved, setIsSaved] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
 
-  // Load dark mode preference from localStorage on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedMode = localStorage.getItem('isDarkMode')
-      if (savedMode !== null) {
-        setIsDarkMode(JSON.parse(savedMode))
-      }
-    }
-  }, [])
+  
+  
 
   // Save dark mode preference to localStorage whenever it changes
   useEffect(() => {
@@ -52,6 +47,32 @@ export default function Component() {
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([])
   const [currentView, setCurrentView] = useState<"write" | "list" | "support" | "hall">("write")
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null)
+
+  useEffect(() => {
+    const scriptId = "kakao-adfit-script";
+
+    const loadAdfit = () => {
+      // Clean up previous ads and scripts
+      const existingScript = document.getElementById(scriptId);
+      if (existingScript) {
+        existingScript.remove();
+      }
+
+      // Create and append the new script
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "//t1.daumcdn.net/kas/static/ba.min.js";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+
+    // Use a timeout to ensure all <ins> tags are rendered before the script runs
+    const timer = setTimeout(loadAdfit, 100);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [currentView, pathname]);
 
   interface DiaryEntry {
     id: string
@@ -163,12 +184,7 @@ export default function Component() {
     }
   }
 
-  useEffect(() => {
-    const savedEntries = localStorage.getItem("diaryEntries")
-    if (savedEntries) {
-      setDiaryEntries(JSON.parse(savedEntries))
-    }
-  }, [])
+  
 
   const getCurrentDate = () => {
     const today = new Date()
@@ -461,7 +477,7 @@ export default function Component() {
         {/* 자연스러운 광고 배치 - 음악 플레이어 다음 */}
         <div className={`text-center mb-4 sm:mb-6 ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
           <p className="text-xs mb-2 opacity-70">✨ 광고 ✨</p>
-          <BannerAd />
+          <TopBannerAd />
         </div>
 
         {currentView === "write" ? (
@@ -1049,7 +1065,7 @@ export default function Component() {
         {/* 하단 자연스러운 광고 */}
         <div className={`text-center mt-8 mb-6 ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
           <p className="text-xs mb-2 opacity-70">✨ 함께 보면 좋은 ✨</p>
-          <BannerAd />
+          <BottomBannerAd />
         </div>
 
         {/* 푸터 */}
