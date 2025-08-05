@@ -27,7 +27,7 @@ export default function Component() {
 
   
   
-  
+
 
   // Save dark mode preference to localStorage whenever it changes
   useEffect(() => {
@@ -788,9 +788,9 @@ export default function Component() {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   {[
-                    { name: "김**님", amount: "150,000원", date: "2024.01.15", message: "좋은 서비스 감사합니다!" },
-                    { name: "이**님", amount: "200,000원", date: "2024.01.20", message: "개발자님 화이팅!" },
-                    { name: "박**님", amount: "100,000원", date: "2024.02.03", message: "매일 사용하고 있어요 ❤️" },
+                    { name: "김**님", amount: "150,000원", date: "2025.08.01", message: "좋은 서비스 감사합니다!" },
+                    { name: "이**님", amount: "200,000원", date: "2025.07.20", message: "개발자님 화이팅!" },
+                    { name: "박**님", amount: "100,000원", date: "2025.08.03", message: "매일 사용하고 있어요 ❤️" },
                   ].map((supporter, index) => (
                     <div
                       key={index}
@@ -1080,7 +1080,7 @@ export default function Component() {
 
         {/* 푸터 */}
         <div className={`text-center mt-8 text-sm ${isDarkMode ? "text-gray-500" : "text-rose-500"}`}>
-          <p>© 2024 하루의 끝. 모든 순간이 소중합니다.</p>
+          <p>© 2025 하루의 끝. 모든 순간이 소중합니다.</p>
         </div>
       </div>
       {selectedEntry && (
