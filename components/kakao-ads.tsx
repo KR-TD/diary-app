@@ -1,82 +1,113 @@
 "use client"
 
 import type React from "react"
-import { useIsMobile } from "@/hooks/use-mobile"
 
-/**
- * A "dumb" component that only renders the <ins> tag for an ad.
- * The actual ad loading and script management is handled by the parent page.
- */
-interface KakaoAdInsProps {
-  adUnit: string
-  adWidth: string
-  adHeight: string
+import { useEffect, useState } from "react"
+
+declare global {
+  interface Window {
+    adsbygoogle: any[]
+  }
+}
+
+interface GoogleAdProps {
+  adSlot: string
+  adFormat?: string
+  adLayout?: string
+  adLayoutKey?: string
+  style?: React.CSSProperties
   className?: string
 }
 
-function KakaoAdIns({ adUnit, adWidth, adHeight, className = "" }: KakaoAdInsProps) {
+export function GoogleAd({ adSlot, adFormat = "auto", adLayout, adLayoutKey, style, className = "" }: GoogleAdProps) {
+  const [showAd, setShowAd] = useState(true)
+
+  useEffect(() => {
+    const adTimer = setTimeout(() => {
+      const adElement = document.querySelector(`.ad-container[data-ad-slot="${adSlot}"] .adsbygoogle`)
+      if (adElement && adElement.innerHTML.trim() === "") {
+        setShowAd(false)
+      }
+    }, 1000) // 1초 후에도 광고가 없으면 대체 이미지 표시!!
+
+    try {
+      if (typeof window !== "undefined" && window.adsbygoogle) {
+        (window.adsbygoogle = window.adsbygoogle || []).push({})
+      }
+    } catch (error) {
+      console.error("AdSense error:", error)
+      setShowAd(false)
+    }
+
+    return () => clearTimeout(adTimer)
+  }, [adSlot])
+
+  if (!showAd) {
+    return (
+      <div className={`ad-placeholder ${className}`} style={{ ...style, height: 'auto', backgroundColor: '#f0f0f0' }}>
+        <img src="/ad-placeholder.png" alt="Advertisement" style={{ width: "100%", height: "auto", display: 'block' }} />
+      </div>
+    )
+  }
+
   return (
-    <div className={`ad-container ${className}`} style={{ width: `${adWidth}px`, height: `${adHeight}px`, margin: "0 auto" }}>
+    <div className={`ad-container ${className}`} style={style} data-ad-slot={adSlot}>
       <ins
-        className="kakao_ad_area"
-        style={{ display: "none" }}
-        data-ad-unit={adUnit}
-        data-ad-width={adWidth}
-        data-ad-height={adHeight}
+        className="adsbygoogle"
+        style={{ display: "block" }}
+        data-ad-client="ca-pub-3964150123386513" // 실제 애드센스 클라이언트 ID로 교체하세요
+        data-ad-slot={adSlot}
+        data-ad-format={adFormat}
+        data-ad-layout={adLayout}
+        data-ad-layout-key={adLayoutKey}
+        data-full-width-responsive="true"
       />
     </div>
   )
 }
 
-// Top Banner Ad
-export function TopBannerAd({ className = "" }: { className?: string }) {
-  const isMobile = useIsMobile()
-  return isMobile ? (
-    <KakaoAdIns
-      adUnit="DAN-OdbuLQOqVTkMus4q"
-      adWidth="320"
-      adHeight="100"
-      className={`banner-ad-mobile ${className}`}
-    />
-  ) : (
-    <KakaoAdIns
-      adUnit="DAN-4JpNW8o4ndtLhmy8"
-      adWidth="728"
-      adHeight="90"
-      className={`banner-ad-desktop ${className}`}
+// 배너 광고 컴포넌트
+export function BannerAd({ className = "" }: { className?: string }) {
+  return (
+    <GoogleAd
+      adSlot="1234567890" // 실제 광고 슬롯 ID로 교체하세요
+      adFormat="horizontal"
+      className={`banner-ad ${className}`}
+      style={{ width: "100%", height: "100px" }}
     />
   )
+}
+
+// 사각형 광고 컴포넌트
+export function SquareAd({ className = "" }: { className?: string }) {
+  return (
+    <GoogleAd
+      adSlot="0987654321" // 실제 광고 슬롯 ID로 교체하세요
+      adFormat="rectangle"
+      className={`square-ad ${className}`}
+      style={{ width: "300px", height: "250px" }}
+    />
+  )
+}
+
+// 사이드바 광고 컴포넌트
+export function SidebarAd({ className = "" }: { className?: string }) {
+  return (
+    <GoogleAd
+      adSlot="1122334455" // 실제 광고 슬롯 ID로 교체하세요
+      adFormat="vertical"
+      className={`sidebar-ad ${className}`}
+      style={{ width: "160px", height: "600px" }}
+    />
+  )
+}
+
+// Top Banner Ad
+export function TopBannerAd({ className = "" }: { className?: string }) {
+  return <BannerAd className={`top-banner-ad ${className}`} />;
 }
 
 // Bottom Banner Ad
 export function BottomBannerAd({ className = "" }: { className?: string }) {
-  const isMobile = useIsMobile()
-  return isMobile ? (
-    <KakaoAdIns
-      adUnit="DAN-yiP4TSU5JEWvwReg"
-      adWidth="320"
-      adHeight="100"
-      className={`banner-ad-mobile ${className}`}
-    />
-  ) : (
-    <KakaoAdIns
-      adUnit="DAN-e1av4mDSH2ie0Ehw"
-      adWidth="728"
-      adHeight="90"
-      className={`banner-ad-desktop ${className}`}
-    />
-  )
-}
-
-// Square Ad
-export function SquareAd({ className = "" }: { className?: string }) {
-  const isMobile = useIsMobile()
-  return (
-    <KakaoAdIns
-      adUnit="DAN-4JpNW8o4ndtLhmy8" // This can be a different ad unit ID
-      adWidth={isMobile ? "320" : "300"}
-      adHeight="250"
-      className={`square-ad ${className}`}
-    />
-  )
+  return <BannerAd className={`bottom-banner-ad ${className}`} />;
 }
