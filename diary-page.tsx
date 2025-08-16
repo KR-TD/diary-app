@@ -15,6 +15,7 @@ export default function Component() {
   const pathname = usePathname()
   const [isSaved, setIsSaved] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(true)
+  const [currentDate, setCurrentDate] = useState("")
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -23,6 +24,15 @@ export default function Component() {
         setIsDarkMode(JSON.parse(savedMode));
       }
     }
+  }, [])
+
+  useEffect(() => {
+    setCurrentDate(new Date().toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "long",
+    }))
   }, [])
 
   
@@ -181,7 +191,12 @@ export default function Component() {
     if (diaryContent.trim()) {
       const newEntry: DiaryEntry = {
         id: Date.now().toString(),
-        date: getCurrentDate(),
+        date: new Date().toLocaleDateString("ko-KR", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          weekday: "long",
+        }),
         content: diaryContent,
         createdAt: new Date(),
       }
@@ -192,19 +207,6 @@ export default function Component() {
       setIsSaved(true)
       setTimeout(() => setIsSaved(false), 2000)
     }
-  }
-
-  
-
-  const getCurrentDate = () => {
-    const today = new Date()
-    const options: Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      weekday: "long",
-    }
-    return today.toLocaleDateString("ko-KR", options)
   }
 
   return (
@@ -502,7 +504,7 @@ export default function Component() {
               <div className="flex items-center justify-center gap-2 mb-4">
                 <Moon className={`w-5 h-5 ${isDarkMode ? "text-yellow-400" : "text-amber-500"}`} />
                 <span className={`text-lg sm:text-xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
-                  {getCurrentDate()}
+                  {currentDate}
                 </span>
                 <Star className={`w-5 h-5 ${isDarkMode ? "text-blue-400" : "text-rose-500"}`} />
               </div>
