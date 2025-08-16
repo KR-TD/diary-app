@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.haru2end.com/sitemap.xml

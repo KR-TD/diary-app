@@ -202,26 +202,6 @@ export default function Component() {
     <>
       {/* ===== SEO Head 영역 ===== */}
       <Head>
-        {/* SEO 소개 섹션 */}
-        <section className={`prose max-w-none mb-4 sm:mb-6 ${isDarkMode ? "prose-invert" : ""}`}>
-          <h2 className="text-xl sm:text-2xl font-semibold">하루의 끝 – 감성 온라인 일기장</h2>
-          <p>
-            하루의 끝은 하루를 차분히 정리하고 기록할 수 있는 감성 일기장 서비스입니다.
-            온라인 다이어리 형태로 언제 어디서나 접근할 수 있으며, 다크/라이트 테마와 배경음악,
-            일기 목록 보기, 후원 및 명예의 전당 등 다양한 기능을 제공합니다. 사용자는 간단한 인터페이스로
-            오늘의 감정과 생각을 자연스럽게 남기고, 시간이 지나도 안전하게 보관된 기록을 다시 돌아볼 수 있습니다.
-            특히 ‘하루의 끝’, ‘감성 일기’, ‘온라인 일기’, ‘다이어리’, ‘기록’과 같은 주제에 관심 있는 분에게
-            편안한 글쓰기 경험을 제공합니다. 이 페이지는 서비스 소개와 함께 주요 기능을 안내하여
-            처음 방문하는 이용자도 쉽게 이해하고 시작할 수 있도록 구성했습니다.
-          </p>
-          <h3 className="text-lg sm:text-xl font-semibold">주요 기능</h3>
-          <ul className="list-disc pl-5">
-            <li>감성적인 다크/라이트 테마와 배경음악</li>
-            <li>일기 저장 및 목록 관리, 해시 기반 내부 링크</li>
-            <li>후원하기와 명예의 전당을 통한 커뮤니티 참여</li>
-          </ul>
-        </section>
-
         <title>{title}</title>
         <meta name="description" content={description} />
         <meta name="keywords" content={keywords} />
@@ -277,6 +257,30 @@ export default function Component() {
               name: siteName,
               url: siteUrl,
               logo: `${siteUrl}/icon-512x512.png`
+            })
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Article",
+              "author": {
+                "@type": "Organization",
+                "name": "하루의 끝 개발팀"
+              },
+              "headline": title,
+              "description": description,
+              "image": ogImage,
+              "publisher": {
+                "@type": "Organization",
+                "name": "하루의 끝",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": `${siteUrl}/icon-512x512.png`
+                }
+              }
             })
           }}
         />
