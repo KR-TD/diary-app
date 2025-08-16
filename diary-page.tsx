@@ -16,6 +16,7 @@ export default function Component() {
   const pathname = usePathname()
   const [isSaved, setIsSaved] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(true)
+  const [isCopied, setIsCopied] = useState(false)
 
   // ====== SEO 변수 (필요 시 교체) ======
   const siteName = "하루의 끝"
