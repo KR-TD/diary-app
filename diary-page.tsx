@@ -400,6 +400,7 @@ export default function Component() {
                   : "bg-orange-500/20 hover:bg-orange-500/30 text-orange-600"
                   }`}
                 variant="ghost"
+                aria-label={isDarkMode ? "라이트 모드로 전환" : "다크 모드로 전환"}
               >
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </Button>
@@ -433,7 +434,7 @@ export default function Component() {
                   <Music className={`w-5 h-5 ${isDarkMode ? "text-purple-400" : "text-rose-500"}`} />
                   {!isMobile && (
                     <div>
-                      <h3 className={`font-medium ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>배경음악</h3>
+                      <h2 className={`font-medium ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>배경음악</h2>
                       <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
                         {musicTracks[currentTrack].name} - {musicTracks[currentTrack].description}
                       </p>
@@ -491,6 +492,7 @@ export default function Component() {
                           ? "bg-slate-700 hover:bg-slate-600"
                           : "bg-gray-200 hover:bg-gray-300"
                       }`}
+                    aria-label={isPlaying ? "음악 일시정지" : "음악 재생"}
                   >
                     {isAudioLoading ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -691,9 +693,9 @@ export default function Component() {
               <CardHeader className="text-center pb-4 sm:pb-6">
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
-                  <span className={`text-xl sm:text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
+                  <h2 className={`text-xl sm:text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
                     개발자 후원하기
-                  </span>
+                  </h2>
                   <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
                 </div>
                 <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
@@ -720,7 +722,7 @@ export default function Component() {
                       }`}
                   >
                     <div className="mb-4">
-                      <img src="/placeholder.svg?height=60&width=60" alt="토스뱅크" className="mx-auto mb-3 rounded-lg" />
+                      <img src="/placeholder.svg?height=60&width=60" alt="토스뱅크" className="mx-auto mb-3 rounded-lg" loading="lazy" />
                       <h4 className={`text-base sm:text-lg font-semibold ${isDarkMode ? "text-pink-300" : "text-pink-700"}`}>
                         토스뱅크
                       </h4>
@@ -781,9 +783,9 @@ export default function Component() {
               <CardHeader className="text-center pb-4 sm:pb-6">
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <div className="text-3xl sm:text-4xl animate-bounce">🏆</div>
-                  <span className={`text-xl sm:text-2xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}>
+                  <h2 className={`text-xl sm:text-2xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}>
                     명예의 전당
-                  </span>
+                  </h2>
                   <div className="text-3xl sm:text-4xl animate-bounce delay-100">🏆</div>
                 </div>
                 <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-300" : "text-yellow-700"}`}>
@@ -1039,7 +1041,7 @@ export default function Component() {
                       }`}
                   >
                     <div className="mb-4">
-                      <img src="/placeholder.svg?height=60&width=60" alt="토스뱅크" className="mx-auto mb-3 rounded-lg" />
+                      <img src="/placeholder.svg?height=60&width=60" alt="토스뱅크" className="mx-auto mb-3 rounded-lg" loading="lazy" />
                       <h4 className={`text-lg font-semibold ${isDarkMode ? "text-pink-300" : "text-pink-700"}`}>
                         토스뱅크
                       </h4>
@@ -1104,16 +1106,22 @@ export default function Component() {
           </div>
 
           {/* 푸터 */}
-          <div className={`text-center mt-8 text-sm ${isDarkMode ? "text-gray-500" : "text-rose-500"}`}>
-            <p>© 2025 하루의 끝. 모든 순간이 소중합니다.</p>
-
-            {/* 소셜 링크 (URL을 실제 계정으로 바꿔줘) */}
-            <nav className="mt-2 flex justify-center gap-4 underline">
-              <a href="https://x.com/haru2end" target="_blank" rel="noopener noreferrer">X(Twitter)</a>
-              <a href="https://www.instagram.com/haru2_end" target="_blank" rel="noopener noreferrer">Instagram</a>
-              <a href="https://www.youtube.com/@bear_game123" target="_blank" rel="noopener noreferrer">YouTube</a>
+          <footer className={`text-center mt-8 py-8 border-t ${isDarkMode ? "border-slate-800 text-gray-500" : "border-rose-100 text-rose-500"}`}>
+            <nav aria-label="Footer Navigation" className="mb-4">
+              <ul className="flex justify-center gap-4">
+                <li><Button variant="link" onClick={() => setCurrentView('write')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>일기 쓰기</Button></li>
+                <li><Button variant="link" onClick={() => setCurrentView('list')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>목록 보기</Button></li>
+                <li><Button variant="link" onClick={() => setCurrentView('support')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>후원하기</Button></li>
+                <li><Button variant="link" onClick={() => setCurrentView('hall')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>명예의 전당</Button></li>
+              </ul>
             </nav>
-          </div>
+            <nav aria-label="Social Media Links" className="mb-4 flex justify-center gap-4">
+              <a href="https://x.com/haru2end" target="_blank" rel="noopener noreferrer" aria-label="하루의 끝 X(Twitter) 페이지" className="underline">X(Twitter)</a>
+              <a href="https://www.instagram.com/haru2_end" target="_blank" rel="noopener noreferrer" aria-label="하루의 끝 Instagram 페이지" className="underline">Instagram</a>
+              <a href="https://www.youtube.com/@bear_game123" target="_blank" rel="noopener noreferrer" aria-label="하루의 끝 YouTube 채널" className="underline">YouTube</a>
+            </nav>
+            <p className="text-sm">© 2025 하루의 끝. 모든 순간이 소중합니다.</p>
+          </footer>
         </div>
 
         {selectedEntry && (
