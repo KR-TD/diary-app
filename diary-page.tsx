@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import Head from "next/head"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -16,6 +17,23 @@ export default function Component() {
   const [isSaved, setIsSaved] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(true)
 
+  // ====== SEO 변수 (필요 시 교체) ======
+  const siteName = "하루의 끝"
+  const siteUrl = "https://www.haru2end.com"
+  const title = "하루의 끝 | 감성 일기장, 오늘을 아름답게 마무리하세요"
+  const description =
+    "하루의 끝은 감성적인 분위기에서 오늘의 순간들을 기록할 수 있는 온라인 일기장입니다. 다크/라이트 테마, 배경음악, 명예의 전당, 후원 기능을 제공합니다."
+  const ogImage = `${siteUrl}/og-image.png` // 프로젝트에 og-image.png를 배치하세요.
+  const keywords = [
+    "하루의 끝",
+    "일기장",
+    "온라인 일기",
+    "감성 일기",
+    "다이어리",
+    "하루 마무리",
+    "haru2end",
+  ].join(", ")
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedMode = localStorage.getItem('isDarkMode');
@@ -25,11 +43,6 @@ export default function Component() {
     }
   }, [])
 
-  
-  
-
-
-  // Save dark mode preference to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('isDarkMode', JSON.stringify(isDarkMode))
@@ -62,13 +75,10 @@ export default function Component() {
     const scriptId = "kakao-adfit-script";
 
     const loadAdfit = () => {
-      // Clean up previous ads and scripts
       const existingScript = document.getElementById(scriptId);
       if (existingScript) {
         existingScript.remove();
       }
-
-      // Create and append the new script
       const script = document.createElement("script");
       script.id = scriptId;
       script.src = "//t1.daumcdn.net/kas/static/ba.min.js";
@@ -76,9 +86,7 @@ export default function Component() {
       document.head.appendChild(script);
     }
 
-    // Use a timeout to ensure all <ins> tags are rendered before the script runs
     const timer = setTimeout(loadAdfit, 100);
-
     return () => {
       clearTimeout(timer);
     };
@@ -92,7 +100,6 @@ export default function Component() {
     mood?: string
   }
 
-  // Centralized error handler
   const handleAudioError = (e: Event | string) => {
     console.error("Audio error:", e)
     setAudioError(true)
@@ -100,30 +107,24 @@ export default function Component() {
     setIsAudioLoading(false)
   }
 
-  // Setup audio element on mount
   useEffect(() => {
-    // Check for audio support
     const testAudio = new Audio()
     if (typeof testAudio.canPlayType !== "function" || !testAudio.canPlayType("audio/mpeg")) {
       setAudioSupported(false)
       return
     }
-
-    // Create and configure the audio element
     const audio = new Audio()
     audio.loop = true
     audio.preload = "auto"
     audioRef.current = audio
 
-    // Event listeners
     audio.addEventListener("error", handleAudioError)
     audio.addEventListener("play", () => setIsPlaying(true))
     audio.addEventListener("pause", () => setIsPlaying(false))
     audio.addEventListener("loadstart", () => setIsAudioLoading(true))
     audio.addEventListener("canplaythrough", () => setIsAudioLoading(false))
-    audio.addEventListener("ended", () => setIsPlaying(false)) // For non-looping tracks in future
+    audio.addEventListener("ended", () => setIsPlaying(false))
 
-    // Cleanup on unmount
     return () => {
       audio.pause()
       audio.removeEventListener("error", handleAudioError)
@@ -136,7 +137,6 @@ export default function Component() {
     }
   }, [])
 
-  // Update volume when state changes
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume
@@ -146,11 +146,9 @@ export default function Component() {
   const togglePlay = () => {
     const audio = audioRef.current
     if (!audio || !audioSupported) return
-
     if (isPlaying) {
       audio.pause()
     } else {
-      // If src is not set, it's the first play. Set it.
       if (!audio.src) {
         audio.src = musicTracks[currentTrack].url
         audio.load()
@@ -161,12 +159,8 @@ export default function Component() {
 
   const changeTrack = (trackIndex: number) => {
     if (!audioSupported || !audioRef.current) return
-
-    // Update track index and reset error
     setCurrentTrack(trackIndex)
     setAudioError(false)
-
-    // Change src, load, and play
     const audio = audioRef.current
     audio.src = musicTracks[trackIndex].url
     audio.load()
@@ -185,7 +179,6 @@ export default function Component() {
         content: diaryContent,
         createdAt: new Date(),
       }
-
       setDiaryEntries((prev) => [newEntry, ...prev])
       localStorage.setItem("diaryEntries", JSON.stringify([newEntry, ...diaryEntries]))
       setDiaryContent("")
@@ -193,8 +186,6 @@ export default function Component() {
       setTimeout(() => setIsSaved(false), 2000)
     }
   }
-
-  
 
   const getCurrentDate = () => {
     const today = new Date()
@@ -208,572 +199,616 @@ export default function Component() {
   }
 
   return (
-    <div
-      className={`min-h-screen transition-all duration-500 p-2 sm:p-4 ${
-        isDarkMode
-          ? "bg-gradient-to-br from-gray-900 via-slate-900 to-black"
-          : "bg-gradient-to-br from-rose-100 via-orange-50 to-amber-100"
-      }`}
-    >
-      {/* 배경 장식 요소들 - 밤하늘 느낌 */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {/* 별똥별 애니메이션 */}
-        <div className="absolute inset-0">
-          <div className="shooting-star shooting-star-1"></div>
-          <div className="shooting-star shooting-star-2"></div>
-          <div className="shooting-star shooting-star-3"></div>
-        </div>
+    <>
+      {/* ===== SEO Head 영역 ===== */}
+      <Head>
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <meta name="keywords" content={keywords} />
+        <link rel="canonical" href={siteUrl} />
 
-        {/* 기존 별들 */}
-        <Star
-          className={`absolute top-20 left-10 w-4 h-4 animate-pulse ${
-            isDarkMode ? "text-yellow-300" : "text-rose-300"
-          }`}
+        {/* Open Graph */}
+        <meta property="og:site_name" content={siteName} />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="ko_KR" />
+        <meta property="og:url" content={siteUrl} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:alt" content="하루의 끝 미리보기 이미지" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={ogImage} />
+
+        {/* Robots */}
+        <meta name="robots" content="index,follow,max-image-preview:large" />
+        <meta name="googlebot" content="index,follow" />
+
+        {/* PWA/Favicon(선택) */}
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="theme-color" content={isDarkMode ? "#0b1020" : "#ffffff"} />
+
+        {/* JSON-LD 구조화 데이터 */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: siteName,
+              url: siteUrl,
+              potentialAction: {
+                "@type": "SearchAction",
+                target: `${siteUrl}/?q={search_term_string}`,
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
         />
-        <Star
-          className={`absolute top-40 right-20 w-3 h-3 animate-pulse delay-1000 ${
-            isDarkMode ? "text-blue-300" : "text-orange-300"
-          }`}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: siteName,
+              url: siteUrl,
+              logo: `${siteUrl}/icon-512x512.png`
+            })
+          }}
         />
-        <Moon
-          className={`absolute top-32 right-10 w-6 h-6 opacity-70 ${isDarkMode ? "text-yellow-200" : "text-amber-300"}`}
-        />
-        <Heart
-          className={`absolute bottom-40 left-16 w-5 h-5 animate-pulse delay-2000 ${
-            isDarkMode ? "text-pink-300" : "text-rose-400"
-          }`}
-        />
-        <Star
-          className={`absolute bottom-60 right-32 w-4 h-4 animate-pulse delay-500 ${
-            isDarkMode ? "text-purple-300" : "text-pink-300"
-          }`}
-        />
+      </Head>
 
-        {/* 추가 별들 - 밤하늘 효과 */}
-        <Star className="absolute top-60 left-1/4 w-2 h-2 animate-pulse text-rose-200 opacity-70" />
-        <Star className="absolute top-80 right-1/3 w-2 h-2 animate-pulse delay-700 text-orange-200 opacity-60" />
-        <Star className="absolute bottom-80 left-1/3 w-3 h-3 animate-pulse delay-1500 text-amber-200 opacity-80" />
-        <Star className="absolute top-1/4 left-1/2 w-1 h-1 animate-pulse delay-300 text-pink-200 opacity-50" />
-        <Star className="absolute top-3/4 right-1/4 w-2 h-2 animate-pulse delay-1200 text-rose-300 opacity-60" />
-        <Star className="absolute top-1/3 left-20 w-1 h-1 animate-pulse delay-800 text-orange-200 opacity-40" />
-        <Star className="absolute bottom-1/4 right-1/3 w-2 h-2 animate-pulse delay-2000 text-amber-200 opacity-70" />
-        <Star className="absolute top-2/3 left-3/4 w-1 h-1 animate-pulse delay-400 text-pink-200 opacity-30" />
-        <Star className="absolute bottom-1/3 left-1/4 w-3 h-3 animate-pulse delay-1800 text-rose-200 opacity-50" />
-        <Star className="absolute top-1/2 right-20 w-1 h-1 animate-pulse delay-600 text-orange-200 opacity-40" />
-
-        {/* 구름 효과 */}
-        <div className="absolute top-1/4 left-0 w-32 h-16 bg-rose-200/20 rounded-full blur-xl opacity-30 animate-pulse delay-1000"></div>
-        <div className="absolute bottom-1/3 right-0 w-40 h-20 bg-orange-200/15 rounded-full blur-2xl opacity-25 animate-pulse delay-2000"></div>
-        <div className="absolute top-2/3 left-1/4 w-24 h-12 bg-amber-200/25 rounded-full blur-lg opacity-20 animate-pulse delay-500"></div>
-      </div>
-
-      <div className="max-w-4xl mx-auto relative z-10">
-        {/* 헤더 */}
-        <div className="text-center mb-4 sm:mb-8 relative">
-          <div className="flex justify-between items-center mb-4 sm:mb-8">
-            <div className="flex gap-1 sm:gap-2">
-              <Button
-                onClick={() => setCurrentView(currentView === "write" ? "list" : "write")}
-                className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
-                  isDarkMode
-                    ? "bg-purple-600/20 hover:bg-purple-600/30 text-purple-300"
-                    : "bg-rose-500/20 hover:bg-rose-500/30 text-rose-600"
-                }`}
-                variant="ghost"
-                size={isMobile ? "icon" : "default"}
-              >
-                {currentView === "write" ? <List className="w-5 h-5" /> : <Pencil className="w-5 h-5" />}
-                {!isMobile && (currentView === "write" ? " 일기 목록" : " 일기 쓰기")}
-              </Button>
-
-              <Button
-                onClick={() => setCurrentView("support")}
-                className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
-                  currentView === "support"
-                    ? isDarkMode
-                      ? "bg-pink-600/30 text-pink-300"
-                      : "bg-pink-500/30 text-pink-600"
-                    : isDarkMode
-                      ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300"
-                      : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600"
-                }`}
-                variant="ghost"
-                size={isMobile ? "icon" : "default"}
-              >
-                <Gem className="w-5 h-5" />
-                {!isMobile && " 후원하기"}
-              </Button>
-
-              <Button
-                onClick={() => setCurrentView("hall")}
-                className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
-                  currentView === "hall"
-                    ? isDarkMode
-                      ? "bg-yellow-600/30 text-yellow-300"
-                      : "bg-yellow-500/30 text-yellow-600"
-                    : isDarkMode
-                      ? "bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-300"
-                      : "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-600"
-                }`}
-                variant="ghost"
-                size={isMobile ? "icon" : "default"}
-              >
-                <Award className="w-5 h-5" />
-                {!isMobile && " 명예의 전당"}
-              </Button>
-            </div>
-
-            <Button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className={`p-3 rounded-full transition-all duration-300 ${
-                isDarkMode
-                  ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300"
-                  : "bg-orange-500/20 hover:bg-orange-500/30 text-orange-600"
-              }`}
-              variant="ghost"
-            >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </Button>
+      <div
+        className={`min-h-screen transition-all duration-500 p-2 sm:p-4 ${
+          isDarkMode
+            ? "bg-gradient-to-br from-gray-900 via-slate-900 to-black"
+            : "bg-gradient-to-br from-rose-100 via-orange-50 to-amber-100"
+        }`}
+      >
+        {/* 배경 장식 요소들 - 밤하늘 느낌 */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          {/* 별똥별 애니메이션 */}
+          <div className="absolute inset-0">
+            <div className="shooting-star shooting-star-1"></div>
+            <div className="shooting-star shooting-star-2"></div>
+            <div className="shooting-star shooting-star-3"></div>
           </div>
 
-          <h1
-            className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-2 ${
-              isDarkMode
-                ? "bg-gradient-to-r from-yellow-300 via-blue-300 to-purple-300 bg-clip-text text-transparent"
-                : "bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 bg-clip-text text-transparent"
+          {/* 기존 별들 */}
+          <Star
+            className={`absolute top-20 left-10 w-4 h-4 animate-pulse ${
+              isDarkMode ? "text-yellow-300" : "text-rose-300"
             }`}
-          >
-            하루의 끝
-          </h1>
-          <p className={`text-base sm:text-lg font-medium ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
-            {isDarkMode
-              ? "고요한 밤, 하루를 돌아보며 마음을 정리해보세요"
-              : "오늘 하루를 마무리하며, 소중한 순간들을 기록해보세요"}
-          </p>
+          />
+          <Star
+            className={`absolute top-40 right-20 w-3 h-3 animate-pulse delay-1000 ${
+              isDarkMode ? "text-blue-300" : "text-orange-300"
+            }`}
+          />
+          <Moon
+            className={`absolute top-32 right-10 w-6 h-6 opacity-70 ${isDarkMode ? "text-yellow-200" : "text-amber-300"}`}
+          />
+          <Heart
+            className={`absolute bottom-40 left-16 w-5 h-5 animate-pulse delay-2000 ${
+              isDarkMode ? "text-pink-300" : "text-rose-400"
+            }`}
+          />
+          <Star
+            className={`absolute bottom-60 right-32 w-4 h-4 animate-pulse delay-500 ${
+              isDarkMode ? "text-purple-300" : "text-pink-300"
+            }`}
+          />
+
+          {/* 추가 별들 */}
+          <Star className="absolute top-60 left-1/4 w-2 h-2 animate-pulse text-rose-200 opacity-70" />
+          <Star className="absolute top-80 right-1/3 w-2 h-2 animate-pulse delay-700 text-orange-200 opacity-60" />
+          <Star className="absolute bottom-80 left-1/3 w-3 h-3 animate-pulse delay-1500 text-amber-200 opacity-80" />
+          <Star className="absolute top-1/4 left-1/2 w-1 h-1 animate-pulse delay-300 text-pink-200 opacity-50" />
+          <Star className="absolute top-3/4 right-1/4 w-2 h-2 animate-pulse delay-1200 text-rose-300 opacity-60" />
+          <Star className="absolute top-1/3 left-20 w-1 h-1 animate-pulse delay-800 text-orange-200 opacity-40" />
+          <Star className="absolute bottom-1/4 right-1/3 w-2 h-2 animate-pulse delay-2000 text-amber-200 opacity-70" />
+          <Star className="absolute top-2/3 left-3/4 w-1 h-1 animate-pulse delay-400 text-pink-200 opacity-30" />
+          <Star className="absolute bottom-1/3 left-1/4 w-3 h-3 animate-pulse delay-1800 text-rose-200 opacity-50" />
+          <Star className="absolute top-1/2 right-20 w-1 h-1 animate-pulse delay-600 text-orange-200 opacity-40" />
+
+          {/* 구름 효과 */}
+          <div className="absolute top-1/4 left-0 w-32 h-16 bg-rose-200/20 rounded-full blur-xl opacity-30 animate-pulse delay-1000"></div>
+          <div className="absolute bottom-1/3 right-0 w-40 h-20 bg-orange-200/15 rounded-full blur-2xl opacity-25 animate-pulse delay-2000"></div>
+          <div className="absolute top-2/3 left-1/4 w-24 h-12 bg-amber-200/25 rounded-full blur-lg opacity-20 animate-pulse delay-500"></div>
         </div>
 
-        {/* 음악 플레이어 */}
-        <Card
-          className={`backdrop-blur-sm border-0 shadow-lg mb-4 sm:mb-6 transition-all duration-500 ${
-            isDarkMode
-              ? "bg-slate-900/70 shadow-purple-500/20 border border-slate-700/50"
-              : "bg-white/80 border border-rose-200/50 shadow-rose-200/20"
-          }`}
-        >
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Music className={`w-5 h-5 ${isDarkMode ? "text-purple-400" : "text-rose-500"}`} />
-                {!isMobile && (
-                  <div>
-                    <h3 className={`font-medium ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>배경음악</h3>
-                    <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
-                      {musicTracks[currentTrack].name} - {musicTracks[currentTrack].description}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2 sm:gap-3">
-                {/* 트랙 선택 */}
-                <div className="flex gap-1">
-                  {musicTracks.map((track, index) => (
-                    <Button
-                      key={index}
-                      onClick={() => changeTrack(index)}
-                      disabled={!audioSupported}
-                      className={`w-8 h-8 p-0 text-sm transition-all duration-200 ${
-                        !audioSupported
-                          ? "opacity-50 cursor-not-allowed"
-                          : currentTrack === index
-                            ? isDarkMode
-                              ? "bg-purple-600 hover:bg-purple-700"
-                              : "bg-purple-500 hover:bg-purple-600"
-                            : isDarkMode
-                              ? "bg-slate-700 hover:bg-slate-600 text-gray-300"
-                              : "bg-gray-200 hover:bg-gray-300 text-gray-600"
-                      }`}
-                      title={track.name}
-                    >
-                      {track.icon}
-                    </Button>
-                  ))}
-                </div>
-
-                {/* 볼륨 조절 */}
-                <div className="hidden sm:flex items-center gap-2">
-                  <Volume2 className={`w-4 h-4 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} />
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={volume}
-                    onChange={(e) => handleVolumeChange(Number.parseFloat(e.target.value))}
-                    className="w-16 h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer"
-                  />
-                </div>
-
-                {/* 재생/일시정지 버튼 */}
+        <div className="max-w-4xl mx-auto relative z-10">
+          {/* 헤더 */}
+          <div className="text-center mb-4 sm:mb-8 relative">
+            <div className="flex justify-between items-center mb-4 sm:mb-8">
+              <div className="flex gap-1 sm:gap-2">
                 <Button
-                  onClick={togglePlay}
-                  disabled={audioError || isAudioLoading || !audioSupported}
-                  className={`w-10 h-10 rounded-full transition-all duration-300 ${
-                    audioError || !audioSupported
-                      ? "bg-gray-400 cursor-not-allowed opacity-50"
-                      : isPlaying
-                        ? isDarkMode
-                          ? "bg-purple-600 hover:bg-purple-700 animate-pulse"
-                          : "bg-purple-500 hover:bg-purple-600 animate-pulse"
-                        : isDarkMode
-                          ? "bg-slate-700 hover:bg-slate-600"
-                          : "bg-gray-200 hover:bg-gray-300"
+                  onClick={() => setCurrentView(currentView === "write" ? "list" : "write")}
+                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
+                    isDarkMode
+                      ? "bg-purple-600/20 hover:bg-purple-600/30 text-purple-300"
+                      : "bg-rose-500/20 hover:bg-rose-500/30 text-rose-600"
                   }`}
+                  variant="ghost"
+                  size={isMobile ? "icon" : "default"}
                 >
-                  {isAudioLoading ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : isPlaying ? (
-                    <Pause
-                      className={`w-4 h-4 ${isPlaying ? "text-white" : isDarkMode ? "text-gray-300" : "text-gray-600"}`}
-                    />
-                  ) : (
-                    <Play
-                      className={`w-4 h-4 ${isPlaying ? "text-white" : isDarkMode ? "text-gray-300" : "text-gray-600"}`}
-                    />
-                  )}
+                  {currentView === "write" ? <List className="w-5 h-5" /> : <Pencil className="w-5 h-5" />}
+                  {!isMobile && (currentView === "write" ? " 일기 목록" : " 일기 쓰기")}
+                </Button>
+
+                <Button
+                  onClick={() => setCurrentView("support")}
+                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
+                    currentView === "support"
+                      ? isDarkMode
+                        ? "bg-pink-600/30 text-pink-300"
+                        : "bg-pink-500/30 text-pink-600"
+                      : isDarkMode
+                        ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300"
+                        : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600"
+                  }`}
+                  variant="ghost"
+                  size={isMobile ? "icon" : "default"}
+                >
+                  <Gem className="w-5 h-5" />
+                  {!isMobile && " 후원하기"}
+                </Button>
+
+                <Button
+                  onClick={() => setCurrentView("hall")}
+                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
+                    currentView === "hall"
+                      ? isDarkMode
+                        ? "bg-yellow-600/30 text-yellow-300"
+                        : "bg-yellow-500/30 text-yellow-600"
+                      : isDarkMode
+                        ? "bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-300"
+                        : "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-600"
+                  }`}
+                  variant="ghost"
+                  size={isMobile ? "icon" : "default"}
+                >
+                  <Award className="w-5 h-5" />
+                  {!isMobile && " 명예의 전당"}
                 </Button>
               </div>
+
+              <Button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className={`p-3 rounded-full transition-all duration-300 ${
+                  isDarkMode
+                    ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300"
+                    : "bg-orange-500/20 hover:bg-orange-500/30 text-orange-600"
+                }`}
+                variant="ghost"
+              >
+                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </Button>
             </div>
 
-            {/* 오디오 상태 표시 */}
-            {!audioSupported ? (
-              <div className="mt-3 text-center">
-                <p className={`text-xs sm:text-sm ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}>
-                  🎵 이 브라우저에서는 음악 기능을 지원하지 않습니다
-                </p>
-              </div>
-            ) : audioError ? (
-              <div className="mt-3 text-center">
-                <p className={`text-xs sm:text-sm ${isDarkMode ? "text-red-400" : "text-red-500"}`}>
-                  🎵 음악을 불러올 수 없습니다. 음악 없이도 일기 작성을 계속하세요
-                </p>
-              </div>
-            ) : isAudioLoading ? (
-              <div className="mt-3 text-center">
-                <p className={`text-xs sm:text-sm ${isDarkMode ? "text-blue-400" : "text-blue-500"}`}>🎵 음악을 불러오는 중...</p>
-              </div>
-            ) : isPlaying ? (
-              <div className="mt-3 flex justify-center">
-                <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-1 bg-gradient-to-t rounded-full animate-pulse ${
-                        isDarkMode ? "from-purple-400 to-blue-400" : "from-purple-500 to-pink-500"
-                      }`}
-                      style={{
-                        height: `${Math.random() * 15 + 8}px`,
-                        animationDelay: `${i * 0.1}s`,
-                        animationDuration: "1s",
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
+            <h1
+              className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-2 ${
+                isDarkMode
+                  ? "bg-gradient-to-r from-yellow-300 via-blue-300 to-purple-300 bg-clip-text text-transparent"
+                  : "bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 bg-clip-text text-transparent"
+              }`}
+            >
+              하루의 끝
+            </h1>
+            <p className={`text-base sm:text-lg font-medium ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
+              {isDarkMode
+                ? "고요한 밤, 하루를 돌아보며 마음을 정리해보세요"
+                : "오늘 하루를 마무리하며, 소중한 순간들을 기록해보세요"}
+            </p>
+          </div>
 
-        {/* 자연스러운 광고 배치 - 음악 플레이어 다음 */}
-        <div className={`text-center mb-4 sm:mb-6 ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
-          <p className="text-xs mb-2 opacity-70">✨ 광고 ✨</p>
-          <TopBannerAd />
-        </div>
-
-        {currentView === "write" ? (
+          {/* 음악 플레이어 */}
           <Card
-            className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
+            className={`backdrop-blur-sm border-0 shadow-lg mb-4 sm:mb-6 transition-all duration-500 ${
               isDarkMode
-                ? "bg-slate-900/80 shadow-purple-500/30 border border-slate-700/50"
-                : "bg-white/90 border border-rose-200/50 shadow-rose-200/30"
+                ? "bg-slate-900/70 shadow-purple-500/20 border border-slate-700/50"
+                : "bg-white/80 border border-rose-200/50 shadow-rose-200/20"
             }`}
           >
-            <CardHeader className="text-center pb-4 sm:pb-6">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Moon className={`w-5 h-5 ${isDarkMode ? "text-yellow-400" : "text-amber-500"}`} />
-                <span className={`text-lg sm:text-xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
-                  {getCurrentDate()}
-                </span>
-                <Star className={`w-5 h-5 ${isDarkMode ? "text-blue-400" : "text-rose-500"}`} />
-              </div>
-              <p className={`italic text-sm sm:text-base ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
-                {isDarkMode
-                  ? "\"밤이 깊어갈수록, 우리의 생각은 더욱 깊어집니다\""
-                  : "\"매일 밤, 우리는 하루를 돌아보며 성장합니다\""}
-              </p>
-            </CardHeader>
-
-            <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-6">
-              {/* 일기 작성 영역 */}
-              <div className="space-y-3">
-                <label className={`text-base sm:text-lg font-medium flex items-center gap-2 ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
-                  <Heart className={`w-5 h-5 ${isDarkMode ? "text-pink-400" : "text-rose-500"}`} />
-                  오늘의 이야기
-                </label>
-                <Textarea
-                  placeholder={
-                    isDarkMode
-                      ? "고요한 밤, 오늘 하루는 어떠셨나요?\n달빛 아래에서 마음속 깊은 이야기를 들려주세요.\n작은 감정들도 소중한 기억이 됩니다..."
-                      : "오늘 하루는 어떠셨나요? \n기쁜 일, 힘들었던 일, 감사한 일들을 자유롭게 적어보세요.\n작은 순간들도 소중한 기억이 됩니다..."
-                  }
-                  value={diaryContent}
-                  onChange={(e) => setDiaryContent(e.target.value)}
-                  className={`min-h-[250px] sm:min-h-[300px] text-base leading-relaxed resize-none border-2 rounded-xl p-3 sm:p-4 backdrop-blur-sm transition-all duration-300 ${
-                    isDarkMode
-                      ? "border-purple-500/30 focus:border-purple-400 bg-slate-700/50 text-gray-200 placeholder:text-gray-400"
-                      : "border-rose-200 focus:border-rose-400 bg-white/70 text-rose-900 placeholder:text-rose-500"
-                  }`}
-                />
-              </div>
-
-              {/* 글자 수 표시 */}
-              <div className={`text-right text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
-                {diaryContent.length}자
-              </div>
-
-              {/* 저장 버튼 */}
-              <div className="flex justify-center pt-2 sm:pt-4">
-                <Button
-                  onClick={handleSave}
-                  className={`px-6 sm:px-8 py-3 text-base sm:text-lg font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${
-                    isSaved
-                      ? "bg-green-500 hover:bg-green-600"
-                      : isDarkMode
-                        ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                        : "bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600"
-                  }`}
-                >
-                  <Save className="w-5 h-5 mr-2" />
-                  {isSaved ? "저장되었습니다!" : "오늘의 일기 저장하기"}
-                </Button>
-              </div>
-
-              {/* 하단 메시지 */}
-              <div className={`text-center pt-4 sm:pt-6 border-t ${isDarkMode ? "border-purple-500/30" : "border-rose-200"}`}>
-                <p className={`text-xs sm:text-sm italic ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
-                  {isDarkMode
-                    ? "별빛 아래에서 당신의 하루가 아름다운 꿈으로 이어지기를 🌙✨"
-                    : "따뜻한 햇살처럼 당신의 소중한 하루가 아름다운 추억으로 남기를 바랍니다 🌅✨"}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ) : currentView === "list" ? (
-          <Card
-            className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
-              isDarkMode ? "bg-slate-800/80 shadow-purple-500/20" : "bg-white/80"
-            }`}
-          >
-            <CardHeader className="text-center pb-4 sm:pb-6">
-              <h2 className={`text-xl sm:text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
-                📖 나의 일기장
-              </h2>
-              <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                총 {diaryEntries.length}개의 소중한 기억들
-              </p>
-            </CardHeader>
-
-            <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
-              {diaryEntries.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                    아직 작성된 일기가 없습니다
-                  </p>
-                  <p className={`text-sm mt-2 ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}>
-                    첫 번째 일기를 작성해보세요! ✨
-                  </p>
-                </div>
-              ) : (
-                diaryEntries.map((entry, index) => (
-                  <div key={entry.id}>
-                    <div
-                      className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md ${
-                        isDarkMode
-                          ? "border-purple-500/30 bg-slate-700/50 hover:bg-slate-700/70"
-                          : "border-purple-100 bg-white/50 hover:bg-white/70"
-                      }`}
-                      onClick={() => setSelectedEntry(entry)}
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>
-                          {entry.date}
-                        </span>
-                        <span className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                          {entry.content.length}자
-                        </span>
-                      </div>
-                      <p className={`text-sm sm:text-base line-clamp-3 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                        {entry.content}
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Music className={`w-5 h-5 ${isDarkMode ? "text-purple-400" : "text-rose-500"}`} />
+                  {!isMobile && (
+                    <div>
+                      <h3 className={`font-medium ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>배경음악</h3>
+                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
+                        {musicTracks[currentTrack].name} - {musicTracks[currentTrack].description}
                       </p>
                     </div>
-                    {/* 일기 목록 중간에 자연스러운 광고 삽입 (5개마다) */}
-                    {(index + 1) % 5 === 0 && index < diaryEntries.length - 1 && (
-                      <div className="my-4 sm:my-6 text-center">
-                        <p className={`text-xs mb-2 opacity-60 ${isDarkMode ? "text-gray-400" : "text-rose-500"}`}>
-                          ✨ 추천 ✨
-                        </p>
-                        <SquareAd />
-                      </div>
-                    )}
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-        ) : currentView === "support" ? (
-          // 후원 페이지
-          <Card
-            className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
-              isDarkMode
-                ? "bg-slate-900/80 shadow-pink-500/30 border border-slate-700/50"
-                : "bg-white/90 border border-pink-200/50 shadow-pink-200/30"
-            }`}
-          >
-            <CardHeader className="text-center pb-4 sm:pb-6">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
-                <span className={`text-xl sm:text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
-                  개발자 후원하기
-                </span>
-                <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
-              </div>
-              <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
-                "하루의 끝"을 사랑해주셔서 감사합니다
-              </p>
-            </CardHeader>
-
-            <CardContent className="space-y-6 sm:space-y-8 p-3 sm:p-6">
-              {/* 후원 메시지 */}
-              <div className="text-center space-y-4">
-                <div className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-rose-50/80"}`}>
-                  <h3 className={`text-lg sm:text-xl font-semibold mb-3 ${isDarkMode ? "text-pink-300" : "text-rose-700"}`}>
-                    💝 후원을 해주시면 개발자에게 큰 힘이 됩니다
-                  </h3>
-                  <p className={`text-sm sm:text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-rose-600"}`}>
-                    여러분의 소중한 일기를 더 안전하고 아름답게 보관할 수 있도록
-                    <br />
-                    지속적으로 개발하고 개선해나가겠습니다.
-                  </p>
+                  )}
                 </div>
-              </div>
 
-              {/* 토스뱅크 정보 */}
-              <div className="text-center space-y-4">
-                <div
-                  className={`p-6 sm:p-8 rounded-xl border-2 border-dashed ${
-                    isDarkMode ? "border-pink-400/50 bg-pink-900/20" : "border-pink-300/50 bg-pink-100/50"
-                  }`}
-                >
-                  <div className="mb-4">
-                    <img src="/placeholder.svg?height=60&width=60" alt="토스뱅크" className="mx-auto mb-3 rounded-lg" />
-                    <h4 className={`text-base sm:text-lg font-semibold ${isDarkMode ? "text-pink-300" : "text-pink-700"}`}>
-                      토스뱅크
-                    </h4>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="flex gap-1">
+                    {musicTracks.map((track, index) => (
+                      <Button
+                        key={index}
+                        onClick={() => changeTrack(index)}
+                        disabled={!audioSupported}
+                        className={`w-8 h-8 p-0 text-sm transition-all duration-200 ${
+                          !audioSupported
+                            ? "opacity-50 cursor-not-allowed"
+                            : currentTrack === index
+                              ? isDarkMode
+                                ? "bg-purple-600 hover:bg-purple-700"
+                                : "bg-purple-500 hover:bg-purple-600"
+                              : isDarkMode
+                                ? "bg-slate-700 hover:bg-slate-600 text-gray-300"
+                                : "bg-gray-200 hover:bg-gray-300 text-gray-600"
+                        }`}
+                        title={track.name}
+                      >
+                        {track.icon}
+                      </Button>
+                    ))}
                   </div>
 
-                  <div
-                    className={`text-2xl sm:text-3xl font-bold mb-4 font-mono tracking-wider ${
-                      isDarkMode ? "text-pink-200" : "text-pink-800"
-                    }`}
-                  >
-                    1000-8490-8014
+                  <div className="hidden sm:flex items-center gap-2">
+                    <Volume2 className={`w-4 h-4 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} />
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={volume}
+                      onChange={(e) => handleVolumeChange(Number.parseFloat(e.target.value))}
+                      className="w-16 h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+                    />
                   </div>
 
                   <Button
-                    onClick={() => navigator.clipboard.writeText("1000-8490-8014")}
-                    className={`px-5 sm:px-6 py-2 rounded-full transition-all duration-300 ${
-                      isDarkMode
-                        ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30"
-                        : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600 border border-pink-300/50"
+                    onClick={togglePlay}
+                    disabled={audioError || isAudioLoading || !audioSupported}
+                    className={`w-10 h-10 rounded-full transition-all duration-300 ${
+                      audioError || !audioSupported
+                        ? "bg-gray-400 cursor-not-allowed opacity-50"
+                        : isPlaying
+                          ? isDarkMode
+                            ? "bg-purple-600 hover:bg-purple-700 animate-pulse"
+                            : "bg-purple-500 hover:bg-purple-600 animate-pulse"
+                          : isDarkMode
+                            ? "bg-slate-700 hover:bg-slate-600"
+                            : "bg-gray-200 hover:bg-gray-300"
                     }`}
-                    variant="outline"
                   >
-                    📋 계좌번호 복사하기
+                    {isAudioLoading ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : isPlaying ? (
+                      <Pause
+                        className={`w-4 h-4 ${isPlaying ? "text-white" : isDarkMode ? "text-gray-300" : "text-gray-600"}`}
+                      />
+                    ) : (
+                      <Play
+                        className={`w-4 h-4 ${isPlaying ? "text-white" : isDarkMode ? "text-gray-300" : "text-gray-600"}`}
+                      />
+                    )}
                   </Button>
                 </div>
               </div>
 
-              {/* 감사 메시지 */}
-              <div className="text-center space-y-4">
-                <div className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? "bg-slate-800/30" : "bg-amber-50/50"}`}>
-                  <p className={`text-xs sm:text-sm italic ${isDarkMode ? "text-gray-400" : "text-amber-700"}`}>
-                    "작은 후원이라도 개발자에게는 큰 격려가 됩니다.
-                    <br />
-                    여러분의 마음이 더 나은 서비스를 만드는 원동력입니다."
+              {!audioSupported ? (
+                <div className="mt-3 text-center">
+                  <p className={`text-xs sm:text-sm ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}>
+                    이 브라우저에서는 음악 기능을 지원하지 않습니다
                   </p>
-                  <div className="mt-4 flex justify-center gap-2">
-                    <Heart className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse`} />
-                    <Heart
-                      className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse delay-100`}
-                    />
-                    <Heart
-                      className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse delay-200`}
-                    />
+                </div>
+              ) : audioError ? (
+                <div className="mt-3 text-center">
+                  <p className={`text-xs sm:text-sm ${isDarkMode ? "text-red-400" : "text-red-500"}`}>
+                    음악을 불러올 수 없습니다. 음악 없이도 일기 작성을 계속하세요
+                  </p>
+                </div>
+              ) : isAudioLoading ? (
+                <div className="mt-3 text-center">
+                  <p className={`text-xs sm:text-sm ${isDarkMode ? "text-blue-400" : "text-blue-500"}`}>음악을 불러오는 중...</p>
+                </div>
+              ) : isPlaying ? (
+                <div className="mt-3 flex justify-center">
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-1 bg-gradient-to-t rounded-full animate-pulse ${
+                          isDarkMode ? "from-purple-400 to-blue-400" : "from-purple-500 to-pink-500"
+                        }`}
+                        style={{
+                          height: `${Math.random() * 15 + 8}px`,
+                          animationDelay: `${i * 0.1}s`,
+                          animationDuration: "1s",
+                        }}
+                      />
+                    ))}
                   </div>
                 </div>
-              </div>
-
-              {/* 개발자 정보 */}
-              <div className="text-center">
-                <div className={`inline-block p-4 rounded-full ${isDarkMode ? "bg-slate-800/50" : "bg-rose-100/50"}`}>
-                  <div className={`text-3xl sm:text-4xl mb-2`}>👨‍💻</div>
-                  <p className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
-                    하루의 끝 개발팀
-                  </p>
-                </div>
-              </div>
+              ) : null}
             </CardContent>
           </Card>
-        ) : currentView === "hall" ? (
-          // 명예의 전당 페이지
-          <Card
-            className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
-              isDarkMode
-                ? "bg-slate-900/80 shadow-yellow-500/30 border border-slate-700/50"
-                : "bg-white/90 border border-yellow-200/50 shadow-yellow-200/30"
-            }`}
-          >
-            <CardHeader className="text-center pb-4 sm:pb-6">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <div className="text-3xl sm:text-4xl animate-bounce">🏆</div>
-                <span className={`text-xl sm:text-2xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}>
-                  명예의 전당
-                </span>
-                <div className="text-3xl sm:text-4xl animate-bounce delay-100">🏆</div>
-              </div>
-              <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-300" : "text-yellow-700"}`}>
-                "하루의 끝"을 후원해주신 소중한 분들
-              </p>
-            </CardHeader>
 
-            <CardContent className="space-y-6 sm:space-y-8 p-3 sm:p-6">
+          {/* 광고 */}
+          <div className={`text-center mb-4 sm:mb-6 ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
+            <p className="text-xs mb-2 opacity-70">광고</p>
+            <TopBannerAd />
+          </div>
+
+          {currentView === "write" ? (
+            <Card
+              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
+                isDarkMode
+                  ? "bg-slate-900/80 shadow-purple-500/30 border border-slate-700/50"
+                  : "bg-white/90 border border-rose-200/50 shadow-rose-200/30"
+              }`}
+            >
+              <CardHeader className="text-center pb-4 sm:pb-6">
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <Moon className={`w-5 h-5 ${isDarkMode ? "text-yellow-400" : "text-amber-500"}`} />
+                  <span className={`text-lg sm:text-xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
+                    {getCurrentDate()}
+                  </span>
+                  <Star className={`w-5 h-5 ${isDarkMode ? "text-blue-400" : "text-rose-500"}`} />
+                </div>
+                <p className={`italic text-sm sm:text-base ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
+                  {isDarkMode
+                    ? "\"밤이 깊어갈수록, 우리의 생각은 더욱 깊어집니다\""
+                    : "\"매일 밤, 우리는 하루를 돌아보며 성장합니다\""}
+                </p>
+              </CardHeader>
+
+              <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-6">
+                <div className="space-y-3">
+                  <label className={`text-base sm:text-lg font-medium flex items-center gap-2 ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
+                    <Heart className={`w-5 h-5 ${isDarkMode ? "text-pink-400" : "text-rose-500"}`} />
+                    오늘의 이야기
+                  </label>
+                  <Textarea
+                    placeholder={
+                      isDarkMode
+                        ? "고요한 밤, 오늘 하루는 어떠셨나요?\n달빛 아래에서 마음속 깊은 이야기를 들려주세요.\n작은 감정들도 소중한 기억이 됩니다..."
+                        : "오늘 하루는 어떠셨나요? \n기쁜 일, 힘들었던 일, 감사한 일들을 자유롭게 적어보세요.\n작은 순간들도 소중한 기억이 됩니다..."
+                    }
+                    value={diaryContent}
+                    onChange={(e) => setDiaryContent(e.target.value)}
+                    className={`min-h-[250px] sm:min-h-[300px] text-base leading-relaxed resize-none border-2 rounded-xl p-3 sm:p-4 backdrop-blur-sm transition-all duration-300 ${
+                      isDarkMode
+                        ? "border-purple-500/30 focus:border-purple-400 bg-slate-700/50 text-gray-200 placeholder:text-gray-400"
+                        : "border-rose-200 focus:border-rose-400 bg-white/70 text-rose-900 placeholder:text-rose-500"
+                    }`}
+                  />
+                </div>
+
+                <div className={`text-right text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
+                  {diaryContent.length}자
+                </div>
+
+                <div className="flex justify-center pt-2 sm:pt-4">
+                  <Button
+                    onClick={handleSave}
+                    className={`px-6 sm:px-8 py-3 text-base sm:text-lg font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${
+                      isSaved
+                        ? "bg-green-500 hover:bg-green-600"
+                        : isDarkMode
+                          ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                          : "bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600"
+                    }`}
+                  >
+                    <Save className="w-5 h-5 mr-2" />
+                    {isSaved ? "저장되었습니다!" : "오늘의 일기 저장하기"}
+                  </Button>
+                </div>
+
+                <div className={`text-center pt-4 sm:pt-6 border-t ${isDarkMode ? "border-purple-500/30" : "border-rose-200"}`}>
+                  <p className={`text-xs sm:text-sm italic ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
+                    {isDarkMode
+                      ? "별빛 아래에서 당신의 하루가 아름다운 꿈으로 이어지기를"
+                      : "따뜻한 햇살처럼 당신의 소중한 하루가 아름다운 추억으로 남기를 바랍니다"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : currentView === "list" ? (
+            <Card
+              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
+                isDarkMode ? "bg-slate-800/80 shadow-purple-500/20" : "bg-white/80"
+              }`}
+            >
+              <CardHeader className="text-center pb-4 sm:pb-6">
+                <h2 className={`text-xl sm:text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
+                  📖 나의 일기장
+                </h2>
+                <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                  총 {diaryEntries.length}개의 소중한 기억들
+                </p>
+              </CardHeader>
+
+              <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
+                {diaryEntries.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                      아직 작성된 일기가 없습니다
+                    </p>
+                    <p className={`text-sm mt-2 ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}>
+                      첫 번째 일기를 작성해보세요!
+                    </p>
+                  </div>
+                ) : (
+                  diaryEntries.map((entry, index) => (
+                    <div key={entry.id}>
+                      <div
+                        className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md ${
+                          isDarkMode
+                            ? "border-purple-500/30 bg-slate-700/50 hover:bg-slate-700/70"
+                            : "border-purple-100 bg-white/50 hover:bg-white/70"
+                        }`}
+                        onClick={() => setSelectedEntry(entry)}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>
+                            {entry.date}
+                          </span>
+                          <span className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                            {entry.content.length}자
+                          </span>
+                        </div>
+                        <p className={`text-sm sm:text-base line-clamp-3 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                          {entry.content}
+                        </p>
+                      </div>
+                      {(index + 1) % 5 === 0 && index < diaryEntries.length - 1 && (
+                        <div className="my-4 sm:my-6 text-center">
+                          <p className={`text-xs mb-2 opacity-60 ${isDarkMode ? "text-gray-400" : "text-rose-500"}`}>
+                            추천
+                          </p>
+                          <SquareAd />
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          ) : currentView === "support" ? (
+            // 후원 페이지
+            <Card
+              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
+                isDarkMode
+                  ? "bg-slate-900/80 shadow-pink-500/30 border border-slate-700/50"
+                  : "bg-white/90 border border-pink-200/50 shadow-pink-200/30"
+              }`}
+            >
+              <CardHeader className="text-center pb-4 sm:pb-6">
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
+                  <span className={`text-xl sm:text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
+                    개발자 후원하기
+                  </span>
+                  <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
+                </div>
+                <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
+                  "하루의 끝"을 사랑해주셔서 감사합니다
+                </p>
+              </CardHeader>
+
+              <CardContent className="space-y-6 sm:space-y-8 p-3 sm:p-6">
+                <div className="text-center space-y-4">
+                  <div className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-rose-50/80"}`}>
+                    <h3 className={`text-lg sm:text-xl font-semibold mb-3 ${isDarkMode ? "text-pink-300" : "text-rose-700"}`}>
+                      후원을 해주시면 개발자에게 큰 힘이 됩니다
+                    </h3>
+                    <p className={`text-sm sm:text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-rose-600"}`}>
+                      여러분의 소중한 일기를 더 안전하고 아름답게 보관할 수 있도록
+                      지속적으로 개발하고 개선해나가겠습니다.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-center space-y-4">
+                  <div
+                    className={`p-6 sm:p-8 rounded-xl border-2 border-dashed ${
+                      isDarkMode ? "border-pink-400/50 bg-pink-900/20" : "border-pink-300/50 bg-pink-100/50"
+                    }`}
+                  >
+                    <div className="mb-4">
+                      <img src="/placeholder.svg?height=60&width=60" alt="토스뱅크" className="mx-auto mb-3 rounded-lg" />
+                      <h4 className={`text-base sm:text-lg font-semibold ${isDarkMode ? "text-pink-300" : "text-pink-700"}`}>
+                        토스뱅크
+                      </h4>
+                    </div>
+
+                    <div
+                      className={`text-2xl sm:text-3xl font-bold mb-4 font-mono tracking-wider ${
+                        isDarkMode ? "text-pink-200" : "text-pink-800"
+                      }`}
+                    >
+                      1000-8490-8014
+                    </div>
+
+                    <Button
+                      onClick={() => navigator.clipboard.writeText("1000-8490-8014")}
+                      className={`px-5 sm:px-6 py-2 rounded-full transition-all duration-300 ${
+                        isDarkMode
+                          ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30"
+                          : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600 border border-pink-300/50"
+                      }`}
+                      variant="outline"
+                    >
+                      계좌번호 복사하기
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="text-center space-y-4">
+                  <div className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? "bg-slate-800/30" : "bg-amber-50/50"}`}>
+                    <p className={`text-xs sm:text-sm italic ${isDarkMode ? "text-gray-400" : "text-amber-700"}`}>
+                      "작은 후원이라도 개발자에게는 큰 격려가 됩니다.
+                      여러분의 마음이 더 나은 서비스를 만드는 원동력입니다."
+                    </p>
+                    <div className="mt-4 flex justify-center gap-2">
+                      <Heart className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse`} />
+                      <Heart className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse delay-100`} />
+                      <Heart className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse delay-200`} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <div className={`inline-block p-4 rounded-full ${isDarkMode ? "bg-slate-800/50" : "bg-rose-100/50"}`}>
+                    <div className={`text-3xl mb-2`}>👨‍💻</div>
+                    <p className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
+                      하루의 끝 개발팀
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : currentView === "hall" ? (
+            // 명예의 전당 페이지
+            <Card
+              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
+                isDarkMode
+                  ? "bg-slate-900/80 shadow-yellow-500/30 border border-slate-700/50"
+                  : "bg-white/90 border border-yellow-200/50 shadow-yellow-200/30"
+              }`}
+            >
+              <CardHeader className="text-center pb-4 sm:pb-6">
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <div className="text-3xl sm:text-4xl animate-bounce">🏆</div>
+                  <span className={`text-xl sm:text-2xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}>
+                    명예의 전당
+                  </span>
+                  <div className="text-3xl sm:text-4xl animate-bounce delay-100">🏆</div>
+                </div>
+                <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-300" : "text-yellow-700"}`}>
+                  "하루의 끝"을 후원해주신 소중한 분들
+                </p>
+              </CardHeader>
+
+              <CardContent className="space-y-6 sm:space-y-8 p-3 sm:p-6">
               {/* 후원자 통계 */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                 <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
                   <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
-                    42
+                    43
                   </div>
                   <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>총 후원자 수</div>
                 </div>
                 <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
                   <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
-                    ₩847,000
+                    ₩857,000
                   </div>
                   <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>총 후원 금액</div>
                 </div>
                 <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
                   <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
-                    156
+                    158
                   </div>
                   <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>누적 일기 수</div>
                 </div>
@@ -856,7 +891,7 @@ export default function Component() {
                 </h3>
                 <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                   {[
-                    "김**님",
+                    "쯔나미님",
                     "이**님",
                     "박**님",
                     "최**님",
@@ -896,7 +931,6 @@ export default function Component() {
                 <div className={`p-3 sm:p-4 rounded-xl text-center ${isDarkMode ? "bg-slate-800/30" : "bg-orange-50/50"}`}>
                   <div className="flex flex-wrap justify-center gap-2">
                     {[
-                      "서**님",
                       "권**님",
                       "민**님",
                       "배**님",
@@ -966,29 +1000,29 @@ export default function Component() {
               </div>
             </CardContent>
           </Card>
-        ) : (
-          // 후원 페이지
-          <Card
-            className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
-              isDarkMode
-                ? "bg-slate-900/80 shadow-pink-500/30 border border-slate-700/50"
-                : "bg-white/90 border border-pink-200/50 shadow-pink-200/30"
-            }`}
-          >
-            <CardHeader className="text-center pb-6">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
-                <span className={`text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
-                  개발자 후원하기
-                </span>
-                <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
-              </div>
-              <p className={`text-lg ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
-                "하루의 끝"을 사랑해주셔서 감사합니다
-              </p>
-            </CardHeader>
+          ) : (
+            // 후원 페이지(대체 뷰) - 원본 유지
+            <Card
+              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
+                isDarkMode
+                  ? "bg-slate-900/80 shadow-pink-500/30 border border-slate-700/50"
+                  : "bg-white/90 border border-pink-200/50 shadow-pink-200/30"
+              }`}
+            >
+              <CardHeader className="text-center pb-6">
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
+                  <span className={`text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
+                    개발자 후원하기
+                  </span>
+                  <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
+                </div>
+                <p className={`text-lg ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
+                  "하루의 끝"을 사랑해주셔서 감사합니다
+                </p>
+              </CardHeader>
 
-            <CardContent className="space-y-8">
+              <CardContent className="space-y-8">
               {/* 후원 메시지 */}
               <div className="text-center space-y-4">
                 <div className={`p-6 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-rose-50/80"}`}>
@@ -1069,55 +1103,55 @@ export default function Component() {
                 </div>
               </div>
             </CardContent>
-          </Card>
-        )}
+            </Card>
+          )}
 
-        {/* 하단 자연스러운 광고 */}
-        <div className={`text-center mt-8 mb-6 ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
-          <p className="text-xs mb-2 opacity-70">✨ 함께 보면 좋은 ✨</p>
-          <BottomBannerAd />
+          <div className={`text-center mt-8 mb-6 ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
+            <p className="text-xs mb-2 opacity-70">함께 보면 좋은</p>
+            <BottomBannerAd />
+          </div>
+
+          <div className={`text-center mt-8 text-sm ${isDarkMode ? "text-gray-500" : "text-rose-500"}`}>
+            <p>© 2025 하루의 끝. 모든 순간이 소중합니다.</p>
+          </div>
         </div>
 
-        {/* 푸터 */}
-        <div className={`text-center mt-8 text-sm ${isDarkMode ? "text-gray-500" : "text-rose-500"}`}>
-          <p>© 2025 하루의 끝. 모든 순간이 소중합니다.</p>
-        </div>
-      </div>
-      {selectedEntry && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <Card className={`max-w-2xl w-full max-h-[80vh] overflow-y-auto ${isDarkMode ? "bg-slate-800" : "bg-white"}`}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className={`text-lg font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
-                    {selectedEntry.date}
-                  </h3>
-                  <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                    {selectedEntry.content.length}자
-                  </p>
+        {selectedEntry && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <Card className={`max-w-2xl w-full max-h-[80vh] overflow-y-auto ${isDarkMode ? "bg-slate-800" : "bg-white"}`}>
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className={`text-lg font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
+                      {selectedEntry.date}
+                    </h3>
+                    <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                      {selectedEntry.content.length}자
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => setSelectedEntry(null)}
+                    variant="ghost"
+                    size="sm"
+                    className={isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"}
+                  >
+                    ✕
+                  </Button>
                 </div>
-                <Button
-                  onClick={() => setSelectedEntry(null)}
-                  variant="ghost"
-                  size="sm"
-                  className={isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"}
+              </CardHeader>
+              <CardContent>
+                <p
+                  className={`text-base leading-relaxed whitespace-pre-wrap ${
+                    isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
                 >
-                  ✕
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p
-                className={`text-base leading-relaxed whitespace-pre-wrap ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
-                {selectedEntry.content}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-    </div>
+                  {selectedEntry.content}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
+    </>
   )
 }
