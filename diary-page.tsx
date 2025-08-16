@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import Head from "next/head"
+
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -18,22 +18,7 @@ export default function Component() {
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [isCopied, setIsCopied] = useState(false)
 
-  // ====== SEO 변수 (필요 시 교체) ======
-  const siteName = "하루의 끝"
-  const siteUrl = "https://www.haru2end.com"
-  const title = "하루의 끝 - 당신의 하루를 기록하는 감성 온라인 일기장"
-  const description =
-    "오늘의 감정과 생각을 기록하세요. '하루의 끝'은 배경음악과 함께하는 감성 다이어리 및 온라인 일기장입니다. 당신의 소중한 하루를 안전하게 보관하고 언제든 다시 돌아보세요."
-  const ogImage = `${siteUrl}/og-image.png` // 프로젝트에 og-image.png를 배치하세요.
-  const keywords = [
-    "하루의 끝",
-    "일기장",
-    "온라인 일기",
-    "감성 일기",
-    "다이어리",
-    "하루 마무리",
-    "haru2end",
-  ].join(", ")
+  
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -201,91 +186,7 @@ export default function Component() {
 
   return (
     <>
-      {/* ===== SEO Head 영역 ===== */}
-      <Head>
-        <title>{title}</title>
-        <meta name="description" content={description} />
-        <meta name="keywords" content={keywords} />
-        <link rel="canonical" href={siteUrl} />
-
-        {/* Open Graph */}
-        <meta property="og:site_name" content={siteName} />
-        <meta property="og:type" content="website" />
-        <meta property="og:locale" content="ko_KR" />
-        <meta property="og:url" content={siteUrl} />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
-        <meta property="og:image" content={ogImage} />
-        <meta property="og:image:alt" content="하루의 끝 미리보기 이미지" />
-
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={title} />
-        <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={ogImage} />
-
-        {/* Robots */}
-        <meta name="robots" content="index,follow,max-image-preview:large" />
-        <meta name="googlebot" content="index,follow" />
-
-        {/* PWA/Favicon(선택) */}
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="theme-color" content={isDarkMode ? "#0b1020" : "#ffffff"} />
-
-        {/* JSON-LD 구조화 데이터 */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: siteName,
-              url: siteUrl,
-              potentialAction: {
-                "@type": "SearchAction",
-                target: `${siteUrl}/?q={search_term_string}`,
-                "query-input": "required name=search_term_string"
-              }
-            })
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: siteName,
-              url: siteUrl,
-              logo: `${siteUrl}/icon-512x512.png`
-            })
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Article",
-              "author": {
-                "@type": "Organization",
-                "name": "하루의 끝 개발팀"
-              },
-              "headline": title,
-              "description": description,
-              "image": ogImage,
-              "publisher": {
-                "@type": "Organization",
-                "name": "하루의 끝",
-                "logo": {
-                  "@type": "ImageObject",
-                  "url": `${siteUrl}/icon-512x512.png`
-                }
-              }
-            })
-          }}
-        />
-      </Head>
+      
 
       <div
         className={`min-h-screen transition-all duration-500 p-2 sm:p-4 ${isDarkMode
