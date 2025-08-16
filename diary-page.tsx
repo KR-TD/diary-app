@@ -202,6 +202,26 @@ export default function Component() {
     <>
       {/* ===== SEO Head 영역 ===== */}
       <Head>
+        {/* SEO 소개 섹션 */}
+        <section className={`prose max-w-none mb-4 sm:mb-6 ${isDarkMode ? "prose-invert" : ""}`}>
+          <h2 className="text-xl sm:text-2xl font-semibold">하루의 끝 – 감성 온라인 일기장</h2>
+          <p>
+            하루의 끝은 하루를 차분히 정리하고 기록할 수 있는 감성 일기장 서비스입니다.
+            온라인 다이어리 형태로 언제 어디서나 접근할 수 있으며, 다크/라이트 테마와 배경음악,
+            일기 목록 보기, 후원 및 명예의 전당 등 다양한 기능을 제공합니다. 사용자는 간단한 인터페이스로
+            오늘의 감정과 생각을 자연스럽게 남기고, 시간이 지나도 안전하게 보관된 기록을 다시 돌아볼 수 있습니다.
+            특히 ‘하루의 끝’, ‘감성 일기’, ‘온라인 일기’, ‘다이어리’, ‘기록’과 같은 주제에 관심 있는 분에게
+            편안한 글쓰기 경험을 제공합니다. 이 페이지는 서비스 소개와 함께 주요 기능을 안내하여
+            처음 방문하는 이용자도 쉽게 이해하고 시작할 수 있도록 구성했습니다.
+          </p>
+          <h3 className="text-lg sm:text-xl font-semibold">주요 기능</h3>
+          <ul className="list-disc pl-5">
+            <li>감성적인 다크/라이트 테마와 배경음악</li>
+            <li>일기 저장 및 목록 관리, 해시 기반 내부 링크</li>
+            <li>후원하기와 명예의 전당을 통한 커뮤니티 참여</li>
+          </ul>
+        </section>
+
         <title>{title}</title>
         <meta name="description" content={description} />
         <meta name="keywords" content={keywords} />
@@ -263,11 +283,10 @@ export default function Component() {
       </Head>
 
       <div
-        className={`min-h-screen transition-all duration-500 p-2 sm:p-4 ${
-          isDarkMode
-            ? "bg-gradient-to-br from-gray-900 via-slate-900 to-black"
-            : "bg-gradient-to-br from-rose-100 via-orange-50 to-amber-100"
-        }`}
+        className={`min-h-screen transition-all duration-500 p-2 sm:p-4 ${isDarkMode
+          ? "bg-gradient-to-br from-gray-900 via-slate-900 to-black"
+          : "bg-gradient-to-br from-rose-100 via-orange-50 to-amber-100"
+          }`}
       >
         {/* 배경 장식 요소들 - 밤하늘 느낌 */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -280,27 +299,23 @@ export default function Component() {
 
           {/* 기존 별들 */}
           <Star
-            className={`absolute top-20 left-10 w-4 h-4 animate-pulse ${
-              isDarkMode ? "text-yellow-300" : "text-rose-300"
-            }`}
+            className={`absolute top-20 left-10 w-4 h-4 animate-pulse ${isDarkMode ? "text-yellow-300" : "text-rose-300"
+              }`}
           />
           <Star
-            className={`absolute top-40 right-20 w-3 h-3 animate-pulse delay-1000 ${
-              isDarkMode ? "text-blue-300" : "text-orange-300"
-            }`}
+            className={`absolute top-40 right-20 w-3 h-3 animate-pulse delay-1000 ${isDarkMode ? "text-blue-300" : "text-orange-300"
+              }`}
           />
           <Moon
             className={`absolute top-32 right-10 w-6 h-6 opacity-70 ${isDarkMode ? "text-yellow-200" : "text-amber-300"}`}
           />
           <Heart
-            className={`absolute bottom-40 left-16 w-5 h-5 animate-pulse delay-2000 ${
-              isDarkMode ? "text-pink-300" : "text-rose-400"
-            }`}
+            className={`absolute bottom-40 left-16 w-5 h-5 animate-pulse delay-2000 ${isDarkMode ? "text-pink-300" : "text-rose-400"
+              }`}
           />
           <Star
-            className={`absolute bottom-60 right-32 w-4 h-4 animate-pulse delay-500 ${
-              isDarkMode ? "text-purple-300" : "text-pink-300"
-            }`}
+            className={`absolute bottom-60 right-32 w-4 h-4 animate-pulse delay-500 ${isDarkMode ? "text-purple-300" : "text-pink-300"
+              }`}
           />
 
           {/* 추가 별들 */}
@@ -328,11 +343,10 @@ export default function Component() {
               <div className="flex gap-1 sm:gap-2">
                 <Button
                   onClick={() => setCurrentView(currentView === "write" ? "list" : "write")}
-                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
-                    isDarkMode
-                      ? "bg-purple-600/20 hover:bg-purple-600/30 text-purple-300"
-                      : "bg-rose-500/20 hover:bg-rose-500/30 text-rose-600"
-                  }`}
+                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${isDarkMode
+                    ? "bg-purple-600/20 hover:bg-purple-600/30 text-purple-300"
+                    : "bg-rose-500/20 hover:bg-rose-500/30 text-rose-600"
+                    }`}
                   variant="ghost"
                   size={isMobile ? "icon" : "default"}
                 >
@@ -342,15 +356,14 @@ export default function Component() {
 
                 <Button
                   onClick={() => setCurrentView("support")}
-                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
-                    currentView === "support"
-                      ? isDarkMode
-                        ? "bg-pink-600/30 text-pink-300"
-                        : "bg-pink-500/30 text-pink-600"
-                      : isDarkMode
-                        ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300"
-                        : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600"
-                  }`}
+                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${currentView === "support"
+                    ? isDarkMode
+                      ? "bg-pink-600/30 text-pink-300"
+                      : "bg-pink-500/30 text-pink-600"
+                    : isDarkMode
+                      ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300"
+                      : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600"
+                    }`}
                   variant="ghost"
                   size={isMobile ? "icon" : "default"}
                 >
@@ -360,15 +373,14 @@ export default function Component() {
 
                 <Button
                   onClick={() => setCurrentView("hall")}
-                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
-                    currentView === "hall"
-                      ? isDarkMode
-                        ? "bg-yellow-600/30 text-yellow-300"
-                        : "bg-yellow-500/30 text-yellow-600"
-                      : isDarkMode
-                        ? "bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-300"
-                        : "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-600"
-                  }`}
+                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${currentView === "hall"
+                    ? isDarkMode
+                      ? "bg-yellow-600/30 text-yellow-300"
+                      : "bg-yellow-500/30 text-yellow-600"
+                    : isDarkMode
+                      ? "bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-300"
+                      : "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-600"
+                    }`}
                   variant="ghost"
                   size={isMobile ? "icon" : "default"}
                 >
@@ -379,11 +391,10 @@ export default function Component() {
 
               <Button
                 onClick={() => setIsDarkMode(!isDarkMode)}
-                className={`p-3 rounded-full transition-all duration-300 ${
-                  isDarkMode
-                    ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300"
-                    : "bg-orange-500/20 hover:bg-orange-500/30 text-orange-600"
-                }`}
+                className={`p-3 rounded-full transition-all duration-300 ${isDarkMode
+                  ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300"
+                  : "bg-orange-500/20 hover:bg-orange-500/30 text-orange-600"
+                  }`}
                 variant="ghost"
               >
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -391,11 +402,10 @@ export default function Component() {
             </div>
 
             <h1
-              className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-2 ${
-                isDarkMode
-                  ? "bg-gradient-to-r from-yellow-300 via-blue-300 to-purple-300 bg-clip-text text-transparent"
-                  : "bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 bg-clip-text text-transparent"
-              }`}
+              className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-2 ${isDarkMode
+                ? "bg-gradient-to-r from-yellow-300 via-blue-300 to-purple-300 bg-clip-text text-transparent"
+                : "bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 bg-clip-text text-transparent"
+                }`}
             >
               하루의 끝
             </h1>
@@ -408,11 +418,10 @@ export default function Component() {
 
           {/* 음악 플레이어 */}
           <Card
-            className={`backdrop-blur-sm border-0 shadow-lg mb-4 sm:mb-6 transition-all duration-500 ${
-              isDarkMode
-                ? "bg-slate-900/70 shadow-purple-500/20 border border-slate-700/50"
-                : "bg-white/80 border border-rose-200/50 shadow-rose-200/20"
-            }`}
+            className={`backdrop-blur-sm border-0 shadow-lg mb-4 sm:mb-6 transition-all duration-500 ${isDarkMode
+              ? "bg-slate-900/70 shadow-purple-500/20 border border-slate-700/50"
+              : "bg-white/80 border border-rose-200/50 shadow-rose-200/20"
+              }`}
           >
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
@@ -435,17 +444,16 @@ export default function Component() {
                         key={index}
                         onClick={() => changeTrack(index)}
                         disabled={!audioSupported}
-                        className={`w-8 h-8 p-0 text-sm transition-all duration-200 ${
-                          !audioSupported
-                            ? "opacity-50 cursor-not-allowed"
-                            : currentTrack === index
-                              ? isDarkMode
-                                ? "bg-purple-600 hover:bg-purple-700"
-                                : "bg-purple-500 hover:bg-purple-600"
-                              : isDarkMode
-                                ? "bg-slate-700 hover:bg-slate-600 text-gray-300"
-                                : "bg-gray-200 hover:bg-gray-300 text-gray-600"
-                        }`}
+                        className={`w-8 h-8 p-0 text-sm transition-all duration-200 ${!audioSupported
+                          ? "opacity-50 cursor-not-allowed"
+                          : currentTrack === index
+                            ? isDarkMode
+                              ? "bg-purple-600 hover:bg-purple-700"
+                              : "bg-purple-500 hover:bg-purple-600"
+                            : isDarkMode
+                              ? "bg-slate-700 hover:bg-slate-600 text-gray-300"
+                              : "bg-gray-200 hover:bg-gray-300 text-gray-600"
+                          }`}
                         title={track.name}
                       >
                         {track.icon}
@@ -469,17 +477,16 @@ export default function Component() {
                   <Button
                     onClick={togglePlay}
                     disabled={audioError || isAudioLoading || !audioSupported}
-                    className={`w-10 h-10 rounded-full transition-all duration-300 ${
-                      audioError || !audioSupported
-                        ? "bg-gray-400 cursor-not-allowed opacity-50"
-                        : isPlaying
-                          ? isDarkMode
-                            ? "bg-purple-600 hover:bg-purple-700 animate-pulse"
-                            : "bg-purple-500 hover:bg-purple-600 animate-pulse"
-                          : isDarkMode
-                            ? "bg-slate-700 hover:bg-slate-600"
-                            : "bg-gray-200 hover:bg-gray-300"
-                    }`}
+                    className={`w-10 h-10 rounded-full transition-all duration-300 ${audioError || !audioSupported
+                      ? "bg-gray-400 cursor-not-allowed opacity-50"
+                      : isPlaying
+                        ? isDarkMode
+                          ? "bg-purple-600 hover:bg-purple-700 animate-pulse"
+                          : "bg-purple-500 hover:bg-purple-600 animate-pulse"
+                        : isDarkMode
+                          ? "bg-slate-700 hover:bg-slate-600"
+                          : "bg-gray-200 hover:bg-gray-300"
+                      }`}
                   >
                     {isAudioLoading ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -518,9 +525,8 @@ export default function Component() {
                     {[...Array(5)].map((_, i) => (
                       <div
                         key={i}
-                        className={`w-1 bg-gradient-to-t rounded-full animate-pulse ${
-                          isDarkMode ? "from-purple-400 to-blue-400" : "from-purple-500 to-pink-500"
-                        }`}
+                        className={`w-1 bg-gradient-to-t rounded-full animate-pulse ${isDarkMode ? "from-purple-400 to-blue-400" : "from-purple-500 to-pink-500"
+                          }`}
                         style={{
                           height: `${Math.random() * 15 + 8}px`,
                           animationDelay: `${i * 0.1}s`,
@@ -542,11 +548,10 @@ export default function Component() {
 
           {currentView === "write" ? (
             <Card
-              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
-                isDarkMode
-                  ? "bg-slate-900/80 shadow-purple-500/30 border border-slate-700/50"
-                  : "bg-white/90 border border-rose-200/50 shadow-rose-200/30"
-              }`}
+              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${isDarkMode
+                ? "bg-slate-900/80 shadow-purple-500/30 border border-slate-700/50"
+                : "bg-white/90 border border-rose-200/50 shadow-rose-200/30"
+                }`}
             >
               <CardHeader className="text-center pb-4 sm:pb-6">
                 <div className="flex items-center justify-center gap-2 mb-4">
@@ -577,11 +582,10 @@ export default function Component() {
                     }
                     value={diaryContent}
                     onChange={(e) => setDiaryContent(e.target.value)}
-                    className={`min-h-[250px] sm:min-h-[300px] text-base leading-relaxed resize-none border-2 rounded-xl p-3 sm:p-4 backdrop-blur-sm transition-all duration-300 ${
-                      isDarkMode
-                        ? "border-purple-500/30 focus:border-purple-400 bg-slate-700/50 text-gray-200 placeholder:text-gray-400"
-                        : "border-rose-200 focus:border-rose-400 bg-white/70 text-rose-900 placeholder:text-rose-500"
-                    }`}
+                    className={`min-h-[250px] sm:min-h-[300px] text-base leading-relaxed resize-none border-2 rounded-xl p-3 sm:p-4 backdrop-blur-sm transition-all duration-300 ${isDarkMode
+                      ? "border-purple-500/30 focus:border-purple-400 bg-slate-700/50 text-gray-200 placeholder:text-gray-400"
+                      : "border-rose-200 focus:border-rose-400 bg-white/70 text-rose-900 placeholder:text-rose-500"
+                      }`}
                   />
                 </div>
 
@@ -592,13 +596,12 @@ export default function Component() {
                 <div className="flex justify-center pt-2 sm:pt-4">
                   <Button
                     onClick={handleSave}
-                    className={`px-6 sm:px-8 py-3 text-base sm:text-lg font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${
-                      isSaved
-                        ? "bg-green-500 hover:bg-green-600"
-                        : isDarkMode
-                          ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                          : "bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600"
-                    }`}
+                    className={`px-6 sm:px-8 py-3 text-base sm:text-lg font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${isSaved
+                      ? "bg-green-500 hover:bg-green-600"
+                      : isDarkMode
+                        ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                        : "bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600"
+                      }`}
                   >
                     <Save className="w-5 h-5 mr-2" />
                     {isSaved ? "저장되었습니다!" : "오늘의 일기 저장하기"}
@@ -616,9 +619,8 @@ export default function Component() {
             </Card>
           ) : currentView === "list" ? (
             <Card
-              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
-                isDarkMode ? "bg-slate-800/80 shadow-purple-500/20" : "bg-white/80"
-              }`}
+              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${isDarkMode ? "bg-slate-800/80 shadow-purple-500/20" : "bg-white/80"
+                }`}
             >
               <CardHeader className="text-center pb-4 sm:pb-6">
                 <h2 className={`text-xl sm:text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
@@ -643,11 +645,10 @@ export default function Component() {
                   diaryEntries.map((entry, index) => (
                     <div key={entry.id}>
                       <div
-                        className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md ${
-                          isDarkMode
-                            ? "border-purple-500/30 bg-slate-700/50 hover:bg-slate-700/70"
-                            : "border-purple-100 bg-white/50 hover:bg-white/70"
-                        }`}
+                        className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md ${isDarkMode
+                          ? "border-purple-500/30 bg-slate-700/50 hover:bg-slate-700/70"
+                          : "border-purple-100 bg-white/50 hover:bg-white/70"
+                          }`}
                         onClick={() => setSelectedEntry(entry)}
                       >
                         <div className="flex justify-between items-start mb-2">
@@ -678,11 +679,10 @@ export default function Component() {
           ) : currentView === "support" ? (
             // 후원 페이지
             <Card
-              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
-                isDarkMode
-                  ? "bg-slate-900/80 shadow-pink-500/30 border border-slate-700/50"
-                  : "bg-white/90 border border-pink-200/50 shadow-pink-200/30"
-              }`}
+              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${isDarkMode
+                ? "bg-slate-900/80 shadow-pink-500/30 border border-slate-700/50"
+                : "bg-white/90 border border-pink-200/50 shadow-pink-200/30"
+                }`}
             >
               <CardHeader className="text-center pb-4 sm:pb-6">
                 <div className="flex items-center justify-center gap-2 mb-4">
@@ -712,9 +712,8 @@ export default function Component() {
 
                 <div className="text-center space-y-4">
                   <div
-                    className={`p-6 sm:p-8 rounded-xl border-2 border-dashed ${
-                      isDarkMode ? "border-pink-400/50 bg-pink-900/20" : "border-pink-300/50 bg-pink-100/50"
-                    }`}
+                    className={`p-6 sm:p-8 rounded-xl border-2 border-dashed ${isDarkMode ? "border-pink-400/50 bg-pink-900/20" : "border-pink-300/50 bg-pink-100/50"
+                      }`}
                   >
                     <div className="mb-4">
                       <img src="/placeholder.svg?height=60&width=60" alt="토스뱅크" className="mx-auto mb-3 rounded-lg" />
@@ -724,20 +723,18 @@ export default function Component() {
                     </div>
 
                     <div
-                      className={`text-2xl sm:text-3xl font-bold mb-4 font-mono tracking-wider ${
-                        isDarkMode ? "text-pink-200" : "text-pink-800"
-                      }`}
+                      className={`text-2xl sm:text-3xl font-bold mb-4 font-mono tracking-wider ${isDarkMode ? "text-pink-200" : "text-pink-800"
+                        }`}
                     >
                       1000-8490-8014
                     </div>
 
                     <Button
                       onClick={() => navigator.clipboard.writeText("1000-8490-8014")}
-                      className={`px-5 sm:px-6 py-2 rounded-full transition-all duration-300 ${
-                        isDarkMode
-                          ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30"
-                          : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600 border border-pink-300/50"
-                      }`}
+                      className={`px-5 sm:px-6 py-2 rounded-full transition-all duration-300 ${isDarkMode
+                        ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30"
+                        : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600 border border-pink-300/50"
+                        }`}
                       variant="outline"
                     >
                       계좌번호 복사하기
@@ -772,11 +769,10 @@ export default function Component() {
           ) : currentView === "hall" ? (
             // 명예의 전당 페이지
             <Card
-              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
-                isDarkMode
-                  ? "bg-slate-900/80 shadow-yellow-500/30 border border-slate-700/50"
-                  : "bg-white/90 border border-yellow-200/50 shadow-yellow-200/30"
-              }`}
+              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${isDarkMode
+                ? "bg-slate-900/80 shadow-yellow-500/30 border border-slate-700/50"
+                : "bg-white/90 border border-yellow-200/50 shadow-yellow-200/30"
+                }`}
             >
               <CardHeader className="text-center pb-4 sm:pb-6">
                 <div className="flex items-center justify-center gap-2 mb-4">
@@ -792,222 +788,217 @@ export default function Component() {
               </CardHeader>
 
               <CardContent className="space-y-6 sm:space-y-8 p-3 sm:p-6">
-              {/* 후원자 통계 */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-                <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
-                  <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
-                    43
-                  </div>
-                  <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>총 후원자 수</div>
-                </div>
-                <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
-                  <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
-                    ₩857,000
-                  </div>
-                  <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>총 후원 금액</div>
-                </div>
-                <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
-                  <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
-                    158
-                  </div>
-                  <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>누적 일기 수</div>
-                </div>
-              </div>
-
-              {/* VIP 후원자 (10만원 이상) */}
-              <div>
-                <h3
-                  className={`text-lg sm:text-xl font-semibold mb-4 text-center ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}
-                >
-                  💎 VIP 후원자 (10만원 이상)
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                  {[
-                    { name: "김**님", amount: "150,000원", date: "2025.08.01", message: "좋은 서비스 감사합니다!" },
-                    { name: "이**님", amount: "200,000원", date: "2025.07.20", message: "개발자님 화이팅!" },
-                    { name: "박**님", amount: "100,000원", date: "2025.08.03", message: "매일 사용하고 있어요 ❤️" },
-                  ].map((supporter, index) => (
-                    <div
-                      key={index}
-                      className={`p-3 sm:p-4 rounded-xl border-2 ${
-                        isDarkMode
-                          ? "border-yellow-400/30 bg-gradient-to-r from-yellow-900/20 to-orange-900/20"
-                          : "border-yellow-300/50 bg-gradient-to-r from-yellow-100/50 to-orange-100/50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="text-2xl">💎</div>
-                        <div>
-                          <div className={`font-semibold ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}>
-                            {supporter.name}
-                          </div>
-                          <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-600"}`}>
-                            {supporter.amount} • {supporter.date}
-                          </div>
-                        </div>
-                      </div>
-                      <p className={`text-sm italic ${isDarkMode ? "text-gray-300" : "text-yellow-600"}`}>
-                        "{supporter.message}"
-                      </p>
+                {/* 후원자 통계 */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                  <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
+                    <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
+                      43
                     </div>
-                  ))}
+                    <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>총 후원자 수</div>
+                  </div>
+                  <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
+                    <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
+                      ₩857,000
+                    </div>
+                    <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>총 후원 금액</div>
+                  </div>
+                  <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
+                    <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
+                      158
+                    </div>
+                    <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>누적 일기 수</div>
+                  </div>
                 </div>
-              </div>
 
-              {/* 골드 후원자 (5만원 이상) */}
-              <div>
-                <h3
-                  className={`text-lg sm:text-xl font-semibold mb-4 text-center ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}
-                >
-                  🥇 골드 후원자 (5만원 이상)
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-                  {["최**님", "정**님", "강**님", "윤**님", "조**님", "장**님", "임**님", "한**님"].map(
-                    (name, index) => (
+                {/* VIP 후원자 (10만원 이상) */}
+                <div>
+                  <h3
+                    className={`text-lg sm:text-xl font-semibold mb-4 text-center ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}
+                  >
+                    💎 VIP 후원자 (10만원 이상)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    {[
+                      { name: "김**님", amount: "150,000원", date: "2025.08.01", message: "좋은 서비스 감사합니다!" },
+                      { name: "이**님", amount: "200,000원", date: "2025.07.20", message: "개발자님 화이팅!" },
+                      { name: "박**님", amount: "100,000원", date: "2025.08.03", message: "매일 사용하고 있어요 ❤️" },
+                    ].map((supporter, index) => (
                       <div
                         key={index}
-                        className={`p-2 sm:p-3 rounded-lg text-center ${
-                          isDarkMode
+                        className={`p-3 sm:p-4 rounded-xl border-2 ${isDarkMode
+                          ? "border-yellow-400/30 bg-gradient-to-r from-yellow-900/20 to-orange-900/20"
+                          : "border-yellow-300/50 bg-gradient-to-r from-yellow-100/50 to-orange-100/50"
+                          }`}
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="text-2xl">💎</div>
+                          <div>
+                            <div className={`font-semibold ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}>
+                              {supporter.name}
+                            </div>
+                            <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-600"}`}>
+                              {supporter.amount} • {supporter.date}
+                            </div>
+                          </div>
+                        </div>
+                        <p className={`text-sm italic ${isDarkMode ? "text-gray-300" : "text-yellow-600"}`}>
+                          "{supporter.message}"
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 골드 후원자 (5만원 이상) */}
+                <div>
+                  <h3
+                    className={`text-lg sm:text-xl font-semibold mb-4 text-center ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}
+                  >
+                    🥇 골드 후원자 (5만원 이상)
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+                    {["최**님", "정**님", "강**님", "윤**님", "조**님", "장**님", "임**님", "한**님"].map(
+                      (name, index) => (
+                        <div
+                          key={index}
+                          className={`p-2 sm:p-3 rounded-lg text-center ${isDarkMode
                             ? "bg-yellow-900/30 border border-yellow-600/30"
                             : "bg-yellow-100/70 border border-yellow-300/50"
-                        }`}
-                      >
-                        <div className="text-xl mb-1">🥇</div>
-                        <div className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}>
-                          {name}
+                            }`}
+                        >
+                          <div className="text-xl mb-1">🥇</div>
+                          <div className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}>
+                            {name}
+                          </div>
                         </div>
-                      </div>
-                    ),
-                  )}
+                      ),
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* 실버 후원자 (1만원 이상) */}
-              <div>
-                <h3
-                  className={`text-lg sm:text-xl font-semibold mb-4 text-center ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}
-                >
-                  🥈 실버 후원자 (1만원 이상)
-                </h3>
-                <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                  {[
-                    "쯔나미님",
-                    "이**님",
-                    "박**님",
-                    "최**님",
-                    "정**님",
-                    "강**님",
-                    "윤**님",
-                    "조**님",
-                    "장**님",
-                    "임**님",
-                    "한**님",
-                    "오**님",
-                    "신**님",
-                    "유**님",
-                    "홍**님",
-                    "송**님",
-                    "안**님",
-                    "황**님",
-                  ].map((name, index) => (
-                    <div
-                      key={index}
-                      className={`p-2 rounded text-center ${isDarkMode ? "bg-gray-700/50" : "bg-gray-100/70"}`}
-                    >
-                      <div className="text-sm mb-1">🥈</div>
-                      <div className={`text-xs ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{name}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 브론즈 후원자 (1만원 미만) */}
-              <div>
-                <h3
-                  className={`text-lg sm:text-xl font-semibold mb-4 text-center ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}
-                >
-                  🥉 브론즈 후원자
-                </h3>
-                <div className={`p-3 sm:p-4 rounded-xl text-center ${isDarkMode ? "bg-slate-800/30" : "bg-orange-50/50"}`}>
-                  <div className="flex flex-wrap justify-center gap-2">
+                {/* 실버 후원자 (1만원 이상) */}
+                <div>
+                  <h3
+                    className={`text-lg sm:text-xl font-semibold mb-4 text-center ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}
+                  >
+                    🥈 실버 후원자 (1만원 이상)
+                  </h3>
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                     {[
-                      "권**님",
-                      "민**님",
-                      "배**님",
-                      "백**님",
-                      "노**님",
-                      "심**님",
-                      "원**님",
-                      "남**님",
-                      "고**님",
-                      "문**님",
-                      "양**님",
-                      "손**님",
-                      "배**님",
+                      "쯔나미님",
+                      "이**님",
+                      "박**님",
+                      "최**님",
+                      "정**님",
+                      "강**님",
+                      "윤**님",
                       "조**님",
+                      "장**님",
+                      "임**님",
+                      "한**님",
+                      "오**님",
+                      "신**님",
+                      "유**님",
+                      "홍**님",
+                      "송**님",
+                      "안**님",
+                      "황**님",
                     ].map((name, index) => (
-                      <span
+                      <div
                         key={index}
-                        className={`inline-block px-2 py-1 rounded text-xs ${
-                          isDarkMode ? "bg-orange-900/30 text-orange-300" : "bg-orange-100 text-orange-700"
-                        }`}
+                        className={`p-2 rounded text-center ${isDarkMode ? "bg-gray-700/50" : "bg-gray-100/70"}`}
                       >
-                        🥉 {name}
-                      </span>
+                        <div className="text-sm mb-1">🥈</div>
+                        <div className={`text-xs ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{name}</div>
+                      </div>
                     ))}
                   </div>
                 </div>
-              </div>
 
-              {/* 감사 메시지 */}
-              <div className="text-center space-y-4">
-                <div className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
-                  <h4 className={`text-base sm:text-lg font-semibold mb-3 ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}>
-                    💌 개발자의 감사 인사
-                  </h4>
-                  <p className={`text-sm sm:text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-yellow-600"}`}>
-                    "하루의 끝"을 사랑해주시고 후원해주신 모든 분들께 진심으로 감사드립니다.
-                    <br />
-                    여러분의 소중한 마음 덕분에 더 나은 서비스를 만드는 원동력입니다.
-                    <br />
-                    앞으로도 여러분의 소중한 일상을 아름답게 기록할 수 있도록 최선을 다하겠습니다.
-                  </p>
-                  <div className="mt-4 flex justify-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Heart
-                        key={i}
-                        className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse`}
-                        style={{ animationDelay: `${i * 0.2}s` }}
-                      />
-                    ))}
+                {/* 브론즈 후원자 (1만원 미만) */}
+                <div>
+                  <h3
+                    className={`text-lg sm:text-xl font-semibold mb-4 text-center ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}
+                  >
+                    🥉 브론즈 후원자
+                  </h3>
+                  <div className={`p-3 sm:p-4 rounded-xl text-center ${isDarkMode ? "bg-slate-800/30" : "bg-orange-50/50"}`}>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {[
+                        "권**님",
+                        "민**님",
+                        "배**님",
+                        "백**님",
+                        "노**님",
+                        "심**님",
+                        "원**님",
+                        "남**님",
+                        "고**님",
+                        "문**님",
+                        "양**님",
+                        "손**님",
+                        "배**님",
+                        "조**님",
+                      ].map((name, index) => (
+                        <span
+                          key={index}
+                          className={`inline-block px-2 py-1 rounded text-xs ${isDarkMode ? "bg-orange-900/30 text-orange-300" : "bg-orange-100 text-orange-700"
+                            }`}
+                        >
+                          🥉 {name}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* 후원하기 버튼 */}
-              <div className="text-center">
-                <Button
-                  onClick={() => setCurrentView("support")}
-                  className={`px-8 py-3 text-lg font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${
-                    isDarkMode
+                {/* 감사 메시지 */}
+                <div className="text-center space-y-4">
+                  <div className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
+                    <h4 className={`text-base sm:text-lg font-semibold mb-3 ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}>
+                      💌 개발자의 감사 인사
+                    </h4>
+                    <p className={`text-sm sm:text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-yellow-600"}`}>
+                      "하루의 끝"을 사랑해주시고 후원해주신 모든 분들께 진심으로 감사드립니다.
+                      <br />
+                      여러분의 소중한 마음 덕분에 더 나은 서비스를 만드는 원동력입니다.
+                      <br />
+                      앞으로도 여러분의 소중한 일상을 아름답게 기록할 수 있도록 최선을 다하겠습니다.
+                    </p>
+                    <div className="mt-4 flex justify-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Heart
+                          key={i}
+                          className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse`}
+                          style={{ animationDelay: `${i * 0.2}s` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 후원하기 버튼 */}
+                <div className="text-center">
+                  <Button
+                    onClick={() => setCurrentView("support")}
+                    className={`px-8 py-3 text-lg font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${isDarkMode
                       ? "bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700"
                       : "bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
-                  }`}
-                >
-                  <Heart className="w-5 h-5 mr-2" />
-                  나도 후원하기
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                      }`}
+                  >
+                    <Heart className="w-5 h-5 mr-2" />
+                    나도 후원하기
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           ) : (
             // 후원 페이지(대체 뷰) - 원본 유지
             <Card
-              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${
-                isDarkMode
-                  ? "bg-slate-900/80 shadow-pink-500/30 border border-slate-700/50"
-                  : "bg-white/90 border border-pink-200/50 shadow-pink-200/30"
-              }`}
+              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${isDarkMode
+                ? "bg-slate-900/80 shadow-pink-500/30 border border-slate-700/50"
+                : "bg-white/90 border border-pink-200/50 shadow-pink-200/30"
+                }`}
             >
               <CardHeader className="text-center pb-6">
                 <div className="flex items-center justify-center gap-2 mb-4">
@@ -1023,86 +1014,83 @@ export default function Component() {
               </CardHeader>
 
               <CardContent className="space-y-8">
-              {/* 후원 메시지 */}
-              <div className="text-center space-y-4">
-                <div className={`p-6 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-rose-50/80"}`}>
-                  <h3 className={`text-xl font-semibold mb-3 ${isDarkMode ? "text-pink-300" : "text-rose-700"}`}>
-                    💝 후원을 해주시면 개발자에게 큰 힘이 됩니다
-                  </h3>
-                  <p className={`text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-rose-600"}`}>
-                    여러분의 소중한 일기를 더 안전하고 아름답게 보관할 수 있도록
-                    <br />
-                    지속적으로 개발하고 개선해나가겠습니다.
-                  </p>
+                {/* 후원 메시지 */}
+                <div className="text-center space-y-4">
+                  <div className={`p-6 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-rose-50/80"}`}>
+                    <h3 className={`text-xl font-semibold mb-3 ${isDarkMode ? "text-pink-300" : "text-rose-700"}`}>
+                      💝 후원을 해주시면 개발자에게 큰 힘이 됩니다
+                    </h3>
+                    <p className={`text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-rose-600"}`}>
+                      여러분의 소중한 일기를 더 안전하고 아름답게 보관할 수 있도록
+                      <br />
+                      지속적으로 개발하고 개선해나가겠습니다.
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              {/* 토스뱅크 정보 */}
-              <div className="text-center space-y-4">
-                <div
-                  className={`p-8 rounded-xl border-2 border-dashed ${
-                    isDarkMode ? "border-pink-400/50 bg-pink-900/20" : "border-pink-300/50 bg-pink-100/50"
-                  }`}
-                >
-                  <div className="mb-4">
-                    <img src="/placeholder.svg?height=60&width=60" alt="토스뱅크" className="mx-auto mb-3 rounded-lg" />
-                    <h4 className={`text-lg font-semibold ${isDarkMode ? "text-pink-300" : "text-pink-700"}`}>
-                      토스뱅크
-                    </h4>
-                  </div>
-
+                {/* 토스뱅크 정보 */}
+                <div className="text-center space-y-4">
                   <div
-                    className={`text-3xl font-bold mb-4 font-mono tracking-wider ${
-                      isDarkMode ? "text-pink-200" : "text-pink-800"
-                    }`}
+                    className={`p-8 rounded-xl border-2 border-dashed ${isDarkMode ? "border-pink-400/50 bg-pink-900/20" : "border-pink-300/50 bg-pink-100/50"
+                      }`}
                   >
-                    1000-8490-8014
-                  </div>
+                    <div className="mb-4">
+                      <img src="/placeholder.svg?height=60&width=60" alt="토스뱅크" className="mx-auto mb-3 rounded-lg" />
+                      <h4 className={`text-lg font-semibold ${isDarkMode ? "text-pink-300" : "text-pink-700"}`}>
+                        토스뱅크
+                      </h4>
+                    </div>
 
-                  <Button
-                    onClick={() => navigator.clipboard.writeText("1000-8490-8014")}
-                    className={`px-6 py-2 rounded-full transition-all duration-300 ${
-                      isDarkMode
+                    <div
+                      className={`text-3xl font-bold mb-4 font-mono tracking-wider ${isDarkMode ? "text-pink-200" : "text-pink-800"
+                        }`}
+                    >
+                      1000-8490-8014
+                    </div>
+
+                    <Button
+                      onClick={() => navigator.clipboard.writeText("1000-8490-8014")}
+                      className={`px-6 py-2 rounded-full transition-all duration-300 ${isDarkMode
                         ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30"
                         : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600 border border-pink-300/50"
-                    }`}
-                    variant="outline"
-                  >
-                    📋 계좌번호 복사하기
-                  </Button>
-                </div>
-              </div>
-
-              {/* 감사 메시지 */}
-              <div className="text-center space-y-4">
-                <div className={`p-6 rounded-xl ${isDarkMode ? "bg-slate-800/30" : "bg-amber-50/50"}`}>
-                  <p className={`text-sm italic ${isDarkMode ? "text-gray-400" : "text-amber-700"}`}>
-                    "작은 후원이라도 개발자에게는 큰 격려가 됩니다.
-                    <br />
-                    여러분의 마음이 더 나은 서비스를 만드는 원동력입니다."
-                  </p>
-                  <div className="mt-4 flex justify-center gap-2">
-                    <Heart className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse`} />
-                    <Heart
-                      className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse delay-100`}
-                    />
-                    <Heart
-                      className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse delay-200`}
-                    />
+                        }`}
+                      variant="outline"
+                    >
+                      📋 계좌번호 복사하기
+                    </Button>
                   </div>
                 </div>
-              </div>
 
-              {/* 개발자 정보 */}
-              <div className="text-center">
-                <div className={`inline-block p-4 rounded-full ${isDarkMode ? "bg-slate-800/50" : "bg-rose-100/50"}`}>
-                  <div className={`text-4xl mb-2`}>👨‍💻</div>
-                  <p className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
-                    하루의 끝 개발팀
-                  </p>
+                {/* 감사 메시지 */}
+                <div className="text-center space-y-4">
+                  <div className={`p-6 rounded-xl ${isDarkMode ? "bg-slate-800/30" : "bg-amber-50/50"}`}>
+                    <p className={`text-sm italic ${isDarkMode ? "text-gray-400" : "text-amber-700"}`}>
+                      "작은 후원이라도 개발자에게는 큰 격려가 됩니다.
+                      <br />
+                      여러분의 마음이 더 나은 서비스를 만드는 원동력입니다."
+                    </p>
+                    <div className="mt-4 flex justify-center gap-2">
+                      <Heart className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse`} />
+                      <Heart
+                        className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse delay-100`}
+                      />
+                      <Heart
+                        className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse delay-200`}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
+
+                {/* 개발자 정보 */}
+                <div className="text-center">
+                  <div className={`inline-block p-4 rounded-full ${isDarkMode ? "bg-slate-800/50" : "bg-rose-100/50"}`}>
+                    <div className={`text-4xl mb-2`}>👨‍💻</div>
+                    <p className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
+                      하루의 끝 개발팀
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
             </Card>
           )}
 
@@ -1111,8 +1099,16 @@ export default function Component() {
             <BottomBannerAd />
           </div>
 
+          {/* 푸터 */}
           <div className={`text-center mt-8 text-sm ${isDarkMode ? "text-gray-500" : "text-rose-500"}`}>
             <p>© 2025 하루의 끝. 모든 순간이 소중합니다.</p>
+
+            {/* 소셜 링크 (URL을 실제 계정으로 바꿔줘) */}
+            <nav className="mt-2 flex justify-center gap-4 underline">
+              <a href="https://x.com/haru2end" target="_blank" rel="noopener noreferrer">X(Twitter)</a>
+              <a href="https://www.instagram.com/haru2_end" target="_blank" rel="noopener noreferrer">Instagram</a>
+              <a href="https://www.youtube.com/@bear_game123" target="_blank" rel="noopener noreferrer">YouTube</a>
+            </nav>
           </div>
         </div>
 
@@ -1141,9 +1137,8 @@ export default function Component() {
               </CardHeader>
               <CardContent>
                 <p
-                  className={`text-base leading-relaxed whitespace-pre-wrap ${
-                    isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
+                  className={`text-base leading-relaxed whitespace-pre-wrap ${isDarkMode ? "text-gray-300" : "text-gray-600"
+                    }`}
                 >
                   {selectedEntry.content}
                 </p>
