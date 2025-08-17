@@ -4,19 +4,26 @@ import { useState, useEffect, useRef } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input" // Input 컴포넌트 추가
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List, Pencil, Award, Gem } from "lucide-react"
+import { Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List, Pencil, Award, Gem, Camera } from "lucide-react"
 import { TopBannerAd, BottomBannerAd, SquareAd } from "@/components/kakao-ads"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { usePathname } from 'next/navigation'
 
 export default function Component() {
+  const [diaryTitle, setDiaryTitle] = useState("") // 제목 상태 추가
   const [diaryContent, setDiaryContent] = useState("")
+  const [selectedMood, setSelectedMood] = useState<string | undefined>(undefined)
+  const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined) // 이미지 상태 추가
   const isMobile = useIsMobile()
   const pathname = usePathname()
   const [isSaved, setIsSaved] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [isCopied, setIsCopied] = useState(false)
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null) // 확대된 이미지 상태
+
+  const imageInputRef = useRef<HTMLInputElement>(null) // 이미지 입력 ref 추가
 
   
 
@@ -25,6 +32,11 @@ export default function Component() {
       const savedMode = localStorage.getItem('isDarkMode');
       if (savedMode !== null) {
         setIsDarkMode(JSON.parse(savedMode));
+      }
+      const savedEntries = localStorage.getItem('diaryEntries');
+      if (savedEntries) {
+        const parsedEntries = JSON.parse(savedEntries);
+        setDiaryEntries(parsedEntries);
       }
     }
   }, [])
@@ -57,6 +69,15 @@ export default function Component() {
   const [currentView, setCurrentView] = useState<"write" | "list" | "support" | "hall">("write")
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null)
 
+  const emotionMap: { [key: string]: string } = {
+    "😊": "기쁨",
+    "😢": "슬픔",
+    "😡": "화남",
+    "😴": "피곤",
+    "🥰": "사랑",
+    "🤔": "고민",
+  }
+
   useEffect(() => {
     const scriptId = "kakao-adfit-script";
 
@@ -81,9 +102,11 @@ export default function Component() {
   interface DiaryEntry {
     id: string
     date: string
+    title: string // 제목 필드 추가
     content: string
     createdAt: Date
     mood?: string
+    image?: string // 이미지 필드 추가
   }
 
   const handleAudioError = (e: Event | string) => {
@@ -158,20 +181,48 @@ export default function Component() {
   }
 
   const handleSave = () => {
-    if (diaryContent.trim()) {
+    if (diaryTitle.trim() && diaryContent.trim()) { // 제목과 내용 모두 비어있지 않을 때만 저장
       const newEntry: DiaryEntry = {
         id: Date.now().toString(),
         date: getCurrentDate(),
+        title: diaryTitle, // 제목 추가
         content: diaryContent,
         createdAt: new Date(),
+        mood: selectedMood,
+        image: selectedImage, // 이미지 추가
       }
       setDiaryEntries((prev) => [newEntry, ...prev])
       localStorage.setItem("diaryEntries", JSON.stringify([newEntry, ...diaryEntries]))
+      setDiaryTitle("") // 제목 초기화
       setDiaryContent("")
+      setSelectedMood(undefined)
+      setSelectedImage(undefined) // 이미지 초기화
       setIsSaved(true)
       setTimeout(() => setIsSaved(false), 2000)
     }
   }
+
+  const handleDelete = (id: string) => {
+    const updatedEntries = diaryEntries.filter(entry => entry.id !== id);
+    setDiaryEntries(updatedEntries);
+    localStorage.setItem("diaryEntries", JSON.stringify(updatedEntries));
+    if (selectedEntry && selectedEntry.id === id) {
+      setSelectedEntry(null); // Close the detailed view if the deleted entry was open
+    }
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setSelectedImage(undefined);
+    }
+  };
 
   const getCurrentDate = () => {
     const today = new Date()
@@ -495,11 +546,68 @@ export default function Component() {
               </CardHeader>
 
               <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-6">
+                {/* 감정 선택 및 사진 추가 */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center"> {/* Added flex container for label and button */}
+                    <label className={`text-base sm:text-lg font-medium flex items-center gap-2 ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
+                      <Heart className={`w-5 h-5 ${isDarkMode ? "text-pink-400" : "text-rose-500"}`} />
+                      오늘의 감정
+                      {selectedMood && (
+                        <span className={`ml-2 text-sm font-normal ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                          ({emotionMap[selectedMood]})
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                      ref={imageInputRef} // ref 추가
+                    />
+                    <Button
+                      onClick={() => imageInputRef.current?.click()} // ref를 사용하여 클릭 트리거
+                      variant="outline"
+                      size="sm"
+                      className={`px-3 py-1 rounded-full text-xs ${selectedImage
+                          ? isDarkMode ? "border-green-500/30 text-green-300 hover:bg-green-900/20" : "border-green-300 text-green-600 hover:bg-green-100"
+                          : isDarkMode ? "border-purple-500/30 text-purple-300 hover:bg-purple-900/20" : "border-rose-300 text-rose-600 hover:bg-rose-100"
+                        }`}
+                    >
+                      <Camera className="w-3 h-3 mr-1" /> {/* 카메라 아이콘으로 변경 */}
+                      {selectedImage ? "사진 변경" : "사진 추가"}
+                    </Button>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {[ "😊", "😢", "😡", "😴", "🥰", "🤔"].map((emoji) => (
+                      <Button
+                        key={emoji}
+                        onClick={() => setSelectedMood(emoji)}
+                        className={`text-2xl p-2 rounded-full transition-all duration-200 ${selectedMood === emoji
+                          ? isDarkMode ? "bg-purple-600/50 border border-purple-400" : "bg-rose-300/50 border border-rose-400"
+                          : isDarkMode ? "bg-slate-700/50 hover:bg-slate-600/50" : "bg-gray-100/50 hover:bg-gray-200/50"
+                        }`}
+                        variant="ghost"
+                      >
+                        {emoji}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
                 <div className="space-y-3">
                   <label className={`text-base sm:text-lg font-medium flex items-center gap-2 ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
                     <Heart className={`w-5 h-5 ${isDarkMode ? "text-pink-400" : "text-rose-500"}`} />
                     오늘의 이야기
                   </label>
+                  <Input // 제목 입력 필드 추가
+                    placeholder="일기 제목을 입력하세요..."
+                    value={diaryTitle}
+                    onChange={(e) => setDiaryTitle(e.target.value)}
+                    className={`mb-4 text-base leading-relaxed resize-none border-2 rounded-xl p-3 sm:p-4 backdrop-blur-sm transition-all duration-300 ${isDarkMode
+                      ? "border-purple-500/30 focus:border-purple-400 bg-slate-700/50 text-gray-200 placeholder:text-gray-400"
+                      : "border-rose-200 focus:border-rose-400 bg-white/70 text-rose-900 placeholder:text-rose-500"
+                      }`}
+                  />
                   <Textarea
                     placeholder={
                       isDarkMode
@@ -578,16 +686,39 @@ export default function Component() {
                         onClick={() => setSelectedEntry(entry)}
                       >
                         <div className="flex justify-between items-start mb-2">
-                          <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>
-                            {entry.date}
-                          </span>
-                          <span className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                            {entry.content.length}자
-                          </span>
+                          <div>
+                            <h3 className={`text-base sm:text-lg font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
+                              {entry.title}
+                            </h3>
+                            <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>
+                              {entry.date} {entry.mood && <span className="ml-2 text-base">{entry.mood} {emotionMap[entry.mood]}</span>}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2"> {/* Added a div to group length and delete button */}
+                            <span className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                              {entry.content.length}자
+                            </span>
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent opening the entry when clicking delete
+                                handleDelete(entry.id);
+                              }}
+                              variant="ghost"
+                              size="sm"
+                              className={`text-xs px-2 py-1 rounded ${isDarkMode ? "text-red-400 hover:bg-red-900/20" : "text-red-600 hover:bg-red-100"}`}
+                            >
+                              삭제
+                            </Button>
+                          </div>
                         </div>
                         <p className={`text-sm sm:text-base line-clamp-3 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
                           {entry.content}
                         </p>
+                        {entry.image && ( // 이미지 미리보기 (리스트 뷰)
+                          <div className="mt-3">
+                            <img src={entry.image} alt="Diary Image" className="w-full h-auto max-h-32 object-cover rounded-lg border border-gray-300/50" />
+                          </div>
+                        )}
                       </div>
                       {(index + 1) % 5 === 0 && index < diaryEntries.length - 1 && (
                         <div className="my-4 sm:my-6 text-center">
@@ -1047,27 +1178,32 @@ export default function Component() {
         {selectedEntry && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <Card className={`max-w-2xl w-full max-h-[80vh] overflow-y-auto ${isDarkMode ? "bg-slate-800" : "bg-white"}`}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className={`text-lg font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
-                      {selectedEntry.date}
-                    </h3>
-                    <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                      {selectedEntry.content.length}자
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => setSelectedEntry(null)}
-                    variant="ghost"
-                    size="sm"
-                    className={isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"}
-                  >
-                    ✕
-                  </Button>
+              <CardHeader className="relative p-4 sm:p-6"> {/* Added relative and padding */}
+                <Button
+                  onClick={() => setSelectedEntry(null)}
+                  variant="ghost"
+                  size="sm"
+                  className={`absolute top-2 right-2 ${isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"}`}
+                >
+                  ✕
+                </Button>
+                <div className="text-center mb-4"> {/* Centered title */}
+                  <h3 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
+                    {selectedEntry.title}
+                  </h3>
+                </div>
+                <div className="flex justify-end items-center mb-4"> {/* Mood and date on right */}
+                  <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                    {selectedEntry.date} {selectedEntry.mood && <span className="ml-2 text-xl">{selectedEntry.mood}</span>} | {selectedEntry.content.length}자
+                  </p>
                 </div>
               </CardHeader>
               <CardContent>
+                {selectedEntry.image && ( // 이미지 미리보기
+                  <div className="mb-4 cursor-pointer" onClick={() => setZoomedImage(selectedEntry.image || null)}>
+                    <img src={selectedEntry.image} alt="Diary Image" className="w-full h-auto max-h-96 object-contain rounded-xl border-2 border-dashed border-gray-400/50" />
+                  </div>
+                )}
                 <p
                   className={`text-base leading-relaxed whitespace-pre-wrap ${isDarkMode ? "text-gray-300" : "text-gray-600"
                     }`}
@@ -1079,6 +1215,27 @@ export default function Component() {
           </div>
         )}
       </div>
+    {zoomedImage && (
+        <div
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
+          onClick={() => setZoomedImage(null)} // 클릭 시 닫기
+        >
+          <img
+            src={zoomedImage}
+            alt="Zoomed Diary Image"
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()} // 이미지 클릭 시 모달 닫히지 않도록
+          />
+          <Button
+            onClick={() => setZoomedImage(null)}
+            variant="ghost"
+            size="sm"
+            className="absolute top-4 right-4 text-white text-2xl"
+          >
+            ✕
+          </Button>
+        </div>
+      )}
     </>
   )
 }
