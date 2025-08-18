@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input" // Input 컴포넌트 추가
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List, Pencil, Award, Gem, Camera } from "lucide-react"
+import { Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List, Pencil, Award, Gem, Camera, Smartphone } from "lucide-react"
 import { TopBannerAd, BottomBannerAd, SquareAd } from "@/components/kakao-ads"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { usePathname } from 'next/navigation'
@@ -22,6 +22,9 @@ export default function Component() {
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [isCopied, setIsCopied] = useState(false)
   const [zoomedImage, setZoomedImage] = useState<string | null>(null) // 확대된 이미지 상태
+
+  const [showAppPromo, setShowAppPromo] = useState(true); // Default to true to show the promo initially
+  const dismissAppPromo = () => setShowAppPromo(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null) // 이미지 입력 ref 추가
 
@@ -1215,6 +1218,88 @@ export default function Component() {
           </div>
         )}
       </div>
+
+      {/* NEW: 중앙 박스를 대체하는 '우측 하단/하단 고정' 앱 프로모션 배너 */}
+      {showAppPromo && (
+        <div
+          className={`
+            fixed z-50
+            ${isMobile ? "left-3 right-3 bottom-3" : "right-6 bottom-6 w-[360px]"}
+          `}
+          aria-label="하루의 끝 모바일 앱 안내 배너"
+        >
+          <div
+            className={`
+              relative overflow-hidden rounded-2xl shadow-2xl backdrop-blur-xl border
+              ${isDarkMode
+                ? "bg-slate-900/70 border-slate-700/60"
+                : "bg-white/80 border-rose-200/70"}
+            `}
+          >
+            {/* 은은한 그라데이션 라이트 */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-yellow-500/10" />
+
+            {/* 닫기 버튼 */}
+            <button
+              onClick={dismissAppPromo}
+              aria-label="앱 안내 닫기"
+              className={`absolute right-2 top-2 rounded-full px-2 py-1 text-xs
+                ${isDarkMode ? "text-gray-300 hover:bg-white/10" : "text-gray-600 hover:bg-black/5"}`}
+            >
+              ×
+            </button>
+
+            <div className="p-4 flex items-start gap-3">
+              <div className={`flex h-10 w-10 flex-none items-center justify-center rounded-xl
+                ${isDarkMode ? "bg-purple-500/20" : "bg-rose-500/15"}`}>
+                <Smartphone className={`${isDarkMode ? "text-purple-300" : "text-rose-600"} h-5 w-5`} />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <h3 className={`truncate text-base font-semibold ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>
+                  하루의 끝 모바일 앱
+                </h3>
+                <p className={`mt-1 text-sm ${isDarkMode ? "text-gray-300/80" : "text-gray-600"}`}>
+                  언제 어디서든 더 빠르게 기록하고 관리하세요.
+                </p>
+
+                <div className="mt-3 flex items-center gap-2">
+                  <a
+                    href="/download" // 필요 시 실제 다운로드/스토어 URL로 교체
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`
+                      inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium
+                      ${isDarkMode
+                        ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                        : "bg-gradient-to-r from-rose-500 to-orange-500 text-white hover:from-rose-600 hover:to-orange-600"}
+                    `}
+                  >
+                    앱 다운로드
+                  </a>
+                  <button
+                    onClick={dismissAppPromo}
+                    className={`
+                      inline-flex items-center justify-center rounded-full px-3 py-2 text-sm
+                      ${isDarkMode
+                        ? "text-gray-300 hover:bg-white/10"
+                        : "text-gray-600 hover:bg-black/5"}
+                    `}
+                  >
+                    나중에
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 모바일일 때만 상단 보더 라인 강조 */}
+            {isMobile && (
+              <div className={`h-[3px] w-full ${isDarkMode ? "bg-purple-400/40" : "bg-rose-400/40"}`} />
+            )}
+          </div>
+        </div>
+      )}
+
     {zoomedImage && (
         <div
           className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
@@ -1235,6 +1320,7 @@ export default function Component() {
             ✕
           </Button>
         </div>
+        
       )}
     </>
   )
