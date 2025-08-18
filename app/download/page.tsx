@@ -1,14 +1,25 @@
 
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { FaApple, FaAndroid } from "react-icons/fa";
+import { useRouter } from 'next/navigation'; // Added
+import { ArrowLeft } from "lucide-react"; // Added
 
 export default function DownloadPage() {
+  const router = useRouter(); // Added
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
       <div className="w-full max-w-md">
-        <Card className="shadow-lg">
+        <Card className="shadow-lg relative"> {/* Added relative */}
+          <div className="absolute top-4 left-4">
+            <Button variant="ghost" size="icon" onClick={() => router.back()}>
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
+          </div>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">하루의 끝 앱 설치</CardTitle>
             <CardDescription>모바일 앱으로 하루의 끝을 경험해보세요.</CardDescription>
