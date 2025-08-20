@@ -1,11 +1,15 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { useTranslation } from "react-i18next"
+import { format } from 'date-fns';
+import { ko, enUS, ja, zhCN } from 'date-fns/locale';
 
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input" // Input 컴포넌트 추가
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List, Pencil, Award, Gem, Camera, Smartphone } from "lucide-react"
 import { TopBannerAd, BottomBannerAd, SquareAd } from "@/components/kakao-ads"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -22,11 +26,18 @@ export default function Component() {
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [isCopied, setIsCopied] = useState(false)
   const [zoomedImage, setZoomedImage] = useState<string | null>(null) // 확대된 이미지 상태
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const [showAppPromo, setShowAppPromo] = useState(true); // Default to true to show the promo initially
   const dismissAppPromo = () => setShowAppPromo(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null) // 이미지 입력 ref 추가
+
+  const { t, i18n } = useTranslation();
 
   
 
@@ -61,8 +72,8 @@ export default function Component() {
 
   const musicTracks = [
     {
-      name: "빗소리와 함께",
-      description: "자연의 소리와 멜로디",
+      name: t("music_track_rain_name"),
+      description: t("music_track_rain_description"),
       url: "/music/rain-sounds.mp3",
       icon: "🌧️",
     },
@@ -73,12 +84,12 @@ export default function Component() {
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null)
 
   const emotionMap: { [key: string]: string } = {
-    "😊": "기쁨",
-    "😢": "슬픔",
-    "😡": "화남",
-    "😴": "피곤",
-    "🥰": "사랑",
-    "🤔": "고민",
+    "😊": t("emotion_joy"),
+    "😢": t("emotion_sadness"),
+    "😡": t("emotion_anger"),
+    "😴": t("emotion_tiredness"),
+    "🥰": t("emotion_love"),
+    "🤔": t("emotion_worry"),
   }
 
   useEffect(() => {
@@ -228,15 +239,18 @@ export default function Component() {
   };
 
   const getCurrentDate = () => {
-    const today = new Date()
-    const options: Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      weekday: "long",
-    }
-    return today.toLocaleDateString("ko-KR", options)
-  }
+    const today = new Date();
+    const locales: { [key: string]: Locale } = {
+      ko: ko,
+      en: enUS,
+      ja: ja,
+      zh: zhCN,
+    };
+    const currentLocale = locales[i18n.language] || ko; // Fallback to Korean
+
+    // Format the date using date-fns
+    return format(today, 'yyyy년 M월 d일 EEEE', { locale: currentLocale });
+  };
 
   return (
     <>
@@ -311,7 +325,7 @@ export default function Component() {
                   size={isMobile ? "icon" : "default"}
                 >
                   {currentView === "write" ? <List className="w-5 h-5" /> : <Pencil className="w-5 h-5" />}
-                  {!isMobile && (currentView === "write" ? " 일기 목록" : " 일기 쓰기")}
+                  {!isMobile && (currentView === "write" ? t("diary_list") : t("write_diary"))}
                 </Button>
 
                 <Button
@@ -328,7 +342,7 @@ export default function Component() {
                   size={isMobile ? "icon" : "default"}
                 >
                   <Gem className="w-5 h-5" />
-                  {!isMobile && " 후원하기"}
+                  {!isMobile && t("support_developer")}
                 </Button>
 
                 <Button
@@ -345,21 +359,54 @@ export default function Component() {
                   size={isMobile ? "icon" : "default"}
                 >
                   <Award className="w-5 h-5" />
-                  {!isMobile && " 명예의 전당"}
+                  {!isMobile && t("hall_of_fame")}
                 </Button>
               </div>
 
-              <Button
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className={`p-3 rounded-full transition-all duration-300 ${isDarkMode
-                  ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300"
-                  : "bg-orange-500/20 hover:bg-orange-500/30 text-orange-600"
-                  }`}
-                variant="ghost"
-                aria-label={isDarkMode ? "라이트 모드로 전환" : "다크 모드로 전환"}
-              >
-                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </Button>
+              <div className="flex items-center gap-2"> {/* New wrapper div */}
+                {/* Language Switcher */}
+                {isClient && (
+                  <Select onValueChange={(value) => i18n.changeLanguage(value)} value={i18n.language}>
+                    <SelectTrigger
+                      className={`
+                        w-[120px] transition-all duration-300
+                        ${isDarkMode
+                          ? "bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30"
+                          : "bg-rose-500/20 hover:bg-rose-500/30 text-rose-600 border border-rose-300/50"
+                        }
+                      `}
+                    >
+                      <SelectValue>
+                        {i18n.language === 'ko' ? '한국어' :
+                         i18n.language === 'en' ? 'English' :
+                         i18n.language === 'ja' ? '日本語' :
+                         i18n.language === 'zh' ? '中文' : ''}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent
+                      className={`
+                        ${isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white border-rose-200"}
+                      `}
+                    >
+                      <SelectItem value="ko">한국어</SelectItem>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="ja">日本語</SelectItem>
+                      <SelectItem value="zh">中文</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+                <Button
+                  onClick={() => setIsDarkMode(!isDarkMode)}
+                  className={`p-3 rounded-full transition-all duration-300 ${isDarkMode
+                    ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300"
+                    : "bg-orange-500/20 hover:bg-orange-500/30 text-orange-600"
+                    }`}
+                  variant="ghost"
+                  aria-label={isDarkMode ? t("switch_to_light_mode") : t("switch_to_dark_mode")}
+                >
+                  {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                </Button>
+              </div> {/* End new wrapper div */}
             </div>
 
             <h1
@@ -368,12 +415,10 @@ export default function Component() {
                 : "bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 bg-clip-text text-transparent"
                 }`}
             >
-              하루의 끝
+              {t("app_title")}
             </h1>
             <p className={`text-base sm:text-lg font-medium ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
-              {isDarkMode
-                ? "고요한 밤, 하루를 돌아보며 마음을 정리해보세요"
-                : "오늘 하루를 마무리하며, 소중한 순간들을 기록해보세요"}
+              {t("app_description")}
             </p>
             <section className="sr-only">
               <h2>하루의 끝 – 감성 온라인 일기장</h2>
@@ -408,7 +453,7 @@ export default function Component() {
                   <Music className={`w-5 h-5 ${isDarkMode ? "text-purple-400" : "text-rose-500"}`} />
                   {!isMobile && (
                     <div>
-                      <h2 className={`font-medium ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>배경음악</h2>
+                      <h2 className={`font-medium ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>{t("background_music")}</h2>
                       <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
                         {musicTracks[currentTrack].name} - {musicTracks[currentTrack].description}
                       </p>
@@ -466,7 +511,7 @@ export default function Component() {
                           ? "bg-slate-700 hover:bg-slate-600"
                           : "bg-gray-200 hover:bg-gray-300"
                       }`}
-                    aria-label={isPlaying ? "음악 일시정지" : "음악 재생"}
+                    aria-label={isPlaying ? t("pause_music") : t("play_music")}
                   >
                     {isAudioLoading ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -486,18 +531,18 @@ export default function Component() {
               {!audioSupported ? (
                 <div className="mt-3 text-center">
                   <p className={`text-xs sm:text-sm ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}>
-                    이 브라우저에서는 음악 기능을 지원하지 않습니다
+                    {t("audio_not_supported")}
                   </p>
                 </div>
               ) : audioError ? (
                 <div className="mt-3 text-center">
                   <p className={`text-xs sm:text-sm ${isDarkMode ? "text-red-400" : "text-red-500"}`}>
-                    음악을 불러올 수 없습니다. 음악 없이도 일기 작성을 계속하세요
+                    {t("audio_error")}
                   </p>
                 </div>
               ) : isAudioLoading ? (
                 <div className="mt-3 text-center">
-                  <p className={`text-xs sm:text-sm ${isDarkMode ? "text-blue-400" : "text-blue-500"}`}>음악을 불러오는 중...</p>
+                  <p className={`text-xs sm:text-sm ${isDarkMode ? "text-blue-400" : "text-blue-500"}`}>{t("loading_audio")}</p>
                 </div>
               ) : isPlaying ? (
                 <div className="mt-3 flex justify-center">
@@ -522,7 +567,7 @@ export default function Component() {
 
           {/* 광고 */}
           <div className={`text-center mb-4 sm:mb-6 ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
-            <p className="text-xs mb-2 opacity-70">광고</p>
+            <p className="text-xs mb-2 opacity-70">{t("ad")}</p>
             <TopBannerAd />
           </div>
 
@@ -543,8 +588,8 @@ export default function Component() {
                 </div>
                 <p className={`italic text-sm sm:text-base ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
                   {isDarkMode
-                    ? "\"밤이 깊어갈수록, 우리의 생각은 더욱 깊어집니다\""
-                    : "\"매일 밤, 우리는 하루를 돌아보며 성장합니다\""}
+                    ? t("footer_message_dark")
+                    : t("footer_message_light")}
                 </p>
               </CardHeader>
 
@@ -554,7 +599,7 @@ export default function Component() {
                   <div className="flex justify-between items-center"> {/* Added flex container for label and button */}
                     <label className={`text-base sm:text-lg font-medium flex items-center gap-2 ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
                       <Heart className={`w-5 h-5 ${isDarkMode ? "text-pink-400" : "text-rose-500"}`} />
-                      오늘의 감정
+                      {t("today_mood")}
                       {selectedMood && (
                         <span className={`ml-2 text-sm font-normal ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
                           ({emotionMap[selectedMood]})
@@ -578,7 +623,7 @@ export default function Component() {
                         }`}
                     >
                       <Camera className="w-3 h-3 mr-1" /> {/* 카메라 아이콘으로 변경 */}
-                      {selectedImage ? "사진 변경" : "사진 추가"}
+                      {selectedImage ? t("change_photo") : t("add_photo")}
                     </Button>
                   </div>
                   <div className="flex gap-2 flex-wrap">
@@ -600,10 +645,10 @@ export default function Component() {
                 <div className="space-y-3">
                   <label className={`text-base sm:text-lg font-medium flex items-center gap-2 ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
                     <Heart className={`w-5 h-5 ${isDarkMode ? "text-pink-400" : "text-rose-500"}`} />
-                    오늘의 이야기
+                    {t("today_story")}
                   </label>
                   <Input // 제목 입력 필드 추가
-                    placeholder="일기 제목을 입력하세요..."
+                    placeholder={t("diary_title_placeholder")}
                     value={diaryTitle}
                     onChange={(e) => setDiaryTitle(e.target.value)}
                     className={`mb-4 text-base leading-relaxed resize-none border-2 rounded-xl p-3 sm:p-4 backdrop-blur-sm transition-all duration-300 ${isDarkMode
@@ -614,8 +659,8 @@ export default function Component() {
                   <Textarea
                     placeholder={
                       isDarkMode
-                        ? "고요한 밤, 오늘 하루는 어떠셨나요?\n달빛 아래에서 마음속 깊은 이야기를 들려주세요.\n작은 감정들도 소중한 기억이 됩니다..."
-                        : "오늘 하루는 어떠셨나요? \n기쁜 일, 힘들었던 일, 감사한 일들을 자유롭게 적어보세요.\n작은 순간들도 소중한 기억이 됩니다..."
+                        ? t("diary_content_placeholder_dark")
+                        : t("diary_content_placeholder_light")
                     }
                     value={diaryContent}
                     onChange={(e) => setDiaryContent(e.target.value)}
@@ -627,7 +672,7 @@ export default function Component() {
                 </div>
 
                 <div className={`text-right text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
-                  {diaryContent.length}자
+                  {diaryContent.length}{t("characters")}
                 </div>
 
                 <div className="flex justify-center pt-2 sm:pt-4">
@@ -641,15 +686,15 @@ export default function Component() {
                       }`}
                   >
                     <Save className="w-5 h-5 mr-2" />
-                    {isSaved ? "저장되었습니다!" : "오늘의 일기 저장하기"}
+                    {isSaved ? t("saved") : t("save_diary")}
                   </Button>
                 </div>
 
                 <div className={`text-center pt-4 sm:pt-6 border-t ${isDarkMode ? "border-purple-500/30" : "border-rose-200"}`}>
                   <p className={`text-xs sm:text-sm italic ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
                     {isDarkMode
-                      ? "별빛 아래에서 당신의 하루가 아름다운 꿈으로 이어지기를"
-                      : "따뜻한 햇살처럼 당신의 소중한 하루가 아름다운 추억으로 남기를 바랍니다"}
+                      ? t("footer_message_dark")
+                      : t("footer_message_light")}
                   </p>
                 </div>
               </CardContent>
@@ -661,10 +706,10 @@ export default function Component() {
             >
               <CardHeader className="text-center pb-4 sm:pb-6">
                 <h2 className={`text-xl sm:text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
-                  📖 나의 일기장
+                  📖 {t("my_diaries")}
                 </h2>
                 <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                  총 {diaryEntries.length}개의 소중한 기억들
+                  {t("total_entries", { count: diaryEntries.length })}
                 </p>
               </CardHeader>
 
@@ -672,10 +717,10 @@ export default function Component() {
                 {diaryEntries.length === 0 ? (
                   <div className="text-center py-12">
                     <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                      아직 작성된 일기가 없습니다
+                      {t("no_entries_yet")}
                     </p>
                     <p className={`text-sm mt-2 ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}>
-                      첫 번째 일기를 작성해보세요!
+                      {t("write_first_diary")}
                     </p>
                   </div>
                 ) : (
@@ -699,7 +744,7 @@ export default function Component() {
                           </div>
                           <div className="flex items-center gap-2"> {/* Added a div to group length and delete button */}
                             <span className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                              {entry.content.length}자
+                              {entry.content.length}{t("characters")}
                             </span>
                             <Button
                               onClick={(e) => {
@@ -710,7 +755,7 @@ export default function Component() {
                               size="sm"
                               className={`text-xs px-2 py-1 rounded ${isDarkMode ? "text-red-400 hover:bg-red-900/20" : "text-red-600 hover:bg-red-100"}`}
                             >
-                              삭제
+                              {t("delete")}
                             </Button>
                           </div>
                         </div>
@@ -726,7 +771,7 @@ export default function Component() {
                       {(index + 1) % 5 === 0 && index < diaryEntries.length - 1 && (
                         <div className="my-4 sm:my-6 text-center">
                           <p className={`text-xs mb-2 opacity-60 ${isDarkMode ? "text-gray-400" : "text-rose-500"}`}>
-                            추천
+                            {t("recommendation")}
                           </p>
                           <SquareAd />
                         </div>
@@ -748,12 +793,12 @@ export default function Component() {
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
                   <h2 className={`text-xl sm:text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
-                    개발자 후원하기
+                    {t("support_developer")}
                   </h2>
                   <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
                 </div>
                 <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
-                  "하루의 끝"을 사랑해주셔서 감사합니다
+                  {t("support_thanks")}
                 </p>
               </CardHeader>
 
@@ -761,11 +806,10 @@ export default function Component() {
                 <div className="text-center space-y-4">
                   <div className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-rose-50/80"}`}>
                     <h3 className={`text-lg sm:text-xl font-semibold mb-3 ${isDarkMode ? "text-pink-300" : "text-rose-700"}`}>
-                      후원을 해주시면 개발자에게 큰 힘이 됩니다
+                      {t("support_message")}
                     </h3>
                     <p className={`text-sm sm:text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-rose-600"}`}>
-                      여러분의 소중한 일기를 더 안전하고 아름답게 보관할 수 있도록
-                      지속적으로 개발하고 개선해나가겠습니다.
+                      {t("support_message_detail")}
                     </p>
                   </div>
                 </div>
@@ -778,7 +822,7 @@ export default function Component() {
                     <div className="mb-4">
                       <img src="/placeholder.svg?height=60&width=60" alt="토스뱅크" className="mx-auto mb-3 rounded-lg" loading="lazy" />
                       <h4 className={`text-base sm:text-lg font-semibold ${isDarkMode ? "text-pink-300" : "text-pink-700"}`}>
-                        토스뱅크
+                        {t("toss_bank")}
                       </h4>
                     </div>
 
@@ -797,7 +841,7 @@ export default function Component() {
                         }`}
                       variant="outline"
                     >
-                      계좌번호 복사하기
+                      {t("copy_account_number")}
                     </Button>
                   </div>
                 </div>
@@ -805,8 +849,7 @@ export default function Component() {
                 <div className="text-center space-y-4">
                   <div className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? "bg-slate-800/30" : "bg-amber-50/50"}`}>
                     <p className={`text-xs sm:text-sm italic ${isDarkMode ? "text-gray-400" : "text-amber-700"}`}>
-                      "작은 후원이라도 개발자에게는 큰 격려가 됩니다.
-                      여러분의 마음이 더 나은 서비스를 만드는 원동력입니다."
+                      {t("small_support_message")}
                     </p>
                     <div className="mt-4 flex justify-center gap-2">
                       <Heart className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse`} />
@@ -820,7 +863,7 @@ export default function Component() {
                   <div className={`inline-block p-4 rounded-full ${isDarkMode ? "bg-slate-800/50" : "bg-rose-100/50"}`}>
                     <div className={`text-3xl mb-2`}>👨‍💻</div>
                     <p className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
-                      하루의 끝 개발팀
+                      {t("developer_team")}
                     </p>
                   </div>
                 </div>
@@ -838,12 +881,12 @@ export default function Component() {
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <div className="text-3xl sm:text-4xl animate-bounce">🏆</div>
                   <h2 className={`text-xl sm:text-2xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}>
-                    명예의 전당
+                    {t("hall_of_fame_title")}
                   </h2>
                   <div className="text-3xl sm:text-4xl animate-bounce delay-100">🏆</div>
                 </div>
                 <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-300" : "text-yellow-700"}`}>
-                  "하루의 끝"을 후원해주신 소중한 분들
+                  {t("hall_of_fame_description")}
                 </p>
               </CardHeader>
 
@@ -854,19 +897,19 @@ export default function Component() {
                     <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
                       43
                     </div>
-                    <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>총 후원자 수</div>
+                    <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>{t("total_supporters")}</div>
                   </div>
                   <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
                     <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
                       ₩857,000
                     </div>
-                    <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>총 후원 금액</div>
+                    <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>{t("total_donations")}</div>
                   </div>
                   <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
                     <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
                       158
                     </div>
-                    <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>누적 일기 수</div>
+                    <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>{t("total_diaries")}</div>
                   </div>
                 </div>
 
@@ -875,7 +918,7 @@ export default function Component() {
                   <h3
                     className={`text-lg sm:text-xl font-semibold mb-4 text-center ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}
                   >
-                    💎 VIP 후원자 (10만원 이상)
+                    {t("vip_supporters")}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     {[
@@ -914,7 +957,7 @@ export default function Component() {
                   <h3
                     className={`text-lg sm:text-xl font-semibold mb-4 text-center ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}
                   >
-                    🥇 골드 후원자 (5만원 이상)
+                    {t("gold_supporters")}
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                     {["최**님", "정**님", "강**님", "윤**님", "조**님", "장**님", "임**님", "한**님"].map(
@@ -941,7 +984,7 @@ export default function Component() {
                   <h3
                     className={`text-lg sm:text-xl font-semibold mb-4 text-center ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}
                   >
-                    🥈 실버 후원자 (1만원 이상)
+                    {t("silver_supporters")}
                   </h3>
                   <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                     {[
@@ -980,7 +1023,7 @@ export default function Component() {
                   <h3
                     className={`text-lg sm:text-xl font-semibold mb-4 text-center ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}
                   >
-                    🥉 브론즈 후원자
+                    {t("bronze_supporters")}
                   </h3>
                   <div className={`p-3 sm:p-4 rounded-xl text-center ${isDarkMode ? "bg-slate-800/30" : "bg-orange-50/50"}`}>
                     <div className="flex flex-wrap justify-center gap-2">
@@ -1016,14 +1059,10 @@ export default function Component() {
                 <div className="text-center space-y-4">
                   <div className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
                     <h4 className={`text-base sm:text-lg font-semibold mb-3 ${isDarkMode ? "text-yellow-300" : "text-yellow-700"}`}>
-                      💌 개발자의 감사 인사
+                      💌 {t("developer_thanks_message_title")}
                     </h4>
                     <p className={`text-sm sm:text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-yellow-600"}`}>
-                      "하루의 끝"을 사랑해주시고 후원해주신 모든 분들께 진심으로 감사드립니다.
-                      <br />
-                      여러분의 소중한 마음 덕분에 더 나은 서비스를 만드는 원동력입니다.
-                      <br />
-                      앞으로도 여러분의 소중한 일상을 아름답게 기록할 수 있도록 최선을 다하겠습니다.
+                      {t("developer_thanks_message")}
                     </p>
                     <div className="mt-4 flex justify-center gap-1">
                       {[...Array(5)].map((_, i) => (
@@ -1047,7 +1086,7 @@ export default function Component() {
                       }`}
                   >
                     <Heart className="w-5 h-5 mr-2" />
-                    나도 후원하기
+                    {t("donate_now")}
                   </Button>
                 </div>
               </CardContent>
@@ -1064,12 +1103,12 @@ export default function Component() {
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
                   <span className={`text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
-                    개발자 후원하기
+                    {t("support_developer")}
                   </span>
                   <Heart className={`w-6 h-6 ${isDarkMode ? "text-pink-400" : "text-pink-500"}`} />
                 </div>
                 <p className={`text-lg ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
-                  "하루의 끝"을 사랑해주셔서 감사합니다
+                  {t("support_thanks")}
                 </p>
               </CardHeader>
 
@@ -1078,12 +1117,10 @@ export default function Component() {
                 <div className="text-center space-y-4">
                   <div className={`p-6 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-rose-50/80"}`}>
                     <h3 className={`text-xl font-semibold mb-3 ${isDarkMode ? "text-pink-300" : "text-rose-700"}`}>
-                      💝 후원을 해주시면 개발자에게 큰 힘이 됩니다
+                      💝 {t("support_message")}
                     </h3>
                     <p className={`text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-rose-600"}`}>
-                      여러분의 소중한 일기를 더 안전하고 아름답게 보관할 수 있도록
-                      <br />
-                      지속적으로 개발하고 개선해나가겠습니다.
+                      {t("support_message_detail")}
                     </p>
                   </div>
                 </div>
@@ -1097,7 +1134,7 @@ export default function Component() {
                     <div className="mb-4">
                       <img src="/placeholder.svg?height=60&width=60" alt="토스뱅크" className="mx-auto mb-3 rounded-lg" loading="lazy" />
                       <h4 className={`text-lg font-semibold ${isDarkMode ? "text-pink-300" : "text-pink-700"}`}>
-                        토스뱅크
+                        {t("toss_bank")}
                       </h4>
                     </div>
 
@@ -1116,7 +1153,7 @@ export default function Component() {
                         }`}
                       variant="outline"
                     >
-                      📋 계좌번호 복사하기
+                      📋 {t("copy_account_number")}
                     </Button>
                   </div>
                 </div>
@@ -1125,9 +1162,7 @@ export default function Component() {
                 <div className="text-center space-y-4">
                   <div className={`p-6 rounded-xl ${isDarkMode ? "bg-slate-800/30" : "bg-amber-50/50"}`}>
                     <p className={`text-sm italic ${isDarkMode ? "text-gray-400" : "text-amber-700"}`}>
-                      "작은 후원이라도 개발자에게는 큰 격려가 됩니다.
-                      <br />
-                      여러분의 마음이 더 나은 서비스를 만드는 원동력입니다."
+                      {t("small_support_message_detail")}
                     </p>
                     <div className="mt-4 flex justify-center gap-2">
                       <Heart className={`w-4 h-4 ${isDarkMode ? "text-pink-400" : "text-pink-500"} animate-pulse`} />
@@ -1146,7 +1181,7 @@ export default function Component() {
                   <div className={`inline-block p-4 rounded-full ${isDarkMode ? "bg-slate-800/50" : "bg-rose-100/50"}`}>
                     <div className={`text-4xl mb-2`}>👨‍💻</div>
                     <p className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
-                      하루의 끝 개발팀
+                      {t("developer_team")}
                     </p>
                   </div>
                 </div>
@@ -1155,7 +1190,7 @@ export default function Component() {
           )}
 
           <div className={`text-center mt-8 mb-6 ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
-            <p className="text-xs mb-2 opacity-70">함께 보면 좋은</p>
+            <p className="text-xs mb-2 opacity-70">{t("also_good_to_see")}</p>
             <BottomBannerAd />
           </div>
 
@@ -1163,10 +1198,10 @@ export default function Component() {
           <footer className={`text-center mt-8 py-8 border-t ${isDarkMode ? "border-slate-800 text-gray-500" : "border-rose-100 text-rose-500"}`}>
             <nav aria-label="Footer Navigation" className="mb-4">
               <ul className="flex justify-center gap-4">
-                <li><Button variant="link" onClick={() => setCurrentView('write')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>일기 쓰기</Button></li>
-                <li><Button variant="link" onClick={() => setCurrentView('list')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>목록 보기</Button></li>
-                <li><Button variant="link" onClick={() => setCurrentView('support')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>후원하기</Button></li>
-                <li><Button variant="link" onClick={() => setCurrentView('hall')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>명예의 전당</Button></li>
+                <li><Button variant="link" onClick={() => setCurrentView('write')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>{t("footer_write_diary")}</Button></li>
+                <li><Button variant="link" onClick={() => setCurrentView('list')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>{t("footer_list_diaries")}</Button></li>
+                <li><Button variant="link" onClick={() => setCurrentView('support')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>{t("footer_support")}</Button></li>
+                <li><Button variant="link" onClick={() => setCurrentView('hall')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>{t("footer_hall_of_fame")}</Button></li>
               </ul>
             </nav>
             <nav aria-label="Social Media Links" className="mb-4 flex justify-center gap-4">
@@ -1174,7 +1209,7 @@ export default function Component() {
               <a href="https://www.instagram.com/haru2_end" target="_blank" rel="noopener noreferrer" aria-label="하루의 끝 Instagram 페이지" className="underline">Instagram</a>
               <a href="https://www.youtube.com/@bear_game123" target="_blank" rel="noopener noreferrer" aria-label="하루의 끝 YouTube 채널" className="underline">YouTube</a>
             </nav>
-            <p className="text-sm">© 2025 하루의 끝. 모든 순간이 소중합니다.</p>
+            <p className="text-sm">© 2025 하루의 끝. {t("all_moments_precious")}.</p>
           </footer>
         </div>
 
@@ -1226,7 +1261,7 @@ export default function Component() {
             fixed z-50
             ${isMobile ? "left-3 right-3 bottom-3" : "right-6 bottom-6 w-[360px]"}
           `}
-          aria-label="하루의 끝 모바일 앱 안내 배너"
+          aria-label={t("app_promo_aria_label")}
         >
           <div
             className={`
@@ -1242,7 +1277,7 @@ export default function Component() {
             {/* 닫기 버튼 */}
             <button
               onClick={dismissAppPromo}
-              aria-label="앱 안내 닫기"
+              aria-label={t("dismiss_app_promo_aria_label")}
               className={`absolute right-2 top-2 rounded-full px-2 py-1 text-xs
                 ${isDarkMode ? "text-gray-300 hover:bg-white/10" : "text-gray-600 hover:bg-black/5"}`}
             >
@@ -1257,10 +1292,10 @@ export default function Component() {
 
               <div className="min-w-0 flex-1">
                 <h3 className={`truncate text-base font-semibold ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>
-                  하루의 끝 모바일 앱
+                  {t("app_promo_title")}
                 </h3>
                 <p className={`mt-1 text-sm ${isDarkMode ? "text-gray-300/80" : "text-gray-600"}`}>
-                  언제 어디서든 더 빠르게 기록하고 관리하세요.
+                  {t("app_promo_description")}
                 </p>
 
                 <div className="mt-3 flex items-center gap-2">
@@ -1275,7 +1310,7 @@ export default function Component() {
                         : "bg-gradient-to-r from-rose-500 to-orange-500 text-white hover:from-rose-600 hover:to-orange-600"}
                     `}
                   >
-                    앱 다운로드
+                    {t("download_app")}
                   </a>
                   <button
                     onClick={dismissAppPromo}
@@ -1286,7 +1321,7 @@ export default function Component() {
                         : "text-gray-600 hover:bg-black/5"}
                     `}
                   >
-                    나중에
+                    {t("later")}
                   </button>
                 </div>
               </div>

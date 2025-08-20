@@ -1,10 +1,14 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { headers } from 'next/headers'
 
 import { ThemeProvider } from "../components/theme-provider"
 
 import "./globals.css"
+
+// New import for Providers
+import { Providers } from "./providers"
 
 
 const inter = Inter({ subsets: ["latin"] })
@@ -67,13 +71,16 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const headersList = await headers()
+  const lang = headersList.get('accept-language')?.split(',')[0] || 'ko'
+
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
@@ -129,13 +136,9 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-        >
+        <Providers initialLocale={lang}>
           {children}
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   )
