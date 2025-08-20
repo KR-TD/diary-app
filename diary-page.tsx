@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { format } from 'date-fns';
-import { ko, enUS, ja, zhCN } from 'date-fns/locale';
+import { ko, enUS, ja, zhCN, Locale } from 'date-fns/locale';
 
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -385,7 +385,7 @@ export default function Component() {
                     </SelectTrigger>
                     <SelectContent
                       className={`
-                        ${isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white border-rose-200"}
+                        ${isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white border-rose-200 text-gray-900"}
                       `}
                     >
                       <SelectItem value="ko">한국어</SelectItem>
