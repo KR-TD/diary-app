@@ -895,13 +895,13 @@ export default function Component() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                   <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
                     <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
-                      43
+                      44
                     </div>
                     <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>{t("total_supporters")}</div>
                   </div>
                   <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
                     <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
-                      ₩857,000
+                      ₩858,000
                     </div>
                     <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>{t("total_donations")}</div>
                   </div>
@@ -1028,6 +1028,7 @@ export default function Component() {
                   <div className={`p-3 sm:p-4 rounded-xl text-center ${isDarkMode ? "bg-slate-800/30" : "bg-orange-50/50"}`}>
                     <div className="flex flex-wrap justify-center gap-2">
                       {[
+                        "김동하님",
                         "권**님",
                         "민**님",
                         "배**님",
