@@ -29,7 +29,7 @@
   "delete": "删除",
   "recommendation": "推荐",
   "support_thanks": "感谢您喜爱“一天结束”",
-  "support_message": "我们将继续开发和改进，以更安全、更美观地保存您珍贵的日记。",
+  "support_message": "让我们一起创造更美好的“一天结束”",
   "toss_bank": "Toss Bank",
   "copy_account_number": "复制账号",
   "small_support_message": "即使是微小的支持，对开发者来说也是巨大的鼓励。您的心是创造更好服务的动力。",
@@ -78,5 +78,9 @@
   "music_track_bird_name": "伴随鸟鸣",
   "music_track_bird_description": "森林的早晨",
   "music_track_fire_name": "噼啪作响的柴火声",
-  "music_track_fire_description": "舒适的壁炉"
+  "music_track_fire_description": "舒适的壁炉",
+  "contact_developer": "联系我们",
+  "contact_title": "有什么可以帮您？",
+  "contact_description": "如有任何关于服务的疑问、错误报告、改进建议等，请随时与我们联系。我们将在24小时内回复。",
+  "contact_email_button": "发送邮件"
 }

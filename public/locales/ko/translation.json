@@ -29,7 +29,7 @@
   "delete": "삭제",
   "recommendation": "추천",
   "support_thanks": "\"하루의 끝\"을 사랑해주셔서 감사합니다",
-  "support_message": "여러분의 소중한 일기를 더 안전하고 아름답게 보관할 수 있도록 지속적으로 개발하고 개선해나가겠습니다.",
+  "support_message": "더 나은 '하루의 끝'을 함께 만들어요",
   "toss_bank": "토스뱅크",
   "copy_account_number": "계좌번호 복사하기",
   "small_support_message": "작은 후원이라도 개발자에게는 큰 격려가 됩니다. 여러분의 마음이 더 나은 서비스를 만드는 원동력입니다.",
@@ -78,5 +78,9 @@
   "music_track_bird_name": "새소리와 함께",
   "music_track_bird_description": "숲속의 아침",
   "music_track_fire_name": "타닥이는 장작 소리",
-  "music_track_fire_description": "아늑한 벽난로"
+  "music_track_fire_description": "아늑한 벽난로",
+  "contact_developer": "개발자에게 문의",
+  "contact_title": "무엇을 도와드릴까요?",
+  "contact_description": "서비스에 대한 궁금한 점, 버그 리포트, 개선 제안 등 어떤 내용이든 편하게 문의해주세요. 24시간 내에 답변 드리겠습니다.",
+  "contact_email_button": "이메일 보내기"
 }

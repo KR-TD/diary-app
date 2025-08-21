@@ -29,7 +29,7 @@
   "delete": "Delete",
   "recommendation": "Recommendation",
   "support_thanks": "Thank you for loving \"End of Day\"",
-  "support_message": "We will continue to develop and improve to keep your precious diaries safer and more beautiful.",
+  "support_message": "Let's create a better 'End of Day' together",
   "toss_bank": "Toss Bank",
   "copy_account_number": "Copy Account Number",
   "small_support_message": "Even small support is a great encouragement to the developer. Your heart is the driving force for creating better services.",
@@ -78,5 +78,9 @@
   "music_track_bird_name": "With Bird Sounds",
   "music_track_bird_description": "Morning in the Forest",
   "music_track_fire_name": "With Crackling Firewood",
-  "music_track_fire_description": "Cozy Fireplace"
+  "music_track_fire_description": "Cozy Fireplace",
+  "contact_developer": "Contact Us",
+  "contact_title": "How can we help?",
+  "contact_description": "Feel free to contact us with any questions, bug reports, or suggestions for improvement. We will respond within 24 hours.",
+  "contact_email_button": "Send Email"
 }

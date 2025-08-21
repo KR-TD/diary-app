@@ -29,7 +29,7 @@
   "delete": "削除",
   "recommendation": "おすすめ",
   "support_thanks": "「一日の終わり」を愛してくださりありがとうございます",
-  "support_message": "皆様の大切な日記をより安全で美しく保管できるよう、継続的に開発・改善していきます。",
+  "support_message": "より良い「一日の終わり」を一緒に作りましょう",
   "toss_bank": "トスバンク",
   "copy_account_number": "口座番号をコピー",
   "small_support_message": "小さなご支援でも開発者にとっては大きな励みになります。皆様の心がより良いサービスを作る原動力です。",
@@ -78,5 +78,9 @@
   "music_track_bird_name": "鳥のさえずりと共に",
   "music_track_bird_description": "森の朝",
   "music_track_fire_name": "パチパチと燃える薪の音",
-  "music_track_fire_description": "居心地の良い暖炉"
+  "music_track_fire_description": "居心地の良い暖炉",
+  "contact_developer": "お問い合わせ",
+  "contact_title": "どうなさいましたか？",
+  "contact_description": "サービスに関するご質問、バグ報告、改善提案など、どんな内容でもお気軽にお問い合わせください。24時間以内にご返信いたします。",
+  "contact_email_button": "メールを送る"
 }

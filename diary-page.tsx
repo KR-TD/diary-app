@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input" // Input 컴포넌트 추가
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List, Pencil, Award, Gem, Camera, Smartphone } from "lucide-react"
+import { Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List, Pencil, Award, Gem, Camera, Smartphone, Mail } from "lucide-react"
 import { TopBannerAd, BottomBannerAd, SquareAd } from "@/components/kakao-ads"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { usePathname } from 'next/navigation'
@@ -92,7 +92,7 @@ export default function Component() {
   ]
 
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([])
-  const [currentView, setCurrentView] = useState<"write" | "list" | "support" | "hall">("write")
+  const [currentView, setCurrentView] = useState<"write" | "list" | "support" | "hall" | "contact">("write")
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null)
 
   const emotionMap: { [key: string]: string } = {
@@ -227,6 +227,14 @@ export default function Component() {
       setTimeout(() => setIsSaved(false), 2000)
     }
   }
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText("1000-8490-8014");
+    setIsCopied(true);
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 2000);
+  };
 
   const handleDelete = (id: string) => {
     const updatedEntries = diaryEntries.filter(entry => entry.id !== id);
@@ -373,6 +381,23 @@ export default function Component() {
                   <Award className="w-5 h-5" />
                   {!isMobile && t("hall_of_fame")}
                 </Button>
+
+                <Button
+                  onClick={() => setCurrentView("contact")}
+                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${currentView === "contact"
+                    ? isDarkMode
+                      ? "bg-green-600/30 text-green-300"
+                      : "bg-green-500/30 text-green-600"
+                    : isDarkMode
+                      ? "bg-green-600/20 hover:bg-green-600/30 text-green-300"
+                      : "bg-green-500/20 hover:bg-green-500/30 text-green-600"
+                    }`}
+                  variant="ghost"
+                  size={isMobile ? "icon" : "default"}
+                >
+                  <Mail className="w-5 h-5" />
+                  {!isMobile && t("contact_developer")}
+                </Button>
               </div>
 
               <div className="flex items-center gap-2"> {/* New wrapper div */}
@@ -432,13 +457,7 @@ export default function Component() {
             <p className={`text-base sm:text-lg font-medium ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
               {t("app_description")}
             </p>
-            <div className={`mt-4 text-center text-sm sm:text-base max-w-2xl mx-auto ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
-              <p className="leading-relaxed">
-                <strong>{t('app_title')}</strong>{t('seo_intro_prefix')}
-                <br />
-                {t('seo_intro_suffix')}
-              </p>
-            </div>
+            
             <section className="sr-only">
               <h2>하루의 끝: 당신의 하루를 기록하는 감성 온라인 일기장</h2>
               <p>
@@ -852,22 +871,25 @@ export default function Component() {
                     </div>
 
                     <div
-                      className={`text-2xl sm:text-3xl font-bold mb-4 font-mono tracking-wider ${isDarkMode ? "text-pink-200" : "text-pink-800"
+                      className={`text-2xl sm:text-3xl font-bold mb-2 font-mono tracking-wider ${isDarkMode ? "text-pink-200" : "text-pink-800"
                         }`}
                     >
                       1000-8490-8014
                     </div>
 
-                    <Button
-                      onClick={() => navigator.clipboard.writeText("1000-8490-8014")}
-                      className={`px-5 sm:px-6 py-2 rounded-full transition-all duration-300 ${isDarkMode
-                        ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30"
-                        : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600 border border-pink-300/50"
-                        }`}
-                      variant="outline"
-                    >
-                      {t("copy_account_number")}
-                    </Button>
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        onClick={handleCopy}
+                        className={`px-5 sm:px-6 py-2 rounded-full transition-all duration-300 ${isDarkMode
+                          ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30"
+                          : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600 border border-pink-300/50"
+                          }`}
+                        variant="outline"
+                      >
+                        {t("copy_account_number")}
+                      </Button>
+                      {isCopied && <span className="copy-success-animation">복사 완료!</span>}
+                    </div>
                   </div>
                 </div>
 
@@ -1117,6 +1139,40 @@ export default function Component() {
                 </div>
               </CardContent>
             </Card>
+          ) : currentView === "contact" ? (
+            // 문의 페이지
+            <Card
+              className={`backdrop-blur-sm border-0 shadow-2xl transition-all duration-500 ${isDarkMode
+                ? "bg-slate-900/80 shadow-green-500/30 border border-slate-700/50"
+                : "bg-white/90 border border-green-200/50 shadow-green-200/30"
+                }`}
+            >
+              <CardHeader className="text-center pb-4 sm:pb-6">
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <Mail className={`w-6 h-6 ${isDarkMode ? "text-green-400" : "text-green-500"}`} />
+                  <h2 className={`text-xl sm:text-2xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
+                    {t("contact_title")}
+                  </h2>
+                </div>
+                <p className={`text-base sm:text-lg ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
+                  {t("contact_description")}
+                </p>
+              </CardHeader>
+
+              <CardContent className="space-y-6 sm:space-y-8 p-3 sm:p-6 text-center">
+                <a href="mailto:haru2end7827@gmail.com">
+                  <Button
+                    className={`px-8 py-3 text-lg font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${isDarkMode
+                      ? "bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700"
+                      : "bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
+                      }`}
+                  >
+                    <Mail className="w-5 h-5 mr-2" />
+                    {t("contact_email_button")}
+                  </Button>
+                </a>
+              </CardContent>
+            </Card>
           ) : (
             // 후원 페이지(대체 뷰) - 원본 유지
             <Card
@@ -1165,22 +1221,24 @@ export default function Component() {
                     </div>
 
                     <div
-                      className={`text-3xl font-bold mb-4 font-mono tracking-wider ${isDarkMode ? "text-pink-200" : "text-pink-800"
+                      className={`text-3xl font-bold mb-2 font-mono tracking-wider ${isDarkMode ? "text-pink-200" : "text-pink-800"
                         }`}
                     >
                       1000-8490-8014
                     </div>
-
-                    <Button
-                      onClick={() => navigator.clipboard.writeText("1000-8490-8014")}
-                      className={`px-6 py-2 rounded-full transition-all duration-300 ${isDarkMode
-                        ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30"
-                        : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600 border border-pink-300/50"
-                        }`}
-                      variant="outline"
-                    >
-                      📋 {t("copy_account_number")}
-                    </Button>
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        onClick={handleCopy}
+                        className={`px-6 py-2 rounded-full transition-all duration-300 ${isDarkMode
+                          ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30"
+                          : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600 border border-pink-300/50"
+                          }`}
+                        variant="outline"
+                      >
+                        📋 {t("copy_account_number")}
+                      </Button>
+                      {isCopied && <span className="copy-success-animation">복사 완료!</span>}
+                    </div>
                   </div>
                 </div>
 
@@ -1233,7 +1291,7 @@ export default function Component() {
             <nav aria-label="Social Media Links" className="mb-4 flex justify-center gap-4">
               <a href="https://x.com/haru2end" target="_blank" rel="noopener noreferrer" aria-label="하루의 끝 X(Twitter) 페이지" className="underline">X(Twitter)</a>
               <a href="https://www.instagram.com/haru2_end" target="_blank" rel="noopener noreferrer" aria-label="하루의 끝 Instagram 페이지" className="underline">Instagram</a>
-              <a href="https://www.youtube.com/@bear_game123" target="_blank" rel="noopener noreferrer" aria-label="하루의 끝 YouTube 채널" className="underline">YouTube</a>
+              <a href="https://www.youtube.com/@haru2end" target="_blank" rel="noopener noreferrer" aria-label="하루의 끝 YouTube 채널" className="underline">YouTube</a>
             </nav>
             <p className="text-sm">© 2025 하루의 끝. {t("all_moments_precious")}.</p>
           </footer>
