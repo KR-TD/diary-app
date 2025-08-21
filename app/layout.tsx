@@ -15,9 +15,9 @@ const inter = Inter({ subsets: ["latin"] })
 
 const siteName = "하루의 끝"
 const siteUrl = "https://www.haru2end.com"
-const title = "하루의 끝 - 당신의 하루를 기록하는 감성 온라인 일기장"
+const title = "하루의 끝 - 감성 온라인 일기장 | 매일의 생각과 감정 기록, 다이어리 꾸미기"
 const description =
-  "하루의 끝에서 당신의 하루를 특별하게 마무리하세요. 이곳은 잔잔한 배경음악과 함께 오늘의 감정과 생각을 기록할 수 있는 감성 온라인 일기장이자 다이어리입니다. 매일의 소중한 순간, 스트레스, 비밀스러운 마음까지 안전하게 기록하고 보관하세요. 익명성이 보장되는 이 공간에서 마음 챙김과 스트레스 해소를 위한 글쓰기를 통해 자신을 돌아보는 시간을 가질 수 있습니다. 당신의 모든 하루를 응원합니다."
+  "하루의 끝에서 당신의 하루를 특별하게 마무리하세요. 감성적인 온라인 일기장에 오늘의 순간, 감정, 생각을 기록하며 나만의 다이어리를 만들고 꾸밀 수 있습니다."
 const ogImage = `${siteUrl}/og-image.png`
 
 export const metadata: Metadata = {
@@ -29,9 +29,12 @@ export const metadata: Metadata = {
   description: description,
   keywords: [
     "하루의 끝",
-    "일기쓰기",
-    "일기장",
-    "일기장 사이트",
+    "온라인 일기장",
+    "감성 다이어리",
+    "하루 기록",
+    "다이어리 꾸미기",
+    "매일의 생각",
+    "감정 기록",
   ],
   openGraph: {
     title: title,
@@ -82,6 +85,17 @@ export default async function RootLayout({
   return (
     <html lang={lang} suppressHydrationWarning>
       <head>
+        {/* Google Tag Manager */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KS38JN7W');`,
+          }}
+        />
+        {/* End Google Tag Manager */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -136,6 +150,10 @@ export default async function RootLayout({
         />
       </head>
       <body className={inter.className}>
+        {/* Google Tag Manager (noscript) */}
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KS38JN7W"
+        height="0" width="0" style={{display:'none',visibility:'hidden'}}></iframe></noscript>
+        {/* End Google Tag Manager (noscript) */}
         <Providers initialLocale={lang}>
           {children}
         </Providers>

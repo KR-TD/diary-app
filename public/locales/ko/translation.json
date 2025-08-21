@@ -72,5 +72,11 @@
   "app_promo_aria_label": "하루의 끝 모바일 앱 안내 배너",
   "dismiss_app_promo_aria_label": "앱 안내 닫기",
   "music_track_rain_name": "빗소리와 함께",
-  "music_track_rain_description": "자연의 소리와 멜로디"
+  "music_track_rain_description": "자연의 소리와 멜로디",
+  "seo_intro_prefix": "은 당신의 소중한 하루를 기록하는 온라인 일기장입니다. ",
+  "seo_intro_suffix": "감성적인 테마와 음악과 함께 오늘의 생각과 감정을 자유롭게 기록하고, 나만의 비밀 다이어리를 만들어보세요.",
+  "music_track_bird_name": "새소리와 함께",
+  "music_track_bird_description": "숲속의 아침",
+  "music_track_fire_name": "타닥이는 장작 소리",
+  "music_track_fire_description": "아늑한 벽난로"
 }

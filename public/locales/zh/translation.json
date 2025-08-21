@@ -72,5 +72,11 @@
   "app_promo_aria_label": "一天结束移动应用推广横幅",
   "dismiss_app_promo_aria_label": "关闭应用推广",
   "music_track_rain_name": "伴随雨声",
-  "music_track_rain_description": "自然的声音和旋律"
+  "music_track_rain_description": "自然的声音和旋律",
+  "seo_intro_prefix": "是记录您宝贵一天的在线日记。",
+  "seo_intro_suffix": "伴随着感性的主题和音乐，自由地记录今天的想法和感受，创造属于您自己的秘密日记吧。",
+  "music_track_bird_name": "伴随鸟鸣",
+  "music_track_bird_description": "森林的早晨",
+  "music_track_fire_name": "噼啪作响的柴火声",
+  "music_track_fire_description": "舒适的壁炉"
 }

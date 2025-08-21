@@ -77,6 +77,18 @@ export default function Component() {
       url: "/music/rain-sounds.mp3",
       icon: "🌧️",
     },
+    {
+      name: t("music_track_bird_name"),
+      description: t("music_track_bird_description"),
+      url: "/music/bird-sounds.mp3",
+      icon: "🐦",
+    },
+    {
+      name: t("music_track_fire_name"),
+      description: t("music_track_fire_description"),
+      url: "/music/fire-sounds.mp3",
+      icon: "🔥",
+    },
   ]
 
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([])
@@ -420,23 +432,36 @@ export default function Component() {
             <p className={`text-base sm:text-lg font-medium ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
               {t("app_description")}
             </p>
-            <section className="sr-only">
-              <h2>하루의 끝 – 감성 온라인 일기장</h2>
-              <p>
-                하루의 끝은 하루를 차분히 정리하고 기록할 수 있는 감성 일기장 서비스입니다.
-                온라인 다이어리 형태로 언제 어디서나 접근할 수 있으며, 다크/라이트 테마와 배경음악,
-                일기 목록 보기, 후원 및 명예의 전당 등 다양한 기능을 제공합니다. 사용자는 간단한 인터페이스로
-                오늘의 감정과 생각을 자연스럽게 남기고, 시간이 지나도 안전하게 보관된 기록을 다시 돌아볼 수 있습니다.
-                특히 ‘하루의 끝’, ‘감성 일기’, ‘온라인 일기’, ‘다이어리’, ‘기록’과 같은 주제에 관심 있는 분에게
-                편안한 글쓰기 경험을 제공합니다. 이 페이지는 서비스 소개와 함께 주요 기능을 안내하여
-                처음 방문하는 이용자도 쉽게 이해하고 시작할 수 있도록 구성했습니다.
+            <div className={`mt-4 text-center text-sm sm:text-base max-w-2xl mx-auto ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
+              <p className="leading-relaxed">
+                <strong>{t('app_title')}</strong>{t('seo_intro_prefix')}
+                <br />
+                {t('seo_intro_suffix')}
               </p>
-              <h3>주요 기능</h3>
+            </div>
+            <section className="sr-only">
+              <h2>하루의 끝: 당신의 하루를 기록하는 감성 온라인 일기장</h2>
+              <p>
+                '하루의 끝'은 매일의 생각과 감정을 기록하고 싶을 때 찾는 최고의 온라인 일기장 서비스입니다. 이 감성 다이어리는 사용자가 하루를 돌아보며 글을 쓰는 행위를 통해 마음을 챙기고 스트레스를 해소할 수 있도록 설계되었습니다. '온라인 다이어리', '감성 일기장', '하루 기록' 등과 같은 키워드를 중심으로, 사용자에게 최적화된 글쓰기 환경을 제공합니다.
+              </p>
+              <h3>주요 특징 및 기능</h3>
               <ul>
-                <li>감성적인 다크/라이트 테마와 배경음악</li>
-                <li>일기 저장 및 목록 관리, 해시 기반 내부 링크</li>
-                <li>후원하기와 명예의 전당을 통한 커뮤니티 참여</li>
+                <li><strong>감성적인 글쓰기 환경</strong>: 다크 모드와 라이트 모드를 지원하며, 잔잔한 배경 음악과 함께 집중해서 일기를 작성할 수 있습니다.</li>
+                <li><strong>나만의 온라인 다이어리</strong>: 제목, 내용, 그날의 기분을 이모티콘으로 선택하여 하루를 완벽하게 기록하세요. 사진을 첨부하여 더욱 생생한 추억을 남길 수도 있습니다.</li>
+                <li><strong>완벽한 익명성 보장</strong>: 모든 기록은 로컬에 저장되어 개인 정보 노출 걱정 없이 안전하게 비밀 일기를 작성할 수 있습니다.</li>
+                <li><strong>다이어리 꾸미기</strong>: 다양한 테마와 옵션을 통해 자신만의 스타일로 다이어리를 꾸미는 재미를 느껴보세요.</li>
+                <li><strong>쉬운 사용법</strong>: 직관적인 인터페이스로 누구나 쉽게 '하루 기록'을 시작할 수 있습니다.</li>
               </ul>
+              <h3>이런 분들께 추천합니다</h3>
+              <p>
+                - 매일의 일상을 기록하며 하루를 마무리하고 싶은 분<br />
+                - 생각이나 감정을 털어놓을 비밀 다이어리가 필요한 분<br />
+                - 감성적인 분위기에서 글쓰기를 즐기고 싶은 분<br />
+                - 온라인에서 편리하게 다이어리 꾸미기를 하고 싶은 분
+              </p>
+              <p>
+                하루의 끝과 함께 당신의 모든 순간을 소중하게 간직하세요. 지금 바로 당신의 첫 온라인 일기장을 시작해보세요.
+              </p>
             </section>
           </div>
 

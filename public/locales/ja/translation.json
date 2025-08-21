@@ -72,5 +72,11 @@
   "app_promo_aria_label": "一日の終わりモバイルアプリ案内バナー",
   "dismiss_app_promo_aria_label": "アプリ案内を閉じる",
   "music_track_rain_name": "雨の音とともに",
-  "music_track_rain_description": "自然の音とメロディー"
+  "music_track_rain_description": "自然の音とメロディー",
+  "seo_intro_prefix": "は、あなたの大切な一日を記録するオンライン日記帳です。",
+  "seo_intro_suffix": "感性的なテーマと音楽と共に、今日の考えや感情を自由に記録し、自分だけの秘密の日記を作ってみましょう。",
+  "music_track_bird_name": "鳥のさえずりと共に",
+  "music_track_bird_description": "森の朝",
+  "music_track_fire_name": "パチパチと燃える薪の音",
+  "music_track_fire_description": "居心地の良い暖炉"
 }

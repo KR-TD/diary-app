@@ -72,5 +72,11 @@
   "app_promo_aria_label": "End of Day Mobile App Promotion Banner",
   "dismiss_app_promo_aria_label": "Dismiss App Promotion",
   "music_track_rain_name": "With Rain Sound",
-  "music_track_rain_description": "Sounds of Nature and Melody"
+  "music_track_rain_description": "Sounds of Nature and Melody",
+  "seo_intro_prefix": " is an online diary to record your precious day. ",
+  "seo_intro_suffix": "Freely write down your thoughts and emotions with sentimental themes and music, and create your own secret diary.",
+  "music_track_bird_name": "With Bird Sounds",
+  "music_track_bird_description": "Morning in the Forest",
+  "music_track_fire_name": "With Crackling Firewood",
+  "music_track_fire_description": "Cozy Fireplace"
 }
