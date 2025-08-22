@@ -211,7 +211,7 @@ export default function Component() {
     if (diaryTitle.trim() && diaryContent.trim()) { // 제목과 내용 모두 비어있지 않을 때만 저장
       const newEntry: DiaryEntry = {
         id: Date.now().toString(),
-        date: new Date().toISOString(), // Save date in ISO format
+        date: getCurrentDate(),
         title: diaryTitle, // 제목 추가
         content: diaryContent,
         createdAt: new Date(),
@@ -244,33 +244,6 @@ export default function Component() {
     if (selectedEntry && selectedEntry.id === id) {
       setSelectedEntry(null); // Close the detailed view if the deleted entry was open
     }
-  };
-
-  const formatEntryDate = (dateString: string) => {
-    const date = new Date(dateString);
-    // Check if the dateString is a valid ISO date
-    if (!isNaN(date.getTime())) {
-      const locales: { [key: string]: Locale } = {
-        ko: ko,
-        en: enUS,
-        ja: ja,
-        zh: zhCN,
-      };
-      const currentLocale = locales[i18n.language] || ko;
-      let formatString = 'yyyy년 M월 d일'; // Default/Korean format
-      switch (i18n.language) {
-        case 'en':
-          formatString = 'MMM d, yyyy';
-          break;
-        case 'ja':
-        case 'zh':
-          formatString = 'yyyy年M月d日';
-          break;
-      }
-      return format(date, formatString, { locale: currentLocale });
-    }
-    // If it's not a valid ISO string, it's probably an old entry. Return as-is.
-    return dateString;
   };
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -676,7 +649,7 @@ export default function Component() {
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <Moon className={`w-5 h-5 ${isDarkMode ? "text-yellow-400" : "text-amber-500"}`} />
                   <span className={`text-lg sm:text-xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
-                    {isClient ? getCurrentDate() : "..."}
+                    {getCurrentDate()}
                   </span>
                   <Star className={`w-5 h-5 ${isDarkMode ? "text-blue-400" : "text-rose-500"}`} />
                 </div>
@@ -833,7 +806,7 @@ export default function Component() {
                               {entry.title}
                             </h3>
                             <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>
-                              {formatEntryDate(entry.date)} {entry.mood && <span className="ml-2 text-base">{entry.mood} {emotionMap[entry.mood]}</span>}
+                              {entry.date} {entry.mood && <span className="ml-2 text-base">{entry.mood} {emotionMap[entry.mood]}</span>}
                             </span>
                           </div>
                           <div className="flex items-center gap-2"> {/* Added a div to group length and delete button */}
@@ -1126,8 +1099,8 @@ export default function Component() {
                     <div className="flex flex-wrap justify-center gap-2">
                       {[
                         "김동하님",
-                        "권**님",
-                        "민**님",
+                        "현**님",
+                        "문**님",
                         "배**님",
                         "백**님",
                         "노**님",
@@ -1210,15 +1183,17 @@ export default function Component() {
               </CardHeader>
 
               <CardContent className="space-y-6 sm:space-y-8 p-3 sm:p-6 text-center">
-                <Button asChild className={`px-8 py-3 text-lg font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${isDarkMode
+                <a href="mailto:haru2end7827@gmail.com">
+                  <Button
+                    className={`px-8 py-3 text-lg font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${isDarkMode
                       ? "bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700"
                       : "bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
-                      }`}>
-                  <a href="mailto:haru2end7827@gmail.com">
+                      }`}
+                  >
                     <Mail className="w-5 h-5 mr-2" />
                     {t("contact_email_button")}
-                  </a>
-                </Button>
+                  </Button>
+                </a>
               </CardContent>
             </Card>
           ) : (
@@ -1364,7 +1339,7 @@ export default function Component() {
                 </div>
                 <div className="flex justify-end items-center mb-4"> {/* Mood and date on right */}
                   <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                    {formatEntryDate(selectedEntry.date)} {selectedEntry.mood && <span className="ml-2 text-xl">{selectedEntry.mood}</span>} | {selectedEntry.content.length}자
+                    {selectedEntry.date} {selectedEntry.mood && <span className="ml-2 text-xl">{selectedEntry.mood}</span>} | {selectedEntry.content.length}자
                   </p>
                 </div>
               </CardHeader>
