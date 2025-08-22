@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { ko, enUS, ja, zhCN, Locale } from 'date-fns/locale';
 
 import { Button } from "@/components/ui/button"
@@ -210,7 +211,7 @@ export default function Component() {
     if (diaryTitle.trim() && diaryContent.trim()) { // 제목과 내용 모두 비어있지 않을 때만 저장
       const newEntry: DiaryEntry = {
         id: Date.now().toString(),
-        date: getCurrentDate(),
+        date: new Date().toISOString(), // Save date in ISO format
         title: diaryTitle, // 제목 추가
         content: diaryContent,
         createdAt: new Date(),
@@ -245,6 +246,33 @@ export default function Component() {
     }
   };
 
+  const formatEntryDate = (dateString: string) => {
+    const date = new Date(dateString);
+    // Check if the dateString is a valid ISO date
+    if (!isNaN(date.getTime())) {
+      const locales: { [key: string]: Locale } = {
+        ko: ko,
+        en: enUS,
+        ja: ja,
+        zh: zhCN,
+      };
+      const currentLocale = locales[i18n.language] || ko;
+      let formatString = 'yyyy년 M월 d일'; // Default/Korean format
+      switch (i18n.language) {
+        case 'en':
+          formatString = 'MMM d, yyyy';
+          break;
+        case 'ja':
+        case 'zh':
+          formatString = 'yyyy年M月d日';
+          break;
+      }
+      return format(date, formatString, { locale: currentLocale });
+    }
+    // If it's not a valid ISO string, it's probably an old entry. Return as-is.
+    return dateString;
+  };
+
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -266,10 +294,32 @@ export default function Component() {
       ja: ja,
       zh: zhCN,
     };
-    const currentLocale = locales[i18n.language] || ko; // Fallback to Korean
+    const currentLocale = locales[i18n.language] || ko;
 
-    // Format the date using date-fns
-    return format(today, 'yyyy년 M월 d일 EEEE', { locale: currentLocale });
+    let formatString = 'yyyy년 M월 d일 EEEE';
+    let timeZone = 'Asia/Seoul';
+
+    switch (i18n.language) {
+      case 'en':
+        formatString = 'EEEE, MMMM d, yyyy';
+        timeZone = 'America/New_York'; // Representing a major English-speaking region
+        break;
+      case 'ja':
+        formatString = 'yyyy年M月d日 EEEE';
+        timeZone = 'Asia/Tokyo';
+        break;
+      case 'zh':
+        formatString = 'yyyy年M月d日 EEEE';
+        timeZone = 'Asia/Shanghai';
+        break;
+      case 'ko':
+      default:
+        formatString = 'yyyy년 M월 d일 EEEE';
+        timeZone = 'Asia/Seoul';
+        break;
+    }
+
+    return formatInTimeZone(today, timeZone, formatString, { locale: currentLocale });
   };
 
   return (
@@ -626,7 +676,7 @@ export default function Component() {
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <Moon className={`w-5 h-5 ${isDarkMode ? "text-yellow-400" : "text-amber-500"}`} />
                   <span className={`text-lg sm:text-xl font-semibold ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
-                    {getCurrentDate()}
+                    {isClient ? getCurrentDate() : "..."}
                   </span>
                   <Star className={`w-5 h-5 ${isDarkMode ? "text-blue-400" : "text-rose-500"}`} />
                 </div>
@@ -662,8 +712,8 @@ export default function Component() {
                       variant="outline"
                       size="sm"
                       className={`px-3 py-1 rounded-full text-xs ${selectedImage
-                          ? isDarkMode ? "border-green-500/30 text-green-300 hover:bg-green-900/20" : "border-green-300 text-green-600 hover:bg-green-100"
-                          : isDarkMode ? "border-purple-500/30 text-purple-300 hover:bg-purple-900/20" : "border-rose-300 text-rose-600 hover:bg-rose-100"
+                          ? isDarkMode ? "border-green-500/30 text-green-300 hover:bg-green-900/20" : "border-green-200 bg-green-100 text-green-700 hover:bg-green-200"
+                          : isDarkMode ? "border-purple-500/30 text-purple-300 hover:bg-purple-900/20" : "border-rose-200 bg-rose-100 text-rose-700 hover:bg-rose-200"
                         }`}
                     >
                       <Camera className="w-3 h-3 mr-1" /> {/* 카메라 아이콘으로 변경 */}
@@ -783,7 +833,7 @@ export default function Component() {
                               {entry.title}
                             </h3>
                             <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>
-                              {entry.date} {entry.mood && <span className="ml-2 text-base">{entry.mood} {emotionMap[entry.mood]}</span>}
+                              {formatEntryDate(entry.date)} {entry.mood && <span className="ml-2 text-base">{entry.mood} {emotionMap[entry.mood]}</span>}
                             </span>
                           </div>
                           <div className="flex items-center gap-2"> {/* Added a div to group length and delete button */}
@@ -1160,17 +1210,15 @@ export default function Component() {
               </CardHeader>
 
               <CardContent className="space-y-6 sm:space-y-8 p-3 sm:p-6 text-center">
-                <a href="mailto:haru2end7827@gmail.com">
-                  <Button
-                    className={`px-8 py-3 text-lg font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${isDarkMode
+                <Button asChild className={`px-8 py-3 text-lg font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${isDarkMode
                       ? "bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700"
                       : "bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
-                      }`}
-                  >
+                      }`}>
+                  <a href="mailto:haru2end7827@gmail.com">
                     <Mail className="w-5 h-5 mr-2" />
                     {t("contact_email_button")}
-                  </Button>
-                </a>
+                  </a>
+                </Button>
               </CardContent>
             </Card>
           ) : (
@@ -1316,7 +1364,7 @@ export default function Component() {
                 </div>
                 <div className="flex justify-end items-center mb-4"> {/* Mood and date on right */}
                   <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                    {selectedEntry.date} {selectedEntry.mood && <span className="ml-2 text-xl">{selectedEntry.mood}</span>} | {selectedEntry.content.length}자
+                    {formatEntryDate(selectedEntry.date)} {selectedEntry.mood && <span className="ml-2 text-xl">{selectedEntry.mood}</span>} | {selectedEntry.content.length}자
                   </p>
                 </div>
               </CardHeader>
