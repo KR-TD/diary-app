@@ -324,11 +324,7 @@ export default function Component() {
 
   return (
     <>
-      {!ready ? (
-        <div className="flex items-center justify-center min-h-screen text-2xl font-bold">
-          Loading...
-        </div>
-      ) : (
+      
         <div
           className={`min-h-screen transition-all duration-500 p-2 sm:p-4 ${isDarkMode
             ? "bg-gradient-to-br from-gray-900 via-slate-900 to-black"
@@ -1167,8 +1163,6 @@ export default function Component() {
             </div>
           )}
         </div>
-      )}
-
       {/* NEW: 중앙 박스를 대체하는 '우측 하단/하단 고정' 앱 프로모션 배너 */}
       {showAppPromo && (
         <div
