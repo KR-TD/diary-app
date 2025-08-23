@@ -82,5 +82,6 @@
   "contact_developer": "联系我们",
   "contact_title": "有什么可以帮您？",
   "contact_description": "如有任何关于服务的疑问、错误报告、改进建议等，请随时与我们联系。我们将在24小时内回复。",
-  "contact_email_button": "发送邮件"
+  "contact_email_button": "发送邮件",
+  "contact_copy_email": "复制电子邮件地址"
 }

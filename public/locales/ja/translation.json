@@ -82,5 +82,6 @@
   "contact_developer": "お問い合わせ",
   "contact_title": "どうなさいましたか？",
   "contact_description": "サービスに関するご質問、バグ報告、改善提案など、どんな内容でもお気軽にお問い合わせください。24時間以内にご返信いたします。",
-  "contact_email_button": "メールを送る"
+  "contact_email_button": "メールを送る",
+  "contact_copy_email": "メールアドレスをコピー"
 }

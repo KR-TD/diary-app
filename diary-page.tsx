@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input" // Input 컴포넌트 추가
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List, Pencil, Award, Gem, Camera, Smartphone, Mail } from "lucide-react"
+import { Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List, Pencil, Award, Gem, Camera, Smartphone, Mail, Clipboard } from "lucide-react"
 import { TopBannerAd, BottomBannerAd, SquareAd } from "@/components/kakao-ads"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { usePathname } from 'next/navigation'
@@ -26,6 +26,7 @@ export default function Component() {
   const [isSaved, setIsSaved] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [isCopied, setIsCopied] = useState(false)
+  const [emailCopied, setEmailCopied] = useState(false)
   const [zoomedImage, setZoomedImage] = useState<string | null>(null) // 확대된 이미지 상태
   const [isClient, setIsClient] = useState(false);
 
@@ -211,7 +212,7 @@ export default function Component() {
     if (diaryTitle.trim() && diaryContent.trim()) { // 제목과 내용 모두 비어있지 않을 때만 저장
       const newEntry: DiaryEntry = {
         id: Date.now().toString(),
-        date: getCurrentDate(),
+        date: new Date().toISOString(), // Save date in ISO format
         title: diaryTitle, // 제목 추가
         content: diaryContent,
         createdAt: new Date(),
@@ -237,6 +238,14 @@ export default function Component() {
     }, 2000);
   };
 
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText("haru2end7827@gmail.com");
+    setEmailCopied(true);
+    setTimeout(() => {
+      setEmailCopied(false);
+    }, 2000);
+  };
+
   const handleDelete = (id: string) => {
     const updatedEntries = diaryEntries.filter(entry => entry.id !== id);
     setDiaryEntries(updatedEntries);
@@ -244,6 +253,33 @@ export default function Component() {
     if (selectedEntry && selectedEntry.id === id) {
       setSelectedEntry(null); // Close the detailed view if the deleted entry was open
     }
+  };
+
+  const formatEntryDate = (dateString: string) => {
+    const date = new Date(dateString);
+    // Check if the dateString is a valid ISO date
+    if (!isNaN(date.getTime())) {
+      const locales: { [key: string]: Locale } = {
+        ko: ko,
+        en: enUS,
+        ja: ja,
+        zh: zhCN,
+      };
+      const currentLocale = locales[i18n.language] || ko;
+      let formatString = 'yyyy년 M월 d일'; // Default/Korean format
+      switch (i18n.language) {
+        case 'en':
+          formatString = 'MMM d, yyyy';
+          break;
+        case 'ja':
+        case 'zh':
+          formatString = 'yyyy年M月d日';
+          break;
+      }
+      return format(date, formatString, { locale: currentLocale });
+    }
+    // If it's not a valid ISO string, it's probably an old entry. Return as-is.
+    return dateString;
   };
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -806,7 +842,7 @@ export default function Component() {
                               {entry.title}
                             </h3>
                             <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>
-                              {entry.date} {entry.mood && <span className="ml-2 text-base">{entry.mood} {emotionMap[entry.mood]}</span>}
+                              {formatEntryDate(entry.date)} {entry.mood && <span className="ml-2 text-base">{entry.mood} {emotionMap[entry.mood]}</span>}
                             </span>
                           </div>
                           <div className="flex items-center gap-2"> {/* Added a div to group length and delete button */}
@@ -1184,18 +1220,33 @@ export default function Component() {
                 </p>
               </CardHeader>
 
-              <CardContent className="space-y-6 sm:space-y-8 p-3 sm:p-6 text-center">
-                <a href="mailto:haru2end7827@gmail.com">
-                  <Button
-                    className={`px-8 py-3 text-lg font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${isDarkMode
-                      ? "bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700"
-                      : "bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"
-                      }`}
-                  >
-                    <Mail className="w-5 h-5 mr-2" />
-                    {t("contact_email_button")}
+              <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-6 text-center">
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-100'}`}>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Email Address</p>
+                  <p className={`text-lg font-semibold font-mono ${isDarkMode ? 'text-green-300' : 'text-green-700'}`}>
+                    haru2end7827@gmail.com
+                  </p>
+                </div>
+                <div className="flex justify-center items-center gap-2 flex-wrap">
+                  <Button asChild className={`px-6 py-2 text-base font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${isDarkMode
+                    ? "bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700"
+                    : "bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"}`}>
+                    <a href="mailto:haru2end7827@gmail.com">
+                      <Mail className="w-5 h-5 mr-2" />
+                      {t("contact_email_button")}
+                    </a>
                   </Button>
-                </a>
+                  <Button
+                    onClick={handleCopyEmail}
+                    variant="outline"
+                    className={`px-6 py-2 text-base font-medium rounded-full transition-all duration-300 ${isDarkMode
+                      ? "border-purple-500/30 text-purple-300 hover:bg-purple-900/20"
+                      : "border-rose-300 text-rose-600 hover:bg-rose-100"}`}>
+                    <Clipboard className="w-5 h-5 mr-2" />
+                    {t("contact_copy_email")}
+                  </Button>
+                </div>
+                {emailCopied && <span className="copy-success-animation mt-2">이메일 주소 복사 완료!</span>}
               </CardContent>
             </Card>
           ) : (
@@ -1341,7 +1392,7 @@ export default function Component() {
                 </div>
                 <div className="flex justify-end items-center mb-4"> {/* Mood and date on right */}
                   <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                    {selectedEntry.date} {selectedEntry.mood && <span className="ml-2 text-xl">{selectedEntry.mood}</span>} | {selectedEntry.content.length}자
+                    {formatEntryDate(selectedEntry.date)} {selectedEntry.mood && <span className="ml-2 text-xl">{selectedEntry.mood}</span>} | {selectedEntry.content.length}자
                   </p>
                 </div>
               </CardHeader>
