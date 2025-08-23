@@ -26,7 +26,6 @@ export default function Component() {
   const [isSaved, setIsSaved] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [isCopied, setIsCopied] = useState(false)
-  const [emailCopied, setEmailCopied] = useState(false)
   const [zoomedImage, setZoomedImage] = useState<string | null>(null) // 확대된 이미지 상태
   const [isClient, setIsClient] = useState(false);
 
@@ -235,14 +234,6 @@ export default function Component() {
     setIsCopied(true);
     setTimeout(() => {
       setIsCopied(false);
-    }, 2000);
-  };
-
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText("haru2end7827@gmail.com");
-    setEmailCopied(true);
-    setTimeout(() => {
-      setEmailCopied(false);
     }, 2000);
   };
 
@@ -1221,32 +1212,16 @@ export default function Component() {
               </CardHeader>
 
               <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-6 text-center">
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-100'}`}>
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Email Address</p>
-                  <p className={`text-lg font-semibold font-mono ${isDarkMode ? 'text-green-300' : 'text-green-700'}`}>
-                    haru2end7827@gmail.com
-                  </p>
-                </div>
                 <div className="flex justify-center items-center gap-2 flex-wrap">
                   <Button asChild className={`px-6 py-2 text-base font-medium rounded-full transition-all duration-300 text-white shadow-lg hover:shadow-xl transform hover:scale-105 ${isDarkMode
                     ? "bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700"
                     : "bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600"}`}>
-                    <a href="mailto:haru2end7827@gmail.com">
+                    <a href="https://forms.gle/FqDo7Xq31L3fbK5T8" target="_blank" rel="noopener noreferrer">
                       <Mail className="w-5 h-5 mr-2" />
-                      {t("contact_email_button")}
+                      {t("contact_form_button")}
                     </a>
                   </Button>
-                  <Button
-                    onClick={handleCopyEmail}
-                    variant="outline"
-                    className={`px-6 py-2 text-base font-medium rounded-full transition-all duration-300 ${isDarkMode
-                      ? "border-purple-500/30 text-purple-300 hover:bg-purple-900/20"
-                      : "border-rose-300 text-rose-600 hover:bg-rose-100"}`}>
-                    <Clipboard className="w-5 h-5 mr-2" />
-                    {t("contact_copy_email")}
-                  </Button>
                 </div>
-                {emailCopied && <span className="copy-success-animation mt-2">이메일 주소 복사 완료!</span>}
               </CardContent>
             </Card>
           ) : (

@@ -81,7 +81,6 @@
   "music_track_fire_description": "Cozy Fireplace",
   "contact_developer": "Contact Us",
   "contact_title": "How can we help?",
-  "contact_description": "Feel free to contact us with any questions, bug reports, or suggestions for improvement. We will respond within 24 hours.",
-  "contact_email_button": "Send Email",
-  "contact_copy_email": "Copy Email Address"
+  "contact_description": "Feel free to send us your questions, bug reports, or suggestions for improvement.",
+  "contact_form_button": "Send Feedback"
 }

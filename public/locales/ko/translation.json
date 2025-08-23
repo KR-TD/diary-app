@@ -81,7 +81,6 @@
   "music_track_fire_description": "아늑한 벽난로",
   "contact_developer": "개발자에게 문의",
   "contact_title": "무엇을 도와드릴까요?",
-  "contact_description": "서비스에 대한 궁금한 점, 버그 리포트, 개선 제안 등 어떤 내용이든 편하게 문의해주세요. 24시간 내에 답변 드리겠습니다.",
-  "contact_email_button": "이메일 보내기",
-  "contact_copy_email": "이메일 주소 복사"
+  "contact_description": "서비스에 대한 궁금한 점, 버그 리포트, 개선 제안 등 어떤 내용이든 편하게 알려주세요.",
+  "contact_form_button": "피드백 보내기"
 }

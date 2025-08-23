@@ -81,7 +81,6 @@
   "music_track_fire_description": "舒适的壁炉",
   "contact_developer": "联系我们",
   "contact_title": "有什么可以帮您？",
-  "contact_description": "如有任何关于服务的疑问、错误报告、改进建议等，请随时与我们联系。我们将在24小时内回复。",
-  "contact_email_button": "发送邮件",
-  "contact_copy_email": "复制电子邮件地址"
+  "contact_description": "我们欢迎您就服务提出任何问题、报告错误或提供改进建议。",
+  "contact_form_button": "发送反馈"
 }
