@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { format } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
@@ -11,6 +11,15 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input" // Input 컴포넌트 추가
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 import { Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List, Pencil, Award, Gem, Camera, Smartphone, Mail, Clipboard } from "lucide-react"
 import { TopBannerAd, BottomBannerAd, SquareAd } from "@/components/kakao-ads"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -28,6 +37,7 @@ export default function Component() {
   const [isCopied, setIsCopied] = useState(false)
   const [zoomedImage, setZoomedImage] = useState<string | null>(null) // 확대된 이미지 상태
   const [isClient, setIsClient] = useState(false);
+  const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([])
 
   useEffect(() => {
     setIsClient(true);
@@ -67,9 +77,18 @@ export default function Component() {
   const [volume, setVolume] = useState(0.5)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  const [audioError, setAudioError] = useState(false)
+    const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3; // 3 items per page
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = diaryEntries.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(diaryEntries.length / itemsPerPage);
   const [isAudioLoading, setIsAudioLoading] = useState(false)
   const [audioSupported, setAudioSupported] = useState(true)
+  const [audioError, setAudioError] = useState(false)
 
   const musicTracks = [
     {
@@ -92,7 +111,7 @@ export default function Component() {
     },
   ]
 
-  const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([])
+  
   const [currentView, setCurrentView] = useState<"write" | "list" | "support" | "hall" | "contact">("write")
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null)
 
@@ -324,7 +343,6 @@ export default function Component() {
 
   return (
     <>
-      
         <div
           className={`min-h-screen transition-all duration-500 p-2 sm:p-4 ${isDarkMode
             ? "bg-gradient-to-br from-gray-900 via-slate-900 to-black"
@@ -817,60 +835,114 @@ export default function Component() {
                       </p>
                     </div>
                   ) : (
-                    diaryEntries.map((entry, index) => (
-                      <div key={entry.id}>
-                        <div
-                          className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md ${isDarkMode
-                            ? "border-purple-500/30 bg-slate-700/50 hover:bg-slate-700/70"
-                            : "border-purple-100 bg-white/50 hover:bg-white/70"
-                            }`}
-                          onClick={() => setSelectedEntry(entry)}
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h3 className={`text-base sm:text-lg font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
-                                {entry.title}
-                              </h3>
-                              <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>
-                                {formatEntryDate(entry.date)} {entry.mood && <span className="ml-2 text-base">{entry.mood} {emotionMap[entry.mood]}</span>}
-                              </span>
+                    <>
+                      {currentItems.map((entry, index) => (
+                        <div key={entry.id}>
+                          <div
+                            className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md ${isDarkMode
+                              ? "border-purple-500/30 bg-slate-700/50 hover:bg-slate-700/70"
+                              : "border-purple-100 bg-white/50 hover:bg-white/70"
+                              }`}
+                            onClick={() => setSelectedEntry(entry)}
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <h3 className={`text-base sm:text-lg font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
+                                  {entry.title}
+                                </h3>
+                                <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>
+                                  {formatEntryDate(entry.date)} {entry.mood && <span className="ml-2 text-base">{entry.mood} {emotionMap[entry.mood]}</span>}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2"> {/* Added a div to group length and delete button */}
+                                <span className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                                  {entry.content.length}{t("characters")}
+                                </span>
+                                <Button
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent opening the entry when clicking delete
+                                    handleDelete(entry.id);
+                                  }}
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`text-xs px-2 py-1 rounded ${isDarkMode ? "text-red-400 hover:bg-red-900/20" : "text-red-600 hover:bg-red-100"}`}
+                                >
+                                  {t("delete")}
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2"> {/* Added a div to group length and delete button */}
-                              <span className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                                {entry.content.length}{t("characters")}
-                              </span>
-                              <Button
-                                onClick={(e) => {
-                                  e.stopPropagation(); // Prevent opening the entry when clicking delete
-                                  handleDelete(entry.id);
-                                }}
-                                variant="ghost"
-                                size="sm"
-                                className={`text-xs px-2 py-1 rounded ${isDarkMode ? "text-red-400 hover:bg-red-900/20" : "text-red-600 hover:bg-red-100"}`}
-                              >
-                                {t("delete")}
-                              </Button>
-                            </div>
+                            <p className={`text-sm sm:text-base line-clamp-3 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                              {entry.content}
+                            </p>
+                            {entry.image && ( // 이미지 미리보기 (리스트 뷰)
+                              <div className="mt-3">
+                                <img src={entry.image} alt="Diary Image" className="w-full h-auto max-h-32 object-cover rounded-lg border border-gray-300/50" />
+                              </div>
+                            )}
                           </div>
-                          <p className={`text-sm sm:text-base line-clamp-3 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                            {entry.content}
-                          </p>
-                          {entry.image && ( // 이미지 미리보기 (리스트 뷰)
-                            <div className="mt-3">
-                              <img src={entry.image} alt="Diary Image" className="w-full h-auto max-h-32 object-cover rounded-lg border border-gray-300/50" />
+                          {(index + 1) % 5 === 0 && index < diaryEntries.length - 1 && (
+                            <div className="my-4 sm:my-6 text-center">
+                              <p className={`text-xs mb-2 opacity-60 ${isDarkMode ? "text-gray-400" : "text-rose-500"}`}>
+                                {t("recommendation")}
+                              </p>
+                              <SquareAd />
                             </div>
                           )}
                         </div>
-                        {(index + 1) % 5 === 0 && index < diaryEntries.length - 1 && (
-                          <div className="my-4 sm:my-6 text-center">
-                            <p className={`text-xs mb-2 opacity-60 ${isDarkMode ? "text-gray-400" : "text-rose-500"}`}>
-                              {t("recommendation")}
-                            </p>
-                            <SquareAd />
-                          </div>
-                        )}
-                      </div>
-                    ))
+                      ))}
+                    <Pagination className="mt-4">
+                      <PaginationContent>
+                        {(() => {
+                          const items: (number | 'ellipsis')[] = [];
+                          const maxPagesToShow = 5; // Adjust as needed
+
+                          if (totalPages <= maxPagesToShow) {
+                            for (let i = 1; i <= totalPages; i++) {
+                              items.push(i);
+                            }
+                          } else {
+                            items.push(1);
+
+                            if (currentPage > 3) {
+                              items.push('ellipsis');
+                            }
+
+                            // Pages around the current page
+                            const startPage = Math.max(2, currentPage - 1);
+                            const endPage = Math.min(totalPages - 1, currentPage + 1);
+
+                            for (let i = startPage; i <= endPage; i++) {
+                              if (i !== 1 && i !== totalPages) { // Avoid duplicating 1 and totalPages
+                                items.push(i);
+                              }
+                            }
+
+                            if (currentPage < totalPages - 2) {
+                              items.push('ellipsis');
+                            }
+
+                            items.push(totalPages);
+                          }
+
+                          return items.map((item, index) => (
+                            <PaginationItem key={index}>
+                              {item === 'ellipsis' ? (
+                                <PaginationEllipsis />
+                              ) : (
+                                <PaginationLink
+                                  href="#"
+                                  isActive={item === currentPage}
+                                  onClick={() => setCurrentPage(item as number)}
+                                >
+                                  {item}
+                                </PaginationLink>
+                              )}
+                            </PaginationItem>
+                          ));
+                        })()}
+                      </PaginationContent>
+                    </Pagination>
+                    </>
                   )}
                 </CardContent>
               </Card>
