@@ -287,7 +287,7 @@ export default function Component() {
     },
     {
       id: "p3", title: "다들 잘자요", content: "8월 31일 일요일 저녁에 쓰며,,", mood: "love",
-      thumb: "/test/bye_hand.jpg", avatar: "/test/profile.png", author: "곰겜", date: "2025.08.31 (일)", views: 18, likes: 3, commentsCount: 2
+      thumb: "/test/v.JPG", avatar: "/test/profile.png", author: "곰겜", date: "2025.08.31 (일)", views: 18, likes: 3, commentsCount: 2
     },
     {
       id: "p4", title: "히히 개발 재밌당", content: "사실 즐겁지는 않은데 모르겠다ㅏㅏ.", mood: "joy",
@@ -1212,7 +1212,7 @@ export default function Component() {
               <h2 className={`text-xl font-semibold ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>{openedPost.title}</h2>
             </div>
             {/* 이미지 */}
-            {openedPost.thumb && (<div className="px-5 mt-3"><img src={openedPost.thumb} alt="post" className="w-full rounded-lg border border-white/10 object-cover max-h-56" /></div>)}
+            {openedPost.thumb && (<div className="px-5 mt-3"><img src={openedPost.thumb} alt="post" className="w-full rounded-lg border border-white/10 object-cover max-h-56 cursor-pointer" onClick={() => setZoomedImage(openedPost.thumb || null)} /></div>)}
             {/* 본문 */}
             <div className="px-5 mt-4">
               <div className={`space-y-3 text-[15px] leading-7 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
