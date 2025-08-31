@@ -82,5 +82,17 @@
   "contact_developer": "联系我们",
   "contact_title": "有什么可以帮您？",
   "contact_description": "我们欢迎您就服务提出任何问题、报告错误或提供改进建议。",
-  "contact_form_button": "发送反馈"
+  "contact_form_button": "发送反馈",
+  "community": "社区",
+  "community_latest": "最新",
+  "community_popular": "热门",
+  "community_post_list": "帖子列表",
+  "community_no_comments": "暂无评论。",
+  "community_no_replies": "暂无回复。",
+  "community_reply_placeholder": "输入您的回复",
+  "community_comment_placeholder": "在此处撰写评论",
+  "action_like": "赞",
+  "action_share": "分享",
+  "action_bookmarked": "已保存",
+  "action_bookmark": "收藏"
 }

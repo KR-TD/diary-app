@@ -82,5 +82,17 @@
   "contact_developer": "Contact Us",
   "contact_title": "How can we help?",
   "contact_description": "Feel free to send us your questions, bug reports, or suggestions for improvement.",
-  "contact_form_button": "Send Feedback"
+  "contact_form_button": "Send Feedback",
+  "community": "Community",
+  "community_latest": "Latest",
+  "community_popular": "Popular",
+  "community_post_list": "Post List",
+  "community_no_comments": "No comments yet.",
+  "community_no_replies": "No replies yet.",
+  "community_reply_placeholder": "Enter your reply",
+  "community_comment_placeholder": "Write your comment here",
+  "action_like": "Like",
+  "action_share": "Share",
+  "action_bookmarked": "Saved",
+  "action_bookmark": "Bookmark"
 }

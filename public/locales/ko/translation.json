@@ -82,5 +82,17 @@
   "contact_developer": "개발자에게 문의",
   "contact_title": "무엇을 도와드릴까요?",
   "contact_description": "서비스에 대한 궁금한 점, 버그 리포트, 개선 제안 등 어떤 내용이든 편하게 알려주세요.",
-  "contact_form_button": "피드백 보내기"
+  "contact_form_button": "피드백 보내기",
+  "community": "커뮤니티",
+  "community_latest": "최신",
+  "community_popular": "인기",
+  "community_post_list": "글 목록",
+  "community_no_comments": "아직 댓글이 없어요.",
+  "community_no_replies": "아직 답글이 없어요.",
+  "community_reply_placeholder": "답글을 입력하세요",
+  "community_comment_placeholder": "여기에 댓글을 작성해보세요",
+  "action_like": "좋아요",
+  "action_share": "공유하기",
+  "action_bookmarked": "저장됨",
+  "action_bookmark": "담아두기"
 }
