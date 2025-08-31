@@ -707,7 +707,7 @@ export default function Component() {
               <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-6">
                 {/* 감정 선택 및 사진 추가 */}
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center"> {/* Added flex container for label and button */}
+                  <div className="flex justify-between items-center">
                     <label className={`text-base sm:text-lg font-medium flex items-center gap-2 ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
                       <Heart className={`w-5 h-5 ${isDarkMode ? "text-pink-400" : "text-rose-500"}`} />
                       {t("today_mood")}
@@ -717,26 +717,48 @@ export default function Component() {
                         </span>
                       )}
                     </label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                      ref={imageInputRef} // ref 추가
-                    />
-                    <Button
-                      onClick={() => imageInputRef.current?.click()} // ref를 사용하여 클릭 트리거
-                      variant="outline"
-                      size="sm"
-                      className={`px-3 py-1 rounded-full text-xs ${selectedImage
-                        ? isDarkMode ? "border-green-500/30 text-green-300 hover:bg-green-900/20" : "border-green-200 bg-green-100 text-green-700 hover:bg-green-200"
-                        : isDarkMode ? "border-purple-500/30 text-purple-300 hover:bg-purple-900/20" : "border-rose-200 bg-rose-100 text-rose-700 hover:bg-rose-200"
-                        }`}
-                    >
-                      <Camera className="w-3 h-3 mr-1" /> {/* 카메라 아이콘으로 변경 */}
-                      {selectedImage ? t("change_photo") : t("add_photo")}
-                    </Button>
+
+                    {/* 버튼 + 썸네일 + 삭제 버튼 */}
+                    <div className="flex flex-col items-end">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                        ref={imageInputRef}
+                      />
+                      <Button
+                        onClick={() => imageInputRef.current?.click()}
+                        variant="outline"
+                        size="sm"
+                        className={`px-3 py-1 rounded-full text-xs ${selectedImage
+                          ? isDarkMode ? "border-green-500/30 text-green-300 hover:bg-green-900/20" : "border-green-200 bg-green-100 text-green-700 hover:bg-green-200"
+                          : isDarkMode ? "border-purple-500/30 text-purple-300 hover:bg-purple-900/20" : "border-rose-200 bg-rose-100 text-rose-700 hover:bg-rose-200"
+                          }`}
+                      >
+                        <Camera className="w-3 h-3 mr-1" />
+                        {selectedImage ? t("change_photo") : t("add_photo")}
+                      </Button>
+
+                      {selectedImage && (
+                        <div className="relative mt-2">
+                          <img
+                            src={selectedImage}
+                            alt="Selected Image"
+                            className="w-16 h-16 object-cover rounded-md border border-gray-400/50 cursor-pointer"
+                            onClick={() => setZoomedImage(selectedImage)}
+                          />
+                          <button
+                            onClick={() => setSelectedImage(undefined)}
+                            className="absolute top-1 right-1 bg-black/50 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
+
                   <div className="flex gap-2 flex-wrap">
                     {["😊", "😢", "😡", "😴", "🥰", "🤔"].map((emoji) => (
                       <Button
@@ -752,6 +774,7 @@ export default function Component() {
                       </Button>
                     ))}
                   </div>
+
                 </div>
                 <div className="space-y-3">
                   <label className={`text-base sm:text-lg font-medium flex items-center gap-2 ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>
@@ -1109,13 +1132,13 @@ export default function Component() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                   <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
                     <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
-                      48
+                      49
                     </div>
                     <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>{t("total_supporters")}</div>
                   </div>
                   <div className={`text-center p-3 sm:p-4 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-yellow-50/80"}`}>
                     <div className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-yellow-300" : "text-yellow-600"}`}>
-                      ₩861,200
+                      ₩862,200
                     </div>
                     <div className={`text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-yellow-700"}`}>{t("total_donations")}</div>
                   </div>
@@ -1242,6 +1265,7 @@ export default function Component() {
                   <div className={`p-3 sm:p-4 rounded-xl text-center ${isDarkMode ? "bg-slate-800/30" : "bg-orange-50/50"}`}>
                     <div className="flex flex-wrap justify-center gap-2">
                       {[
+                        "강**님",
                         "김동하님",
                         "현**님",
                         "문**님",
@@ -1507,110 +1531,114 @@ export default function Component() {
             </Card>
           </div>
         )}
-      </div>
+      </div >
       {/* NEW: 중앙 박스를 대체하는 '우측 하단/하단 고정' 앱 프로모션 배너 */}
-      {showAppPromo && (
-        <div
-          className={`
+      {
+        showAppPromo && (
+          <div
+            className={`
             fixed z-50
             ${isMobile ? "left-3 right-3 bottom-3" : "right-6 bottom-6 w-[360px]"}
           `}
-          aria-label={t("app_promo_aria_label")}
-        >
-          <div
-            className={`
+            aria-label={t("app_promo_aria_label")}
+          >
+            <div
+              className={`
               relative overflow-hidden rounded-2xl shadow-2xl backdrop-blur-xl border
               ${isDarkMode
-                ? "bg-slate-900/70 border-slate-700/60"
-                : "bg-white/80 border-rose-200/70"}
+                  ? "bg-slate-900/70 border-slate-700/60"
+                  : "bg-white/80 border-rose-200/70"}
             `}
-          >
-            {/* 은은한 그라데이션 라이트 */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-yellow-500/10" />
-
-            {/* 닫기 버튼 */}
-            <button
-              onClick={dismissAppPromo}
-              aria-label={t("dismiss_app_promo_aria_label")}
-              className={`absolute right-2 top-2 rounded-full px-2 py-1 text-xs
-                ${isDarkMode ? "text-gray-300 hover:bg-white/10" : "text-gray-600 hover:bg-black/5"}`}
             >
-              ×
-            </button>
+              {/* 은은한 그라데이션 라이트 */}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-yellow-500/10" />
 
-            <div className="p-4 flex items-start gap-3">
-              <div className={`flex h-10 w-10 flex-none items-center justify-center rounded-xl
+              {/* 닫기 버튼 */}
+              <button
+                onClick={dismissAppPromo}
+                aria-label={t("dismiss_app_promo_aria_label")}
+                className={`absolute right-2 top-2 rounded-full px-2 py-1 text-xs
+                ${isDarkMode ? "text-gray-300 hover:bg-white/10" : "text-gray-600 hover:bg-black/5"}`}
+              >
+                ×
+              </button>
+
+              <div className="p-4 flex items-start gap-3">
+                <div className={`flex h-10 w-10 flex-none items-center justify-center rounded-xl
                 ${isDarkMode ? "bg-purple-500/20" : "bg-rose-500/15"}`}>
-                <Smartphone className={`${isDarkMode ? "text-purple-300" : "text-rose-600"} h-5 w-5`} />
-              </div>
+                  <Smartphone className={`${isDarkMode ? "text-purple-300" : "text-rose-600"} h-5 w-5`} />
+                </div>
 
-              <div className="min-w-0 flex-1">
-                <h3 className={`truncate text-base font-semibold ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>
-                  {t("app_promo_title")}
-                </h3>
-                <p className={`mt-1 text-sm ${isDarkMode ? "text-gray-300/80" : "text-gray-600"}`}>
-                  {t("app_promo_description")}
-                </p>
+                <div className="min-w-0 flex-1">
+                  <h3 className={`truncate text-base font-semibold ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>
+                    {t("app_promo_title")}
+                  </h3>
+                  <p className={`mt-1 text-sm ${isDarkMode ? "text-gray-300/80" : "text-gray-600"}`}>
+                    {t("app_promo_description")}
+                  </p>
 
-                <div className="mt-3 flex items-center gap-2">
-                  <a
-                    href="/download" // 필요 시 실제 다운로드/스토어 URL로 교체
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`
+                  <div className="mt-3 flex items-center gap-2">
+                    <a
+                      href="/download" // 필요 시 실제 다운로드/스토어 URL로 교체
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`
                       inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium
                       ${isDarkMode
-                        ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
-                        : "bg-gradient-to-r from-rose-500 to-orange-500 text-white hover:from-rose-600 hover:to-orange-600"}
+                          ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                          : "bg-gradient-to-r from-rose-500 to-orange-500 text-white hover:from-rose-600 hover:to-orange-600"}
                     `}
-                  >
-                    {t("download_app")}
-                  </a>
-                  <button
-                    onClick={dismissAppPromo}
-                    className={`
+                    >
+                      {t("download_app")}
+                    </a>
+                    <button
+                      onClick={dismissAppPromo}
+                      className={`
                       inline-flex items-center justify-center rounded-full px-3 py-2 text-sm
                       ${isDarkMode
-                        ? "text-gray-300 hover:bg-white/10"
-                        : "text-gray-600 hover:bg-black/5"}
+                          ? "text-gray-300 hover:bg-white/10"
+                          : "text-gray-600 hover:bg-black/5"}
                     `}
-                  >
-                    {t("later")}
-                  </button>
+                    >
+                      {t("later")}
+                    </button>
+                  </div>
                 </div>
               </div>
+
+              {/* 모바일일 때만 상단 보더 라인 강조 */}
+              {isMobile && (
+                <div className={`h-[3px] w-full ${isDarkMode ? "bg-purple-400/40" : "bg-rose-400/40"}`} />
+              )}
             </div>
-
-            {/* 모바일일 때만 상단 보더 라인 강조 */}
-            {isMobile && (
-              <div className={`h-[3px] w-full ${isDarkMode ? "bg-purple-400/40" : "bg-rose-400/40"}`} />
-            )}
           </div>
-        </div>
-      )}
+        )
+      }
 
-      {zoomedImage && (
-        <div
-          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
-          onClick={() => setZoomedImage(null)} // 클릭 시 닫기
-        >
-          <img
-            src={zoomedImage}
-            alt="Zoomed Diary Image"
-            className="max-w-full max-h-full object-contain"
-            onClick={(e) => e.stopPropagation()} // 이미지 클릭 시 모달 닫히지 않도록
-          />
-          <Button
-            onClick={() => setZoomedImage(null)}
-            variant="ghost"
-            size="sm"
-            className="absolute top-4 right-4 text-white text-2xl"
+      {
+        zoomedImage && (
+          <div
+            className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
+            onClick={() => setZoomedImage(null)} // 클릭 시 닫기
           >
-            ✕
-          </Button>
-        </div>
+            <img
+              src={zoomedImage}
+              alt="Zoomed Diary Image"
+              className="max-w-full max-h-full object-contain"
+              onClick={(e) => e.stopPropagation()} // 이미지 클릭 시 모달 닫히지 않도록
+            />
+            <Button
+              onClick={() => setZoomedImage(null)}
+              variant="ghost"
+              size="sm"
+              className="absolute top-4 right-4 text-white text-2xl"
+            >
+              ✕
+            </Button>
+          </div>
 
-      )}
+        )
+      }
     </>
   )
 }
