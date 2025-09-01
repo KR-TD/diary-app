@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { format } from 'date-fns';
+import { format, formatDistanceToNowStrict } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { ko, enUS, ja, zhCN, Locale } from 'date-fns/locale';
 
@@ -279,23 +279,23 @@ export default function Component() {
   const [posts, setPosts] = useState<CommunityPost[]>([
     {
       id: "p1", title: "커뮤니티 개발중에 있습니다!", content: "곧 일기를 공유할 수 있는 커뮤니티 출시 하겠습니다!", mood: "joy",
-      thumb: "/test/logo.png", avatar: "/test/profile.png", author: "곰겜", date: "2025.09.01 (월)", views: 27, likes: 5, commentsCount: 2
+      thumb: "/test/logo.png", avatar: "/test/profile.png", author: "곰겜", date: "2025-09-01T13:00:00", views: 27, likes: 5, commentsCount: 2
     },
     {
       id: "p2", title: "개발 어려워용 엉엉", content: "커뮤니티 개발 너무 어려워요.. ㅠ,ㅠ", mood: "sad",
-      avatar: "/test/profile.png", author: "곰겜", date: "2025.09.01 (월)", views: 9, likes: 1, commentsCount: 1
+      avatar: "/test/profile.png", author: "곰겜", date: "2025-09-01T11:30:00", views: 9, likes: 1, commentsCount: 1
     },
     {
       id: "p3", title: "다들 잘자요", content: "8월 31일 일요일 저녁에 쓰며,,", mood: "love",
-      thumb: "/test/v.JPG", avatar: "/test/profile.png", author: "곰겜", date: "2025.08.31 (일)", views: 18, likes: 3, commentsCount: 2
+      thumb: "/test/v.JPG", avatar: "/test/profile.png", author: "곰겜", date: "2025-08-31T23:50:00", views: 18, likes: 3, commentsCount: 2
     },
     {
       id: "p4", title: "히히 개발 재밌당", content: "사실 즐겁지는 않은데 모르겠다ㅏㅏ.", mood: "joy",
-      thumb: "/test/beer.JPG", avatar: "/test/profile.png", author: "곰겜", date: "2025.09.01 (월)", views: 11, likes: 2, commentsCount: 0
+      thumb: "/test/beer.JPG", avatar: "/test/profile.png", author: "곰겜", date: "2025-09-01T09:05:00", views: 11, likes: 2, commentsCount: 0
     },
     {
       id: "p5", title: "오류 해결하기 싫다", content: "아ㅏㅏ 오류좀 그만 나라.", mood: "anger",
-      avatar: "/test/profile.png", author: "곰겜", date: "2025.09.01 (월)", views: 18, likes: 1, commentsCount: 3
+      avatar: "/test/profile.png", author: "곰겜", date: "2025-09-01T02:00:00", views: 18, likes: 1, commentsCount: 3
     },
   ])
   const [openedPost, setOpenedPost] = useState<CommunityPost | null>(null)
@@ -728,7 +728,7 @@ export default function Component() {
             </Card>
           ) : currentView === "community" ? (
             /* --- 커뮤니티 뷰 (신규) --- */
-            <Card className={`backdrop-blur-sm shadow-2xl transition-all duration-500 ${isDarkMode ? "bg-slate-900/80 border border-slate-700/50" : "bg-white/90 border border-rose-200/50"}`}>    
+            <Card className={`backdrop-blur-sm shadow-2xl transition-all duration-500 ${isDarkMode ? "bg-slate-900/80 border border-slate-700/50" : "bg-white/90 border border-rose-200/50"}`}>
               <CardHeader className="pb-2">
                 {/* 상단 탭 */}
                 <div className="flex items-center gap-4 overflow-x-auto no-scrollbar px-1">
@@ -761,7 +761,13 @@ export default function Component() {
                             <h3 className={`text-sm sm:text-base font-semibold truncate ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>{p.title}</h3>
                             {p.mood && (<span className="text-[11px] px-2 py-[2px] rounded-full bg-white/5 text-gray-300">{MOOD_LABEL[p.mood]}</span>)}
                           </div>
-                          <p className={`text-xs mt-1 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>[{p.author}] 방금전</p>
+                          <p className={`text-xs mt-1 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                            [{p.author}]{' '}
+                            {formatDistanceToNowStrict(new Date(p.date), {
+                              addSuffix: true,
+                              locale: { ko, en: enUS, ja, zh: zhCN }[i18n.language] || ko,
+                            })}
+                          </p>
                           <div className="mt-1 flex items-center gap-3 text-[12px]">
                             <span className="flex items-center gap-1 text-gray-400"><Eye className="w-4 h-4" /> {p.views}</span>
                             <span className="flex items-center gap-1 text-gray-400"><MessageSquare className="w-4 h-4" /> {p.commentsCount}</span>
@@ -1206,7 +1212,12 @@ export default function Component() {
               <div className="flex items-center gap-2 mb-3">
                 <img src={openedPost.avatar || "/placeholder.svg"} className={`w-6 h-6 rounded-full border ${isDarkMode ? "border-white/10" : "border-gray-200"}`} alt="avatar" />
                 <span className={isDarkMode ? "text-gray-300 text-sm" : "text-gray-700 text-sm"}>{openedPost.author}</span>
-                <span className={`ml-auto text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{openedPost.date}</span>
+                <span className={`ml-auto text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                  {formatDistanceToNowStrict(new Date(openedPost.date), {
+                    addSuffix: true,
+                    locale: { ko, en: enUS, ja, zh: zhCN }[i18n.language] || ko,
+                  })}
+                </span>
                 {openedPost.mood && <span className={`ml-2 text-sm ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{MOOD_LABEL[openedPost.mood]}</span>}
               </div>
               <h2 className={`text-xl font-semibold ${isDarkMode ? "text-gray-100" : "text-gray-700"}`}>{openedPost.title}</h2>

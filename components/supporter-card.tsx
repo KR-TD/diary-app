@@ -2,6 +2,9 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Heart, Trophy, Award, Medal } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import { formatDistanceToNow } from "date-fns"
+import { ko, enUS, ja, zhCN } from "date-fns/locale"
 
 interface SupporterCardProps {
   name: string
@@ -12,7 +15,22 @@ interface SupporterCardProps {
   isDarkMode: boolean
 }
 
+const localeMap = {
+  ko: ko,
+  en: enUS,
+  ja: ja,
+  zh: zhCN,
+}
+
 export function SupporterCard({ name, amount, date, message, tier, isDarkMode }: SupporterCardProps) {
+  const { i18n } = useTranslation()
+  const currentLocale = localeMap[i18n.language] || enUS
+
+  const formattedDate = formatDistanceToNow(new Date(date), {
+    addSuffix: true,
+    locale: currentLocale,
+  })
+
   const getTierIcon = () => {
     switch (tier) {
       case "vip":
@@ -55,7 +73,7 @@ export function SupporterCard({ name, amount, date, message, tier, isDarkMode }:
           <div>
             <div className={`font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>{name}</div>
             <div className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-              {amount} • {date}
+              {amount} • {formattedDate}
             </div>
           </div>
         </div>
