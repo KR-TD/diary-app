@@ -1212,7 +1212,6 @@ export default function Component() {
               <h2 className={`text-xl font-semibold ${isDarkMode ? "text-gray-100" : "text-gray-700"}`}>{openedPost.title}</h2>
             </div>
             {/* 이미지 */}
-<<<<<<< HEAD
             {openedPost.thumb && (<div className="px-5 mt-3"><img src={openedPost.thumb} alt="post" className={`w-full rounded-lg border ${isDarkMode ? "border-white/10" : "border-gray-200"} object-cover max-h-56 cursor-pointer`} onClick={() => setZoomedImage(openedPost.thumb || null)} /></div>)}
             {/* 본문 */}
             <div className="px-5 mt-4">
