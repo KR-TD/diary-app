@@ -264,7 +264,8 @@ export default function Component() {
     thumb?: string
     avatar?: string
     author: string
-    date: string
+    createdAt: string
+    writeDate: string
     views: number
     likes: number
     commentsCount: number
@@ -279,23 +280,23 @@ export default function Component() {
   const [posts, setPosts] = useState<CommunityPost[]>([
     {
       id: "p1", title: "커뮤니티 개발중에 있습니다!", content: "곧 일기를 공유할 수 있는 커뮤니티 출시 하겠습니다!", mood: "joy",
-      thumb: "/test/logo.png", avatar: "/test/profile.png", author: "곰겜", date: "2025-09-01T13:00:00", views: 27, likes: 5, commentsCount: 2
+      thumb: "/test/logo.png", avatar: "/test/profile.png", author: "곰겜", createdAt: "2025-09-01T13:00:00", writeDate: "2025-09-01T13:00:00", views: 27, likes: 5, commentsCount: 2
     },
     {
       id: "p2", title: "개발 어려워용 엉엉", content: "커뮤니티 개발 너무 어려워요.. ㅠ,ㅠ", mood: "sad",
-      avatar: "/test/profile.png", author: "곰겜", date: "2025-09-01T11:30:00", views: 9, likes: 1, commentsCount: 1
+      avatar: "/test/profile.png", author: "곰겜", createdAt: "2025-09-01T11:30:00", writeDate: "2025-09-01T11:30:00", views: 9, likes: 1, commentsCount: 1
     },
     {
-      id: "p3", title: "다들 잘자요", content: "8월 31일 일요일 저녁에 쓰며,,", mood: "love",
-      thumb: "/test/v.JPG", avatar: "/test/profile.png", author: "곰겜", date: "2025-08-31T23:50:00", views: 18, likes: 3, commentsCount: 2
+      id: "p3", title: "다들 잘자요", content: "8월 31일 일요일 저녁에 쓰며,," , mood: "love",
+      thumb: "/test/v.JPG", avatar: "/test/profile.png", author: "곰겜", createdAt: "2025-08-31T23:50:00", writeDate: "2025-08-31T23:50:00", views: 18, likes: 3, commentsCount: 2
     },
     {
       id: "p4", title: "히히 개발 재밌당", content: "사실 즐겁지는 않은데 모르겠다ㅏㅏ.", mood: "joy",
-      thumb: "/test/beer.JPG", avatar: "/test/profile.png", author: "곰겜", date: "2025-09-01T09:05:00", views: 11, likes: 2, commentsCount: 0
+      thumb: "/test/beer.JPG", avatar: "/test/profile.png", author: "곰겜", createdAt: "2025-09-01T09:05:00", writeDate: "2025-09-01T09:05:00", views: 11, likes: 2, commentsCount: 0
     },
     {
       id: "p5", title: "오류 해결하기 싫다", content: "아ㅏㅏ 오류좀 그만 나라.", mood: "anger",
-      avatar: "/test/profile.png", author: "곰겜", date: "2025-09-01T02:00:00", views: 18, likes: 1, commentsCount: 3
+      avatar: "/test/profile.png", author: "곰겜", createdAt: "2025-09-01T02:00:00", writeDate: "2025-09-01T02:00:00", views: 18, likes: 1, commentsCount: 3
     },
   ])
   const [openedPost, setOpenedPost] = useState<CommunityPost | null>(null)
@@ -322,7 +323,7 @@ export default function Component() {
   const filteredPosts = useMemo(() => {
     let arr = [...posts]
     if (cat === "popular") arr.sort((a, b) => b.views - a.views)
-    else if (cat === "latest") arr.sort((a, b) => b.date.localeCompare(a.date))
+    else if (cat === "latest") arr.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     else arr = arr.filter(p => p.mood === cat)
     return arr
   }, [posts, cat])
@@ -763,7 +764,7 @@ export default function Component() {
                           </div>
                           <p className={`text-xs mt-1 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
                             [{p.author}]{' '}
-                            {formatDistanceToNowStrict(new Date(p.date), {
+                            {formatDistanceToNowStrict(new Date(p.createdAt), {
                               addSuffix: true,
                               locale: { ko, en: enUS, ja, zh: zhCN }[i18n.language] || ko,
                             })}
@@ -1213,10 +1214,7 @@ export default function Component() {
                 <img src={openedPost.avatar || "/placeholder.svg"} className={`w-6 h-6 rounded-full border ${isDarkMode ? "border-white/10" : "border-gray-200"}`} alt="avatar" />
                 <span className={isDarkMode ? "text-gray-300 text-sm" : "text-gray-700 text-sm"}>{openedPost.author}</span>
                 <span className={`ml-auto text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                  {formatDistanceToNowStrict(new Date(openedPost.date), {
-                    addSuffix: true,
-                    locale: { ko, en: enUS, ja, zh: zhCN }[i18n.language] || ko,
-                  })}
+                  {formatEntryDate(openedPost.writeDate)}
                 </span>
                 {openedPost.mood && <span className={`ml-2 text-sm ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{MOOD_LABEL[openedPost.mood]}</span>}
               </div>
