@@ -1189,8 +1189,8 @@ export default function Component() {
 
       {/* 이미지 줌 모달 */}
       {zoomedImage && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onClick={() => setZoomedImage(null)}>
-          <img src={zoomedImage} alt="Zoomed" className="max-w-full max-h-full object-contain" onClick={(e) => e.stopPropagation()} />
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[9999] p-4" onClick={() => setZoomedImage(null)}>
+          <img src={zoomedImage} alt="Zoomed" className="max-w-full max-h-full object-contain object-fit: cover" onClick={(e) => e.stopPropagation()} />
           <Button onClick={() => setZoomedImage(null)} variant="ghost" size="sm" className="absolute top-4 right-4 text-white text-2xl">✕</Button>
         </div>
       )}
