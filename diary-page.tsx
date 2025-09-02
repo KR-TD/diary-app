@@ -287,7 +287,7 @@ export default function Component() {
       avatar: "/test/profile.png", author: "곰겜", createdAt: "2025-09-01T11:30:00", writeDate: "2025-09-01T11:30:00", views: 9, likes: 1, commentsCount: 1
     },
     {
-      id: "p3", title: "다들 잘자요", content: "8월 31일 일요일 저녁에 쓰며,," , mood: "love",
+      id: "p3", title: "다들 잘자요", content: "8월 31일 일요일 저녁에 쓰며,,", mood: "love",
       thumb: "/test/v.JPG", avatar: "/test/profile.png", author: "곰겜", createdAt: "2025-08-31T23:50:00", writeDate: "2025-08-31T23:50:00", views: 18, likes: 3, commentsCount: 2
     },
     {
@@ -1197,119 +1197,193 @@ export default function Component() {
 
       {/* 커뮤니티 상세 모달 */}
       {currentView === "community" && openedPost && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-stretch sm:items-center justify-center p-0 sm:p-4 overscroll-contain">
           <div className="absolute inset-0 bg-black/60" onClick={() => setOpenedPost(null)} />
-          <Card className={`relative max-w-md w-full ${isDarkMode ? "bg-slate-900" : "bg-gray-50"} overflow-hidden`}>
-            {/* 헤더 */}
-            <div className={`flex items-center justify-between px-4 py-3 border-b ${isDarkMode ? "border-white/10" : "border-gray-200"}`}>
+
+          <Card className={`relative max-w-md w-full h-[100dvh] sm:h-auto max-h-[100dvh] flex flex-col ${isDarkMode ? "bg-slate-900" : "bg-gray-50"} overflow-hidden`}>
+            {/* 헤더: 상단 고정 + 세이프 에어리어 패딩 */}
+            <div className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 pt-[max(12px,env(safe-area-inset-top))] border-b backdrop-blur ${isDarkMode ? "border-white/10 bg-slate-900/80" : "border-gray-200 bg-white/80"}`}>
               <button onClick={() => setOpenedPost(null)} className="flex items-center gap-1 text-sm">
                 <ChevronLeft className={`w-5 h-5 ${isDarkMode ? "text-gray-300" : "text-gray-800"}`} />
                 <span className={isDarkMode ? "text-gray-300" : "text-gray-600"}>{t("community_post_list")}</span>
               </button>
               <MoreVertical className={isDarkMode ? "text-gray-400" : "text-gray-800"} />
             </div>
-            {/* 작성자/제목/날짜/감정 */}
-            <div className="px-5 pt-4">
-              <div className="flex items-center gap-2 mb-3">
-                <img src={openedPost.avatar || "/placeholder.svg"} className={`w-6 h-6 rounded-full border ${isDarkMode ? "border-white/10" : "border-gray-200"}`} alt="avatar" />
-                <span className={isDarkMode ? "text-gray-300 text-sm" : "text-gray-700 text-sm"}>{openedPost.author}</span>
-                <span className={`ml-auto text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                  {formatEntryDate(openedPost.writeDate)}
-                </span>
-                {openedPost.mood && <span className={`ml-2 text-sm ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{MOOD_LABEL[openedPost.mood]}</span>}
-              </div>
-              <h2 className={`text-xl font-semibold ${isDarkMode ? "text-gray-100" : "text-gray-700"}`}>{openedPost.title}</h2>
-            </div>
-            {/* 이미지 */}
-            {openedPost.thumb && (<div className="px-5 mt-3"><img src={openedPost.thumb} alt="post" className={`w-full rounded-lg border ${isDarkMode ? "border-white/10" : "border-gray-200"} object-cover max-h-56 cursor-pointer`} onClick={() => setZoomedImage(openedPost.thumb || null)} /></div>)}
-            {/* 본문 */}
-            <div className="px-5 mt-4">
-              <div className={`space-y-3 text-[15px] leading-7 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                <p>{openedPost.content}</p>
-              </div>
-            </div>
-            {/* 액션 */}
-            <div className="px-5 mt-5">
-              <div className={`grid grid-cols-3 text-center py-2 border-y ${isDarkMode ? "border-white/10" : "border-gray-200"}`}>
-                <button onClick={() => togglePostLike(openedPost.id)} className="flex items-center justify-center gap-2 py-1">
-                  <Heart className={`w-5 h-5 ${postLiked[openedPost.id] ? "fill-current text-pink-500" : (isDarkMode ? "" : "text-black")}`} />
-                  <span className="text-sm">{openedPost.likes + (postLiked[openedPost.id] ? 1 : 0)} 좋아요</span>
-                </button>
-                <div className="flex items-center justify-center gap-2 py-1">
-                  <Share2 className={`w-5 h-5 ${isDarkMode ? "text-gray-400" : "text-gray-800"}`} /><span className="text-sm">공유하기</span>
+
+            {/* 스크롤 영역: 본문/이미지/댓글 목록 */}
+            <div className="flex-1 overflow-y-auto">
+              {/* 작성자/제목/날짜/감정 */}
+              <div className="px-5 pt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <img
+                    src={openedPost.avatar || "/placeholder.svg"}
+                    className={`w-6 h-6 rounded-full border ${isDarkMode ? "border-white/10" : "border-gray-200"}`}
+                    alt="avatar"
+                  />
+                  <span className={isDarkMode ? "text-gray-300 text-sm" : "text-gray-700 text-sm"}>{openedPost.author}</span>
+                  <span className={`ml-auto text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                    {formatEntryDate(openedPost.writeDate)}
+                  </span>
+                  {openedPost.mood && (
+                    <span className={`ml-2 text-sm ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                      {MOOD_LABEL[openedPost.mood]}
+                    </span>
+                  )}
                 </div>
-                <button onClick={() => togglePostBookmark(openedPost.id)} className="flex items-center justify-center gap-2 py-1">
-                  <Bookmark className={`w-5 h-5 ${postBookmarked[openedPost.id] ? "fill-current text-yellow-500" : (isDarkMode ? "" : "text-black")}`} />
-                  <span className="text-sm">{postBookmarked[openedPost.id] ? "저장됨" : "담아두기"}</span>
-                </button>
+                <h2 className={`text-xl font-semibold ${isDarkMode ? "text-gray-100" : "text-gray-700"}`}>{openedPost.title}</h2>
               </div>
-            </div>
-            {/* 댓글 */}
-            <div className="px-5 pt-3 pb-24">
-              <div className="flex items-center gap-4 text-sm">
-                <button onClick={() => setCommentTab("hot")} className={`${commentTab === "hot" ? (isDarkMode ? "text-white" : "text-gray-800") : (isDarkMode ? "text-gray-400" : "text-gray-500")}`}>인기글</button>
-                <button onClick={() => setCommentTab("new")} className={`${commentTab === "new" ? (isDarkMode ? "text-white" : "text-gray-800") : (isDarkMode ? "text-gray-400" : "text-gray-500")}`}>최신순</button>
-                <span className={`ml-auto text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>총 {(postComments[openedPost.id] || []).length}개</span>
+
+              {/* 이미지 */}
+              {openedPost.thumb && (
+                <div className="px-5 mt-3">
+                  <img
+                    src={openedPost.thumb}
+                    alt="post"
+                    className={`w-full rounded-lg border ${isDarkMode ? "border-white/10" : "border-gray-200"} object-cover max-h-56 cursor-pointer`}
+                    onClick={() => setZoomedImage(openedPost.thumb || null)}
+                  />
+                </div>
+              )}
+
+              {/* 본문 */}
+              <div className="px-5 mt-4">
+                <div className={`space-y-3 text-[15px] leading-7 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                  <p>{openedPost.content}</p>
+                </div>
               </div>
-              <div className="mt-3 space-y-5">
-                {(postComments[openedPost.id] || []).length === 0 ? (
-                  <p className={`text-sm ${isDarkMode ? "text-gray-500" : "text-gray-600"}`}>{t("community_no_comments")}</p>
-                ) : (
-                  (postComments[openedPost.id] || []).map((c) => (
-                    <div key={c.id}>
-                      <div className="flex items-start gap-3">
-                        <img src="/test/user.png" className="w-7 h-7 rounded-full" alt="" />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2"><span className={`text-sm ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{c.nick}</span></div>
-                          <p className={`text-sm mt-1 ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>{c.text}</p>
-                          <div className={`mt-2 flex items-center gap-4 text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                            <button onClick={() => toggleCommentLike(openedPost.id, c.id)} className="inline-flex items-center gap-1 hover:text-gray-200">
-                              <Heart className={`w-4 h-4 ${c.liked ? "fill-current text-pink-500" : (isDarkMode ? "" : "text-black")}`} /> 좋아요 {c.likeCount + (c.liked ? 1 : 0)}
-                            </button>
-                            <button onClick={() => setExpandedReplies(prev => ({ ...prev, [c.id]: !prev[c.id] }))} className={`${isDarkMode ? "hover:text-gray-200" : "hover:text-gray-800"}`}>
-                              답글 {c.replies.length}
-                            </button>
-                            <button className={`${isDarkMode ? "hover:text-gray-200" : "hover:text-gray-800"}`}>더보기</button>
-                          </div>
-                          {expandedReplies[c.id] && (
-                            <div className="mt-3 space-y-3">
-                              {c.replies.length === 0 ? (
-                                <div className={`text-xs ${isDarkMode ? "text-gray-500" : "text-gray-600"}`}>{t("community_no_replies")}</div>
-                              ) : c.replies.map(r => (
-                                <div key={r.id} className="flex items-start gap-3">
-                                  <img src="/images/sample/avatar-2.png" className="w-6 h-6 rounded-full" alt="" />
-                                  <div className="flex-1">
-                                    <div className={`text-xs ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{r.nick}</div>
-                                    <div className={`text-sm ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>{r.text}</div>
-                                    <div className="mt-1">
-                                      <button onClick={() => toggleReplyLike(openedPost.id, c.id, r.id)}
-                                        className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"} ${isDarkMode ? "hover:text-gray-200" : "hover:text-gray-800"} inline-flex items-center gap-1`}>
-                                        <Heart className={`w-3.5 h-3.5 ${r.liked ? "fill-current text-pink-500" : (isDarkMode ? "" : "text-black")}`} /> 좋아요 {r.likeCount + (r.liked ? 1 : 0)}
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                              <div className="flex items-center gap-2">
-                                <input value={replyInput[c.id] || ""} onChange={(e) => setReplyInput(prev => ({ ...prev, [c.id]: e.target.value }))}
-                                  placeholder={t("community_reply_placeholder")} className={`flex-1 rounded-full px-3 py-2 text-sm outline-none ${isDarkMode ? "bg-slate-800 text-gray-100 placeholder:text-gray-500" : "bg-gray-100 text-gray-800 placeholder:text-gray-400"}`} />
-                                <Button size="icon" className="rounded-full" onClick={() => submitReply(openedPost.id, c.id)}><Send className="w-4 h-4" /></Button>
-                              </div>
+
+              {/* 액션 */}
+              <div className="px-5 mt-5">
+                <div className={`grid grid-cols-3 text-center py-2 border-y ${isDarkMode ? "border-white/10" : "border-gray-200"}`}>
+                  <button onClick={() => togglePostLike(openedPost.id)} className="flex items-center justify-center gap-2 py-1">
+                    <Heart className={`w-5 h-5 ${postLiked[openedPost.id] ? "fill-current text-pink-500" : (isDarkMode ? "" : "text-black")}`} />
+                    <span className="text-sm">{openedPost.likes + (postLiked[openedPost.id] ? 1 : 0)} 좋아요</span>
+                  </button>
+                  <div className="flex items-center justify-center gap-2 py-1">
+                    <Share2 className={`w-5 h-5 ${isDarkMode ? "text-gray-400" : "text-gray-800"}`} />
+                    <span className="text-sm">공유하기</span>
+                  </div>
+                  <button onClick={() => togglePostBookmark(openedPost.id)} className="flex items-center justify-center gap-2 py-1">
+                    <Bookmark className={`w-5 h-5 ${postBookmarked[openedPost.id] ? "fill-current text-yellow-500" : (isDarkMode ? "" : "text-black")}`} />
+                    <span className="text-sm">{postBookmarked[openedPost.id] ? "저장됨" : "담아두기"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 댓글 목록 */}
+              <div className="px-5 pt-3 pb-4">
+                <div className="flex items-center gap-4 text-sm">
+                  <button
+                    onClick={() => setCommentTab("hot")}
+                    className={`${commentTab === "hot" ? (isDarkMode ? "text-white" : "text-gray-800") : (isDarkMode ? "text-gray-400" : "text-gray-500")}`}
+                  >
+                    인기글
+                  </button>
+                  <button
+                    onClick={() => setCommentTab("new")}
+                    className={`${commentTab === "new" ? (isDarkMode ? "text-white" : "text-gray-800") : (isDarkMode ? "text-gray-400" : "text-gray-500")}`}
+                  >
+                    최신순
+                  </button>
+                  <span className={`ml-auto text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                    총 {(postComments[openedPost.id] || []).length}개
+                  </span>
+                </div>
+
+                <div className="mt-3 space-y-5">
+                  {(postComments[openedPost.id] || []).length === 0 ? (
+                    <p className={`text-sm ${isDarkMode ? "text-gray-500" : "text-gray-600"}`}>{t("community_no_comments")}</p>
+                  ) : (
+                    (postComments[openedPost.id] || []).map((c) => (
+                      <div key={c.id}>
+                        <div className="flex items-start gap-3">
+                          <img src="/test/user.png" className="w-7 h-7 rounded-full" alt="" />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className={`text-sm ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{c.nick}</span>
                             </div>
-                          )}
+                            <p className={`text-sm mt-1 ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>{c.text}</p>
+                            <div className={`mt-2 flex items-center gap-4 text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                              <button
+                                onClick={() => toggleCommentLike(openedPost.id, c.id)}
+                                className="inline-flex items-center gap-1 hover:text-current"
+                              >
+                                <Heart className={`w-4 h-4 ${c.liked ? "fill-current text-pink-500" : (isDarkMode ? "" : "text-black")}`} />
+                                좋아요 {c.likeCount + (c.liked ? 1 : 0)}
+                              </button>
+                              <button
+                                onClick={() => setExpandedReplies((prev) => ({ ...prev, [c.id]: !prev[c.id] }))}
+                                className={`${isDarkMode ? "hover:text-current" : "hover:text-gray-800"}`}
+                              >
+                                답글 {c.replies.length}
+                              </button>
+                              <button className={`${isDarkMode ? "hover:text-current" : "hover:text-gray-800"}`}>더보기</button>
+                            </div>
+
+                            {expandedReplies[c.id] && (
+                              <div className="mt-3 space-y-3">
+                                {c.replies.length === 0 ? (
+                                  <div className={`text-xs ${isDarkMode ? "text-gray-500" : "text-gray-600"}`}>{t("community_no_replies")}</div>
+                                ) : (
+                                  c.replies.map((r) => (
+                                    <div key={r.id} className="flex items-start gap-3">
+                                      <img src="/images/sample/avatar-2.png" className="w-6 h-6 rounded-full" alt="" />
+                                      <div className="flex-1">
+                                        <div className={`text-xs ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{r.nick}</div>
+                                        <div className={`text-sm ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>{r.text}</div>
+                                        <div className="mt-1">
+                                          <button
+                                            onClick={() => toggleReplyLike(openedPost.id, c.id, r.id)}
+                                            className={`text-xs ${isDarkMode ? "text-gray-400 hover:text-current" : "text-gray-600 hover:text-gray-800"} inline-flex items-center gap-1`}
+                                          >
+                                            <Heart className={`w-3.5 h-3.5 ${r.liked ? "fill-current text-pink-500" : (isDarkMode ? "" : "text-black")}`} />
+                                            좋아요 {r.likeCount + (r.liked ? 1 : 0)}
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))
+                                )}
+
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    value={replyInput[c.id] || ""}
+                                    onChange={(e) => setReplyInput((prev) => ({ ...prev, [c.id]: e.target.value }))}
+                                    placeholder={t("community_reply_placeholder")}
+                                    className={`flex-1 rounded-full px-3 py-2 text-sm outline-none ${isDarkMode ? "bg-slate-800 text-gray-100 placeholder:text-gray-500" : "bg-gray-100 text-gray-800 placeholder:text-gray-400"
+                                      }`}
+                                  />
+                                  <Button size="icon" className="rounded-full" onClick={() => submitReply(openedPost.id, c.id)}>
+                                    <Send className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
-                )}
+                    ))
+                  )}
+                </div>
               </div>
             </div>
-            {/* 하단 댓글 입력 */}
-            <div className={`absolute left-0 right-0 bottom-0 px-4 py-3 border-t ${isDarkMode ? "border-white/10" : "border-gray-200"} ${isDarkMode ? "bg-black/30" : "bg-white/70"} backdrop-blur`}>
+
+            {/* 하단 입력바: 하단 고정 + 세이프 에어리어 반영 */}
+            <div
+              className={`sticky bottom-0 px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))] border-t backdrop-blur ${isDarkMode ? "border-white/10 bg-black/40" : "border-gray-200 bg-white/80"
+                }`}
+            >
               <div className="flex items-center gap-2">
-                <input value={commentInput} onChange={(e) => setCommentInput(e.target.value)} placeholder={t("community_comment_placeholder")}
-                  className={`flex-1 rounded-full px-4 py-2 text-sm outline-none ${isDarkMode ? "bg-slate-800 text-gray-100 placeholder:text-gray-500" : "bg-gray-100 text-gray-800 placeholder:text-gray-400"}`} />
-                <Button size="icon" className="rounded-full" onClick={() => submitComment(openedPost.id)}><Send className="w-4 h-4" /></Button>
+                <input
+                  value={commentInput}
+                  onChange={(e) => setCommentInput(e.target.value)}
+                  placeholder={t("community_comment_placeholder")}
+                  className={`flex-1 rounded-full px-4 py-3 text-base outline-none ${isDarkMode ? "bg-slate-800 text-gray-100 placeholder:text-gray-500" : "bg-gray-100 text-gray-800 placeholder:text-gray-400"
+                    }`}
+                />
+                <Button size="icon" className="rounded-full h-10 w-10" onClick={() => submitComment(openedPost.id)}>
+                  <Send className="w-5 h-5" />
+                </Button>
               </div>
             </div>
           </Card>
