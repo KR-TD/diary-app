@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import { headers } from 'next/headers'
 
@@ -19,6 +19,13 @@ const title = "하루의 끝 - 감성 온라인 일기장 | 매일의 생각과 
 const description =
   "하루의 끝에서 당신의 하루를 특별하게 마무리하세요. 감성적인 온라인 일기장에 오늘의 순간, 감정, 생각을 기록하며 나만의 다이어리를 만들고 꾸밀 수 있습니다."
 const ogImage = `${siteUrl}/og-image.png`
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -85,7 +92,6 @@ export default async function RootLayout({
   return (
     <html lang={lang} suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         {/* Google Tag Manager */}
         <script
           dangerouslySetInnerHTML={{
