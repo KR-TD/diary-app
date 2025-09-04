@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import {
   Pagination,
   PaginationContent,
@@ -18,13 +19,16 @@ import {
   PaginationLink,
 } from "@/components/ui/pagination"
 import {
-  Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List as ListIcon, Pencil, Award, Gem, Camera, Smartphone, Mail,
+  Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List as ListIcon, Pencil, Award, Gem, Camera, Smartphone, Mail, Menu,
   // ▼ 커뮤니티 상세용 추가 아이콘
   Eye, MessageSquare, Share2, Bookmark, ChevronLeft, MoreVertical, Send
 } from "lucide-react"
 import { TopBannerAd, BottomBannerAd, SquareAd } from "@/components/kakao-ads"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { usePathname } from 'next/navigation'
+import { UserMenu } from '@/components/user-menu'
+import { LoginDialog } from '@/components/login-dialog'
+import { SignupDialog } from '@/components/signup-dialog'
 
 export default function Component() {
   // ===== 기존 일기 상태 =====
@@ -39,8 +43,17 @@ export default function Component() {
   const [isCopied, setIsCopied] = useState(false)
   const [zoomedImage, setZoomedImage] = useState<string | null>(null)
   const [isClient, setIsClient] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [showSignupDialog, setShowSignupDialog] = useState(false);
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([])
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
   useEffect(() => { setIsClient(true) }, [])
+
+  const closeSheet = () => {
+    setIsSheetOpen(false);
+  };
+
 
   const [showAppPromo, setShowAppPromo] = useState(true);
   const dismissAppPromo = () => setShowAppPromo(false);
@@ -118,6 +131,7 @@ export default function Component() {
     createdAt: Date
     mood?: string
     image?: string
+    isShared?: boolean
   }
 
   const handleAudioError = (e: Event | string) => {
@@ -189,6 +203,7 @@ export default function Component() {
         createdAt: new Date(),
         mood: selectedMood,
         image: selectedImage,
+        isShared: false,
       }
       setDiaryEntries((prev) => [newEntry, ...prev])
       localStorage.setItem("diaryEntries", JSON.stringify([newEntry, ...diaryEntries]))
@@ -210,6 +225,17 @@ export default function Component() {
     setDiaryEntries(updatedEntries);
     localStorage.setItem("diaryEntries", JSON.stringify(updatedEntries));
     if (selectedEntry && selectedEntry.id === id) setSelectedEntry(null);
+  };
+
+  const handleShare = (id: string) => {
+    setDiaryEntries((prevEntries) =>
+      prevEntries.map((entry) =>
+        entry.id === id ? { ...entry, isShared: true } : entry
+      )
+    );
+    // Optionally, persist to localStorage here if needed
+    localStorage.setItem("diaryEntries", JSON.stringify(diaryEntries.map(entry => entry.id === id ? { ...entry, isShared: true } : entry)));
+    console.log('Shared entry:', id);
   };
 
   const formatEntryDate = (dateString: string) => {
@@ -408,113 +434,79 @@ export default function Component() {
 
         <div className="max-w-4xl mx-auto relative z-10">
           {/* 헤더 */}
-          <div className="text-center mb-4 sm:mb-8 relative">
-            <div className="flex justify-between items-center mb-4 sm:mb-8">
-              <div className="flex gap-1 sm:gap-2">
-                <Button
-                  onClick={() => setCurrentView(currentView === "write" ? "list" : "write")}
-                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${isDarkMode
-                    ? "bg-purple-600/20 hover:bg-purple-600/30 text-purple-300"
-                    : "bg-rose-500/20 hover:bg-rose-500/30 text-rose-600"
-                    }`}
-                  variant="ghost"
-                  size={isMobile ? "icon" : "default"}
-                >
-                  {currentView === "write" ? <ListIcon className="w-5 h-5" /> : <Pencil className="w-5 h-5" />}
-                  {!isMobile && (currentView === "write" ? t("diary_list") : t("write_diary"))}
-                </Button>
+          <header className={`sticky top-0 z-20 w-full transition-all duration-500 ${isDarkMode ? "bg-slate-900/80 border-b border-slate-700/50 shadow-lg shadow-slate-900/20 backdrop-blur-sm" : "bg-rose-100 border-b border-rose-200 shadow-lg shadow-rose-200/10"}`}>
+            <div className="max-w-4xl mx-auto px-2 sm:px-4">
+              <div className="flex items-center justify-end h-16 gap-4">
+                {/* 데스크탑 네비게이션 */}
+                <nav className="hidden md:flex items-center gap-2">
+                  <Button onClick={() => setCurrentView(currentView === "write" ? "list" : "write")} variant={currentView === 'write' || currentView === 'list' ? 'secondary' : 'ghost'} className={`px-4 py-2 rounded-lg ${currentView === 'write' || currentView === 'list' ? (isDarkMode ? 'bg-purple-600/30 text-white' : 'bg-rose-200 text-gray-800') : (isDarkMode ? 'text-gray-300' : 'text-gray-800')}`}>{currentView === "write" ? t("diary_list") : t("write_diary")}</Button>
+                  <Button onClick={() => setCurrentView("community")} variant={currentView === 'community' ? 'secondary' : 'ghost'} className={`px-4 py-2 rounded-lg ${currentView === 'community' ? (isDarkMode ? 'bg-blue-600/30 text-white' : 'bg-blue-200 text-gray-800') : (isDarkMode ? 'text-gray-300' : 'text-gray-800')}`}>{t("community")}</Button>
+                  <Button onClick={() => setCurrentView("support")} variant={currentView === 'support' ? 'secondary' : 'ghost'} className={`px-4 py-2 rounded-lg ${currentView === 'support' ? (isDarkMode ? 'bg-pink-600/30 text-white' : 'bg-pink-200 text-gray-800') : (isDarkMode ? 'text-gray-300' : 'text-gray-800')}`}>{t("support_developer")}</Button>
+                  <Button onClick={() => setCurrentView("hall")} variant={currentView === 'hall' ? 'secondary' : 'ghost'} className={`px-4 py-2 rounded-lg ${currentView === 'hall' ? (isDarkMode ? 'bg-yellow-600/30 text-white' : 'bg-yellow-200 text-gray-800') : (isDarkMode ? 'text-gray-300' : 'text-gray-800')}`}>{t("hall_of_fame")}</Button>
+                  <Button onClick={() => setCurrentView("contact")} variant={currentView === 'contact' ? 'secondary' : 'ghost'} className={`px-4 py-2 rounded-lg ${currentView === 'contact' ? (isDarkMode ? 'bg-green-600/30 text-white' : 'bg-green-200 text-gray-800') : (isDarkMode ? 'text-gray-300' : 'text-gray-800')}`}>{t("contact_developer")}</Button>
+                </nav>
 
-                <Button
-                  onClick={() => setCurrentView("community")}
-                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${currentView === "community"
-                    ? isDarkMode ? "bg-blue-600/30 text-blue-300" : "bg-blue-500/30 text-blue-600"
-                    : isDarkMode ? "bg-blue-600/20 hover:bg-blue-600/30 text-blue-300" : "bg-blue-500/20 hover:bg-blue-500/30 text-blue-600"
-                    }`}
-                  variant="ghost"
-                  size={isMobile ? "icon" : "default"}
-                >
-                  <MessageSquare className="w-5 h-5" />
-                  {!isMobile && t("community")}
-                </Button>
-
-                <Button
-                  onClick={() => setCurrentView("support")}
-                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${currentView === "support"
-                    ? isDarkMode ? "bg-pink-600/30 text-pink-300" : "bg-pink-500/30 text-pink-600"
-                    : isDarkMode ? "bg-pink-600/20 hover:bg-pink-600/30 text-pink-300" : "bg-pink-500/20 hover:bg-pink-500/30 text-pink-600"
-                    }`}
-                  variant="ghost"
-                  size={isMobile ? "icon" : "default"}
-                >
-                  <Gem className="w-5 h-5" />
-                  {!isMobile && t("support_developer")}
-                </Button>
-
-                <Button
-                  onClick={() => setCurrentView("hall")}
-                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${currentView === "hall"
-                    ? isDarkMode ? "bg-yellow-600/30 text-yellow-300" : "bg-yellow-500/30 text-yellow-600"
-                    : isDarkMode ? "bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-300" : "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-600"
-                    }`}
-                  variant="ghost"
-                  size={isMobile ? "icon" : "default"}
-                >
-                  <Award className="w-5 h-5" />
-                  {!isMobile && t("hall_of_fame")}
-                </Button>
-
-                <Button
-                  onClick={() => setCurrentView("contact")}
-                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${currentView === "contact"
-                    ? isDarkMode ? "bg-green-600/30 text-green-300" : "bg-green-500/30 text-green-600"
-                    : isDarkMode ? "bg-green-600/20 hover:bg-green-600/30 text-green-300" : "bg-green-500/20 hover:bg-green-500/30 text-green-600"
-                    }`}
-                  variant="ghost"
-                  size={isMobile ? "icon" : "default"}
-                >
-                  <Mail className="w-5 h-5" />
-                  {!isMobile && t("contact_developer")}
-                </Button>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {isClient && (
-                  <Select onValueChange={(value) => i18n.changeLanguage(value)} value={i18n.language}>
-                    <SelectTrigger className={`w-[120px] transition-all duration-300 ${isDarkMode ? "bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30" : "bg-rose-500/20 hover:bg-rose-500/30 text-rose-600 border border-rose-300/50"}`}>
-                      <SelectValue>
-                        {i18n.language === 'ko' ? '한국어' : i18n.language === 'en' ? 'English' : i18n.language === 'ja' ? '日本語' : i18n.language === 'zh' ? '中文' : ''}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className={`${isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white border-rose-200 text-gray-900"}`}>
-                      <SelectItem value="ko">한국어</SelectItem>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="ja">日本語</SelectItem>
-                      <SelectItem value="zh">中文</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-                <Button
-                  onClick={() => setIsDarkMode(!isDarkMode)}
-                  className={`p-3 rounded-full transition-all duration-300 ${isDarkMode ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300" : "bg-orange-500/20 hover:bg-orange-500/30 text-orange-600"}`}
-                  variant="ghost"
-                  aria-label={isDarkMode ? t("switch_to_light_mode") : t("switch_to_dark_mode")}
-                >
-                  {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                </Button>
+                {/* 오른쪽 메뉴 */}
+                <div className="flex items-center gap-2">
+                  {isClient && (
+                    <Select onValueChange={(value) => i18n.changeLanguage(value)} value={i18n.language}>
+                      <SelectTrigger className={`w-auto transition-all duration-300 border-0 px-2 ${isDarkMode ? "bg-transparent hover:bg-slate-700 text-gray-300" : "bg-transparent hover:bg-gray-100 text-gray-800"}`}>
+                        <SelectValue>
+                          {i18n.language.toUpperCase()}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className={`${isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white border-rose-200 text-gray-900"}`}>
+                        <SelectItem value="ko">한국어 (KO)</SelectItem>
+                        <SelectItem value="en">English (EN)</SelectItem>
+                        <SelectItem value="ja">日本語 (JA)</SelectItem>
+                        <SelectItem value="zh">中文 (ZH)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <Button
+                    onClick={() => setIsDarkMode(!isDarkMode)}
+                    className={`p-2 rounded-full transition-all duration-300 ${isDarkMode ? "text-yellow-300 hover:bg-yellow-500/20" : "text-gray-800 hover:bg-orange-500/10"}`}
+                    variant="ghost"
+                    aria-label={isDarkMode ? t("switch_to_light_mode") : t("switch_to_dark_mode")}
+                  >
+                    {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  </Button>
+                  <UserMenu isDarkMode={isDarkMode} t={t} onLoginClick={() => setShowLoginDialog(true)} onSignupClick={() => setShowSignupDialog(true)} />
+                  
+                  {/* 모바일 메뉴 버튼 */}
+                  <div className="md:hidden">
+                    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                      <SheetTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <Menu className="h-6 w-6" />
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent side="right" className={isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white"}>
+                        <SheetHeader>
+                          <SheetTitle className={isDarkMode ? '' : 'text-gray-800'}>{t("menu")}</SheetTitle>
+                        </SheetHeader>
+                        <div className="grid gap-4 py-4">
+                          <Button onClick={() => {setCurrentView(currentView === "write" ? "list" : "write"); closeSheet();}} variant="ghost" className={`justify-start ${isDarkMode ? '' : 'text-gray-800'}`}>{currentView === "write" ? t("diary_list") : t("write_diary")}</Button>
+                          <Button onClick={() => {setCurrentView("community"); closeSheet();}} variant="ghost" className={`justify-start ${isDarkMode ? '' : 'text-gray-800'}`}>{t("community")}</Button>
+                          <Button onClick={() => {setCurrentView("support"); closeSheet();}} variant="ghost" className={`justify-start ${isDarkMode ? '' : 'text-gray-800'}`}>{t("support_developer")}</Button>
+                          <Button onClick={() => {setCurrentView("hall"); closeSheet();}} variant="ghost" className={`justify-start ${isDarkMode ? '' : 'text-gray-800'}`}>{t("hall_of_fame")}</Button>
+                          <Button onClick={() => {setCurrentView("contact"); closeSheet();}} variant="ghost" className={`justify-start ${isDarkMode ? '' : 'text-gray-800'}`}>{t("contact_developer")}</Button>
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                  </div>
+                </div>
               </div>
             </div>
+          </header>
 
-            <h1 className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-2 ${isDarkMode ? "bg-gradient-to-r from-yellow-300 via-blue-300 to-purple-300 bg-clip-text text-transparent" : "bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 bg-clip-text text-transparent"}`}>
+          <div className="text-center my-4 sm:my-8">
+            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-2 ${isDarkMode ? "bg-gradient-to-r from-yellow-300 via-blue-300 to-purple-300 bg-clip-text text-transparent" : "bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 bg-clip-text text-transparent"}`}>
               {t("app_title")}
-            </h1>
+            </h2>
             <p className={`text-base sm:text-lg font-medium ${isDarkMode ? "text-gray-300" : "text-rose-700"}`}>
               {t("app_description")}
             </p>
-
-            <section className="sr-only">
-              <h2>하루의 끝: 당신의 하루를 기록하는 감성 온라인 일기장</h2>
-              <p>...</p>
-            </section>
           </div>
 
           {/* 음악 플레이어 (그대로) */}
@@ -682,13 +674,24 @@ export default function Component() {
                               <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>{formatEntryDate(entry.date)} {entry.mood && <span className="ml-2 text-base">{entry.mood} {emotionMap[entry.mood]}</span>}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>{entry.content.length}{t("characters")}</span>
+                              <Button
+                                onClick={(e) => { e.stopPropagation(); handleShare(entry.id); }}
+                                variant="ghost"
+                                size="sm"
+                                className={`text-xs px-2 py-1 rounded ${isDarkMode ? "text-blue-400 hover:bg-blue-900/20" : "text-blue-600 hover:bg-blue-100"}`}
+                                disabled={entry.isShared}
+                              >
+                                {t("share_to_community")}
+                              </Button>
                               <Button onClick={(e) => { e.stopPropagation(); handleDelete(entry.id); }} variant="ghost" size="sm" className={`text-xs px-2 py-1 rounded ${isDarkMode ? "text-red-400 hover:bg-red-900/20" : "text-red-600 hover:bg-red-100"}`}>
                                 {t("delete")}
                               </Button>
                             </div>
                           </div>
                           <p className={`text-sm sm:text-base line-clamp-3 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{entry.content}</p>
+                          <div className={`text-right text-xs sm:text-sm mt-2 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                            {entry.content.length}{t("characters")}
+                          </div>
                           {entry.image && (<div className="mt-3"><img src={entry.image} alt="Diary" className="w-full h-auto max-h-32 object-cover rounded-lg border border-gray-300/50" /></div>)}
                         </div>
                         {(index + 1) % 5 === 0 && index < diaryEntries.length - 1 && (
@@ -1146,7 +1149,7 @@ export default function Component() {
                 </div>
                 <div className="flex justify-end items-center mb-4">
                   <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                    {formatEntryDate(selectedEntry.date)} {selectedEntry.mood && <span className="ml-2 text-xl">{selectedEntry.mood}</span>} | {selectedEntry.content.length}자
+                    {formatEntryDate(selectedEntry.date)} {selectedEntry.mood && <span className="ml-2 text-xl">{selectedEntry.mood}</span>}
                   </p>
                 </div>
               </CardHeader>
@@ -1155,11 +1158,18 @@ export default function Component() {
                   <img src={selectedEntry.image} alt="Diary" className="w-full h-auto max-h-96 object-contain rounded-xl border-2 border-dashed border-gray-400/50" />
                 </div>)}
                 <p className={`text-base leading-relaxed whitespace-pre-wrap ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{selectedEntry.content}</p>
+                <div className={`text-right text-xs sm:text-sm mt-4 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                  {selectedEntry.content.length}{t("characters")}
+                </div>
               </CardContent>
             </Card>
           </div>
         )}
       </div>
+
+      {/* Login and Signup Dialogs */}
+      <LoginDialog isOpen={showLoginDialog} onClose={() => setShowLoginDialog(false)} isDarkMode={isDarkMode} />
+      <SignupDialog isOpen={showSignupDialog} onClose={() => setShowSignupDialog(false)} isDarkMode={isDarkMode} />
 
       {/* 앱 프로모션 배너 */}
       {showAppPromo && (
