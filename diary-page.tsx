@@ -1116,9 +1116,10 @@ export default function Component() {
           {/* 푸터 */}
           <footer className={`text-center mt-8 py-8 border-t ${isDarkMode ? "border-slate-800 text-gray-500" : "border-rose-100 text-rose-500"}`}>
             <nav aria-label="Footer Navigation" className="mb-4">
-              <ul className="flex justify-center gap-4">
+              <ul className="flex flex-wrap justify-center gap-2 max-w-2xs mx-auto md:max-w-none">
                 <li><Button variant="link" onClick={() => setCurrentView('write')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>{t("footer_write_diary")}</Button></li>
                 <li><Button variant="link" onClick={() => setCurrentView('list')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>{t("footer_list_diaries")}</Button></li>
+                <li className="basis-full h-0 md:hidden" />
                 <li><Button variant="link" onClick={() => setCurrentView('community')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>{t("community")}</Button></li>
                 <li><Button variant="link" onClick={() => setCurrentView('support')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>{t("footer_support")}</Button></li>
                 <li><Button variant="link" onClick={() => setCurrentView('hall')} className={isDarkMode ? "text-gray-400" : "text-rose-600"}>{t("footer_hall_of_fame")}</Button></li>
