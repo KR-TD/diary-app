@@ -27,6 +27,7 @@
   "no_entries_yet": "まだ書かれた日記はありません",
   "write_first_diary": "最初の日記を書いてみましょう！",
   "delete": "削除",
+  "share_to_community": "コミュニティに共有",
   "recommendation": "おすすめ",
   "support_thanks": "「一日の終わり」を愛してくださりありがとうございます",
   "support_message": "より良い「一日の終わり」を一緒に作りましょう",
@@ -94,5 +95,15 @@
   "action_like": "いいね",
   "action_share": "共有",
   "action_bookmarked": "保存済み",
-  "action_bookmark": "ブックマーク"
+  "action_bookmark": "ブックマーク",
+  "user_menu": "ユーザーメニュー",
+  "login": "ログイン",
+  "signup": "サインアップ",
+  "google_login": "Googleでログイン",
+  "kakao_login": "カカオでログイン",
+  "login_description": "アカウントにログインして日記を管理してください。",
+  "signup_description": "新しいアカウントを作成して日記を始めましょう。",
+  "email": "メールアドレス",
+  "password": "パスワード",
+  "confirm_password": "パスワードを確認"
 }

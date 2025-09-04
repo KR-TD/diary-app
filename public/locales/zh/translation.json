@@ -27,6 +27,7 @@
   "no_entries_yet": "还没有写日记",
   "write_first_diary": "写下您的第一篇日记！",
   "delete": "删除",
+  "share_to_community": "分享到社区",
   "recommendation": "推荐",
   "support_thanks": "感谢您喜爱“一天结束”",
   "support_message": "让我们一起创造更美好的“一天结束”",
@@ -94,5 +95,15 @@
   "action_like": "赞",
   "action_share": "分享",
   "action_bookmarked": "已保存",
-  "action_bookmark": "收藏"
+  "action_bookmark": "收藏",
+  "user_menu": "用户菜单",
+  "login": "登录",
+  "signup": "注册",
+  "google_login": "谷歌登录",
+  "kakao_login": "Kakao登录",
+  "login_description": "登录您的帐户以管理您的日记。",
+  "signup_description": "创建一个新帐户以开始您的日记。",
+  "email": "电子邮件",
+  "password": "密码",
+  "confirm_password": "确认密码"
 }

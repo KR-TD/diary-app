@@ -27,6 +27,7 @@
   "no_entries_yet": "No diaries written yet",
   "write_first_diary": "Write your first diary!",
   "delete": "Delete",
+  "share_to_community": "Share to Community",
   "recommendation": "Recommendation",
   "support_thanks": "Thank you for loving \"End of Day\"",
   "support_message": "Let's create a better 'End of Day' together",
@@ -94,5 +95,15 @@
   "action_like": "Like",
   "action_share": "Share",
   "action_bookmarked": "Saved",
-  "action_bookmark": "Bookmark"
+  "action_bookmark": "Bookmark",
+  "user_menu": "User Menu",
+  "login": "Login",
+  "signup": "Sign Up",
+  "google_login": "Login with Google",
+  "kakao_login": "Login with Kakao",
+  "login_description": "Log in to your account to manage your diaries.",
+  "signup_description": "Create a new account to start your diary.",
+  "email": "Email",
+  "password": "Password",
+  "confirm_password": "Confirm Password"
 }
