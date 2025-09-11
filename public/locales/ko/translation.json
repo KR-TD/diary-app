@@ -109,5 +109,11 @@
   "select_emotion_alert": "감정을 선택해주세요!",
   "enter_title_alert": "제목을 입력해주세요!",
   "enter_content_alert": "내용을 입력해주세요!",
-  "validation_error": "유효성 검사 오류"
+  "validation_error": "유효성 검사 오류",
+  "sending_code": "전송 중...",
+  "send_code": "인증코드 전송",
+  "verification_code_placeholder": "인증코드를 입력하세요.",
+  "verify": "인증하기",
+  "verification_code_sent_message": "인증코드가 전송되었습니다.",
+  "email_verified": "이메일이 성공적으로 인증되었습니다."
 }

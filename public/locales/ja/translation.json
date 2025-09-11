@@ -109,5 +109,11 @@
   "select_emotion_alert": "感情を選択してください！",
   "enter_title_alert": "タイトルを入力してください！",
   "enter_content_alert": "内容を入力してください！",
-  "validation_error": "検証エラー"
+  "validation_error": "検証エラー",
+  "sending_code": "送信中...",
+  "send_code": "認証コードを送信",
+  "verification_code_placeholder": "認証コードを入力してください。",
+  "verify": "認証する",
+  "verification_code_sent_message": "認証コードが送信されました。",
+  "email_verified": "メールアドレスが正常に認証されました。"
 }

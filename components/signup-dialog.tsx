@@ -30,6 +30,13 @@ export function SignupDialog({ isOpen, onClose, isDarkMode }: SignupDialogProps)
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [nickname, setNickname] = React.useState("");
 
+  // 이메일 인증 상태
+  const [isCodeSent, setIsCodeSent] = React.useState(false);
+  const [isVerifying, setIsVerifying] = React.useState(false);
+  const [isVerified, setIsVerified] = React.useState(false);
+  const [verificationCode, setVerificationCode] = React.useState("");
+  const [userCode, setUserCode] = React.useState("");
+
   // 프로필 이미지
   const [profileFile, setProfileFile] = React.useState<File | null>(null);
   const [profilePreview, setProfilePreview] = React.useState<string | null>(null);
@@ -50,7 +57,7 @@ export function SignupDialog({ isOpen, onClose, isDarkMode }: SignupDialogProps)
   const matchValid = confirmPassword.length > 0 && password === confirmPassword;
   const nicknameValid = nickname.trim().length >= 2 && nickname.trim().length <= 20;
 
-  const formValid = emailValid && pwValid && matchValid && nicknameValid;
+  const formValid = emailValid && pwValid && matchValid && nicknameValid && isVerified;
 
   // 프로필 이미지 핸들러
   const handlePickImage = () => imageInputRef.current?.click();
@@ -66,6 +73,27 @@ export function SignupDialog({ isOpen, onClose, isDarkMode }: SignupDialogProps)
     setProfileFile(null);
     setProfilePreview(null);
     if (imageInputRef.current) imageInputRef.current.value = "";
+  };
+
+  const handleSendCode = () => {
+    if (!emailValid) return;
+    setIsVerifying(true);
+    // Mock API call
+    setTimeout(() => {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      setVerificationCode(code);
+      console.log("Verification Code:", code); // For testing
+      setIsVerifying(false);
+      setIsCodeSent(true);
+    }, 1000);
+  };
+
+  const handleVerifyCode = () => {
+    if (userCode === verificationCode) {
+      setIsVerified(true);
+    } else {
+      alert("인증코드가 일치하지 않습니다.");
+    }
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -198,24 +226,63 @@ export function SignupDialog({ isOpen, onClose, isDarkMode }: SignupDialogProps)
             </div>
 
             {/* 이메일 */}
-            <div className="grid grid-cols-4 items-center gap-3">
-              <Label htmlFor="email" className="text-right">{tx("email", "이메일")}</Label>
+            <div className="grid grid-cols-4 items-start gap-3">
+              <Label htmlFor="email" className="text-right mt-2">{tx("email", "이메일")}</Label>
               <div className="col-span-3">
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
-                  className={inputStyle}
-                  aria-invalid={email.length > 0 && !emailValid}
-                  aria-describedby="email-help"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                    className={inputStyle}
+                    aria-invalid={email.length > 0 && !emailValid}
+                    aria-describedby="email-help"
+                    disabled={isVerified}
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="h-9 shrink-0"
+                    disabled={!emailValid || isCodeSent || isVerifying}
+                    onClick={handleSendCode}
+                  >
+                    {isVerifying ? tx("sending_code", "전송 중...") : tx("send_code", "인증코드 전송")}
+                  </Button>
+                </div>
                 <p id="email-help" className={`mt-1 text-xs ${email.length > 0 && !emailValid ? "text-rose-500" : isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
-                  {email.length === 0
-                    ? tx("email_hint", "로그인에 사용할 이메일을 입력하세요.")
-                    : (!emailValid ? tx("email_invalid", "올바른 이메일 형식이 아닙니다.") : " ")}
+                  {isCodeSent 
+                    ? (isVerified ? " " : tx("verification_code_sent_message", "인증코드가 전송되었습니다."))
+                    : (email.length === 0
+                      ? tx("email_hint", "로그인에 사용할 이메일을 입력하세요.")
+                      : (!emailValid ? tx("email_invalid", "올바른 이메일 형식이 아닙니다.") : " "))}
                 </p>
+
+                {isCodeSent && !isVerified && (
+                  <div className="mt-2 space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        id="verificationCode"
+                        value={userCode}
+                        onChange={(e) => setUserCode(e.target.value)}
+                        className={inputStyle}
+                        placeholder={tx("verification_code_placeholder", "인증코드를 입력하세요.")}
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="h-9 shrink-0"
+                        onClick={handleVerifyCode}
+                      >
+                        {tx("verify", "인증하기")}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {isVerified && (
+                  <p className="mt-2 text-sm text-emerald-500">{tx("email_verified", "이메일이 성공적으로 인증되었습니다.")}</p>
+                )}
               </div>
             </div>
 

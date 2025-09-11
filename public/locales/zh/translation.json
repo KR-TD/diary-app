@@ -109,5 +109,11 @@
   "select_emotion_alert": "请选择一种情绪！",
   "enter_title_alert": "请输入标题！",
   "enter_content_alert": "请输入内容！",
-  "validation_error": "验证错误"
+  "validation_error": "验证错误",
+  "sending_code": "发送中...",
+  "send_code": "发送验证码",
+  "verification_code_placeholder": "请输入验证码。",
+  "verify": "验证",
+  "verification_code_sent_message": "验证码已发送。",
+  "email_verified": "电子邮件已成功验证。"
 }

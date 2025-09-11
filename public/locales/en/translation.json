@@ -109,5 +109,11 @@
   "select_emotion_alert": "Please select an emotion!",
   "enter_title_alert": "Please enter a title!",
   "enter_content_alert": "Please enter content!",
-  "validation_error": "Validation Error"
+  "validation_error": "Validation Error",
+  "sending_code": "Sending...",
+  "send_code": "Send Code",
+  "verification_code_placeholder": "Enter verification code.",
+  "verify": "Verify",
+  "verification_code_sent_message": "Verification code has been sent.",
+  "email_verified": "Email has been successfully verified."
 }
