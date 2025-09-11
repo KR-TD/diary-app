@@ -64,7 +64,6 @@
   "play_music": "음악 재생",
   "ad": "광고",
   "today_story": "오늘의 이야기",
-  "characters": "자",
   "support_message_detail": "여러분의 소중한 일기를 더 안전하고 아름답게 보관할 수 있도록 지속적으로 개발하고 개선해나가겠습니다.",
   "developer_thanks_message_title": "개발자의 감사 인사",
   "small_support_message_detail": "작은 후원이라도 개발자에게는 큰 격려가 됩니다.\n여러분의 마음이 더 나은 서비스를 만드는 원동력입니다.",
@@ -105,5 +104,10 @@
   "signup_description": "새 계정을 생성하여 일기를 시작하세요.",
   "email": "이메일",
   "password": "비밀번호",
-  "confirm_password": "비밀번호 확인"
+  "confirm_password": "비밀번호 확인",
+  "emotion_etc": "기타",
+  "select_emotion_alert": "감정을 선택해주세요!",
+  "enter_title_alert": "제목을 입력해주세요!",
+  "enter_content_alert": "내용을 입력해주세요!",
+  "validation_error": "유효성 검사 오류"
 }

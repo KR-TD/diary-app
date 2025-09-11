@@ -64,7 +64,6 @@
   "play_music": "Play Music",
   "ad": "Ad",
   "today_story": "Today's Story",
-  "characters": "chars",
   "support_message_detail": "We will continue to develop and improve to keep your precious diaries safer and more beautiful.",
   "developer_thanks_message_title": "Developer's Thank You Message",
   "small_support_message_detail": "Even small support is a great encouragement to the developer.\nYour heart is the driving force for creating better services.",
@@ -105,5 +104,10 @@
   "signup_description": "Create a new account to start your diary.",
   "email": "Email",
   "password": "Password",
-  "confirm_password": "Confirm Password"
+  "confirm_password": "Confirm Password",
+  "emotion_etc": "Etc.",
+  "select_emotion_alert": "Please select an emotion!",
+  "enter_title_alert": "Please enter a title!",
+  "enter_content_alert": "Please enter content!",
+  "validation_error": "Validation Error"
 }

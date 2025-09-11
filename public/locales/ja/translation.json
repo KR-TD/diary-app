@@ -64,10 +64,9 @@
   "play_music": "音楽再生",
   "ad": "広告",
   "today_story": "今日の物語",
-  "characters": "文字",
   "support_message_detail": "皆様の大切な日記をより安全で美しく保管できるよう、継続的に開発・改善していきます。",
   "developer_thanks_message_title": "開発者からの感謝のメッセージ",
-  "small_support_message_detail": "小さなご支援でも開発者にとっては大きな励みになります。\n皆様の心がより良いサービスを作る原動力です。",
+  "small_support_message_detail": "小さなご支援でも開発者にとっては大きな励みになります。\n皆様の心がより良いサービスを作る原動です。",
   "also_good_to_see": "こちらもおすすめ",
   "all_moments_precious": "すべての瞬間が大切です。",
   "app_promo_aria_label": "一日の終わりモバイルアプリ案内バナー",
@@ -105,5 +104,10 @@
   "signup_description": "新しいアカウントを作成して日記を始めましょう。",
   "email": "メールアドレス",
   "password": "パスワード",
-  "confirm_password": "パスワードを確認"
+  "confirm_password": "パスワードを確認",
+  "emotion_etc": "その他",
+  "select_emotion_alert": "感情を選択してください！",
+  "enter_title_alert": "タイトルを入力してください！",
+  "enter_content_alert": "内容を入力してください！",
+  "validation_error": "検証エラー"
 }

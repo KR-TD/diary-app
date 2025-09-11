@@ -29,6 +29,7 @@ import { usePathname } from 'next/navigation'
 import { UserMenu } from '@/components/user-menu'
 import { LoginDialog } from '@/components/login-dialog'
 import { SignupDialog } from '@/components/signup-dialog'
+import { CustomAlertDialog } from "@/components/custom-alert-dialog";
 
 export default function Component() {
   // ===== 기존 일기 상태 =====
@@ -47,6 +48,11 @@ export default function Component() {
   const [showSignupDialog, setShowSignupDialog] = useState(false);
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([])
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [alertInfo, setAlertInfo] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+  }>({ isOpen: false, title: "", description: "" });
 
   useEffect(() => { setIsClient(true) }, [])
 
@@ -106,6 +112,7 @@ export default function Component() {
     "😴": t("emotion_tiredness"),
     "🥰": t("emotion_love"),
     "🤔": t("emotion_worry"),
+    "🫥": t("emotion_etc"),
   }
 
   useEffect(() => {
@@ -194,26 +201,49 @@ export default function Component() {
   const handleVolumeChange = (newVolume: number) => setVolume(newVolume)
 
   const handleSave = () => {
-    if (diaryTitle.trim() && diaryContent.trim()) {
-      const newEntry: DiaryEntry = {
-        id: Date.now().toString(),
-        date: new Date().toISOString(),
-        title: diaryTitle,
-        content: diaryContent,
-        createdAt: new Date(),
-        mood: selectedMood,
-        image: selectedImage,
-        isShared: false,
-      }
-      setDiaryEntries((prev) => [newEntry, ...prev])
-      localStorage.setItem("diaryEntries", JSON.stringify([newEntry, ...diaryEntries]))
-      setDiaryTitle("")
-      setDiaryContent("")
-      setSelectedMood(undefined)
-      setSelectedImage(undefined)
-      setIsSaved(true)
-      setTimeout(() => setIsSaved(false), 2000)
+    if (!selectedMood) {
+      setAlertInfo({
+        isOpen: true,
+        title: t("validation_error"),
+        description: t("select_emotion_alert"),
+      });
+      return;
     }
+    if (diaryTitle.trim() === "") {
+      setAlertInfo({
+        isOpen: true,
+        title: t("validation_error"),
+        description: t("enter_title_alert"),
+      });
+      return;
+    }
+    if (diaryContent.trim() === "") {
+      setAlertInfo({
+        isOpen: true,
+        title: t("validation_error"),
+        description: t("enter_content_alert"),
+      });
+      return;
+    }
+
+    const newEntry: DiaryEntry = {
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      title: diaryTitle,
+      content: diaryContent,
+      createdAt: new Date(),
+      mood: selectedMood,
+      image: selectedImage,
+      isShared: false,
+    }
+    setDiaryEntries((prev) => [newEntry, ...prev])
+    localStorage.setItem("diaryEntries", JSON.stringify([newEntry, ...diaryEntries]))
+    setDiaryTitle("")
+    setDiaryContent("")
+    setSelectedMood(undefined)
+    setSelectedImage(undefined)
+    setIsSaved(true)
+    setTimeout(() => setIsSaved(false), 2000)
   }
 
   const handleCopy = () => {
@@ -281,7 +311,7 @@ export default function Component() {
   };
 
   // ======================= 커뮤니티 영역 추가 =======================
-  type MoodKey = "joy" | "sad" | "anger" | "tired" | "love" | "worry"
+  type MoodKey = "joy" | "sad" | "anger" | "tired" | "love" | "worry" | "etc"
   interface CommunityPost {
     id: string
     title: string
@@ -300,7 +330,7 @@ export default function Component() {
   interface CommentItem { id: string; nick: string; text: string; liked: boolean; likeCount: number; replies: ReplyItem[] }
 
   const MOOD_LABEL: Record<MoodKey, string> = {
-    joy: "기쁨", sad: "슬픔", anger: "분노", tired: "피곤", love: "사랑", worry: "걱정",
+    joy: "기쁨", sad: "슬픔", anger: "분노", tired: "피곤", love: "사랑", worry: "걱정", etc: "기타",
   }
 
   const [posts, setPosts] = useState<CommunityPost[]>([
@@ -612,7 +642,7 @@ export default function Component() {
                     </div>
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    {["😊", "😢", "😡", "😴", "🥰", "🤔"].map((emoji) => (
+                    {["😊", "😢", "😡", "😴", "🥰", "🤔", "🫥"].map((emoji) => (
                       <Button key={emoji} onClick={() => setSelectedMood(emoji)}
                         className={`text-2xl p-2 rounded-full transition-all duration-200 ${selectedMood === emoji ?
                           (isDarkMode ? "bg-purple-600/50 border border-purple-400" : "bg-rose-300/50 border border-rose-400") :
@@ -745,6 +775,7 @@ export default function Component() {
                     { key: "tired", label: t("emotion_tiredness") },
                     { key: "love", label: t("emotion_love") },
                     { key: "worry", label: t("emotion_worry") },
+                    { key: "etc", label: t("emotion_etc") },
                   ].map(it => (
                     <button key={it.key} onClick={() => setCat(it.key as any)}
                       className={`relative pb-2 text-sm whitespace-nowrap ${cat === it.key ? "text-blue-400" : "text-gray-400"}`}>
@@ -1171,6 +1202,14 @@ export default function Component() {
       <LoginDialog isOpen={showLoginDialog} onClose={() => setShowLoginDialog(false)} isDarkMode={isDarkMode} />
       <SignupDialog isOpen={showSignupDialog} onClose={() => setShowSignupDialog(false)} isDarkMode={isDarkMode} />
 
+      <CustomAlertDialog
+        isOpen={alertInfo.isOpen}
+        onClose={() => setAlertInfo({ isOpen: false, title: "", description: "" })}
+        title={alertInfo.title}
+        description={alertInfo.description}
+        isDarkMode={isDarkMode}
+      />
+
       {/* 앱 프로모션 배너 */}
       {showAppPromo && (
         <div className={`fixed z-50 ${isMobile ? "left-3 right-3 bottom-3" : "right-6 bottom-6 w-[360px]"}`} aria-label={t("app_promo_aria_label")}>
@@ -1328,7 +1367,6 @@ export default function Component() {
                               >
                                 답글 {c.replies.length}
                               </button>
-                              <button className={`${isDarkMode ? "hover:text-current" : "hover:text-gray-800"}`}>더보기</button>
                             </div>
 
                             {expandedReplies[c.id] && (
