@@ -1328,7 +1328,6 @@ export default function Component() {
                               >
                                 답글 {c.replies.length}
                               </button>
-                              <button className={`${isDarkMode ? "hover:text-current" : "hover:text-gray-800"}`}>더보기</button>
                             </div>
 
                             {expandedReplies[c.id] && (
