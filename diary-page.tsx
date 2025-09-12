@@ -7,6 +7,7 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { ko, enUS, ja, zhCN, Locale } from 'date-fns/locale';
 
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -26,6 +27,7 @@ import {
 import { TopBannerAd, BottomBannerAd, SquareAd } from "@/components/kakao-ads"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { usePathname } from 'next/navigation'
+import { useAuth } from '@/contexts/auth-context'
 import { UserMenu } from '@/components/user-menu'
 import { LoginDialog } from '@/components/login-dialog'
 import { SignupDialog } from '@/components/signup-dialog'
@@ -65,6 +67,7 @@ export default function Component() {
   const dismissAppPromo = () => setShowAppPromo(false);
   const imageInputRef = useRef<HTMLInputElement>(null)
   const { t, i18n, ready } = useTranslation();
+  const { isLoggedIn, isLoading, user, logout } = useAuth();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -501,7 +504,26 @@ export default function Component() {
                   >
                     {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                   </Button>
-                  <UserMenu isDarkMode={isDarkMode} t={t} onLoginClick={() => setShowLoginDialog(true)} onSignupClick={() => setShowSignupDialog(true)} />
+                  {/* Auth-aware user menu */}
+                  <div className="flex items-center">
+                    {isLoading ? (
+                      <div className="w-20 h-8 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                    ) : isLoggedIn && user ? (
+                      <UserMenu 
+                        isDarkMode={isDarkMode} 
+                        t={t} 
+                        onLogout={logout} 
+                        userName={user.name} 
+                        userEmail={user.email} 
+                        avatarUrl={user.profileImageUrl} 
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" onClick={() => setShowLoginDialog(true)}>{t("login")}</Button>
+                        <Button onClick={() => { console.log('Signup button clicked!'); setShowSignupDialog(true); }}>{t("signup")}</Button>
+                      </div>
+                    )}
+                  </div>
                   
                   {/* 모바일 메뉴 버튼 */}
                   <div className="md:hidden">
@@ -515,12 +537,39 @@ export default function Component() {
                         <SheetHeader>
                           <SheetTitle className={isDarkMode ? '' : 'text-gray-800'}>{t("menu")}</SheetTitle>
                         </SheetHeader>
+                        
+                        {isLoggedIn && user && (
+                            <div className="px-4 py-2 flex items-center gap-3 border-b border-gray-200 dark:border-gray-700">
+                                <Avatar className="h-10 w-10">
+                                    <AvatarImage src={user.profileImageUrl} alt={user.name} />
+                                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0">
+                                    <p className="text-sm font-medium truncate">{user.name}</p>
+                                    <p className="text-xs truncate text-gray-500 dark:text-gray-400">{user.email}</p>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="grid gap-4 py-4">
                           <Button onClick={() => {setCurrentView(currentView === "write" ? "list" : "write"); closeSheet();}} variant="ghost" className={`justify-start ${isDarkMode ? '' : 'text-gray-800'}`}>{currentView === "write" ? t("diary_list") : t("write_diary")}</Button>
                           <Button onClick={() => {setCurrentView("community"); closeSheet();}} variant="ghost" className={`justify-start ${isDarkMode ? '' : 'text-gray-800'}`}>{t("community")}</Button>
                           <Button onClick={() => {setCurrentView("support"); closeSheet();}} variant="ghost" className={`justify-start ${isDarkMode ? '' : 'text-gray-800'}`}>{t("support_developer")}</Button>
                           <Button onClick={() => {setCurrentView("hall"); closeSheet();}} variant="ghost" className={`justify-start ${isDarkMode ? '' : 'text-gray-800'}`}>{t("hall_of_fame")}</Button>
                           <Button onClick={() => {setCurrentView("contact"); closeSheet();}} variant="ghost" className={`justify-start ${isDarkMode ? '' : 'text-gray-800'}`}>{t("contact_developer")}</Button>
+                          
+                          <div className="border-t border-gray-200 dark:border-gray-700 my-4" />
+
+                          {isLoading ? (
+                            <div className="w-full h-8 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                          ) : isLoggedIn ? (
+                            <Button onClick={() => {logout(); closeSheet();}} variant="ghost" className={`justify-start text-red-500 dark:text-red-400`}>{t("logout")}</Button>
+                          ) : (
+                            <>
+                              <Button onClick={() => {setShowLoginDialog(true); closeSheet();}} variant="ghost" className={`justify-start ${isDarkMode ? '' : 'text-gray-800'}`}>{t("login")}</Button>
+                              <Button onClick={() => {setShowSignupDialog(true); closeSheet();}} variant="ghost" className={`justify-start ${isDarkMode ? '' : 'text-gray-800'}`}>{t("signup")}</Button>
+                            </>
+                          )}
                         </div>
                       </SheetContent>
                     </Sheet>
