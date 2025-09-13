@@ -4,6 +4,6 @@ export default function Page() {
   return (
     <div>
       <DiaryPage />
-         </div>
+    </div>
   )
 }

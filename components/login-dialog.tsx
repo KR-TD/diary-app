@@ -66,6 +66,21 @@ export function LoginDialog({
     }
   }
 
+  const handleSocialLogin = async (provider: 'google' | 'kakao') => {
+    try {
+      const nextUrl = window.location.origin + '/auth/callback';
+      const response = await fetch(`https://code.haru2end.dedyn.io/api/user/${provider}?next=${encodeURIComponent(nextUrl)}`);
+      if (response.ok) {
+        const redirectUrl = await response.text();
+        window.location.href = redirectUrl;
+      } else {
+        setApiError(`소셜 로그인에 실패했습니다. (${provider})`);
+      }
+    } catch (error) {
+      setApiError("소셜 로그인 중 오류가 발생했습니다.");
+    }
+  }
+
   const surface = isDarkMode
     ? "bg-slate-900/80 text-gray-100 border border-slate-700 backdrop-blur-xl"
     : "bg-white/80 text-gray-900 border border-gray-200 backdrop-blur-xl"
@@ -150,15 +165,17 @@ export function LoginDialog({
               <button
                 type="button"
                 className={`w-full h-11 rounded-xl border flex items-center justify-center gap-2 transition hover:shadow-sm ${isDarkMode ? "bg-white text-gray-900 border-white/60" : "bg-white text-gray-900 border-slate-300"}`}
-                onClick={() => console.log("Google login")}
+                onClick={() => handleSocialLogin('google')}
               >
+                <img src="/icons/google.png" alt="Google" className="w-5 h-5" />
                 <span className="text-sm font-medium">{tx("continue_with_google", "Google로 계속하기")}</span>
               </button>
               <button
                 type="button"
                 className="w-full h-11 rounded-xl border border-[#E9D502] bg-[#FEE500] text-black flex items-center justify-center gap-2 hover:brightness-95 transition"
-                onClick={() => console.log("Kakao login")}
+                onClick={() => handleSocialLogin('kakao')}
               >
+                <img src="/icons/kakao.png" alt="Kakao" className="w-5 h-5" />
                 <span className="text-sm font-medium">{tx("continue_with_kakao", "카카오로 계속하기")}</span>
               </button>
             </div>
