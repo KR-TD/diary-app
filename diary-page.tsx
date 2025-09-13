@@ -245,8 +245,42 @@ export default function Component({ boardId }: { boardId?: string }) {
     list: BoardList[];
   }
 
-  interface ReplyItem { id: string; nick: string; text: string; liked: boolean; likeCount: number }
-  interface CommentItem { id: string; nick: string; text: string; liked: boolean; likeCount: number; replies: ReplyItem[] }
+  // Backend DTOs for Comments
+  interface CreateCommentRequest {
+    comment: string;
+  }
+
+  interface CommentList {
+    id: number;
+    userId: number;
+    comment: string;
+    profile: string;
+    writer: string;
+    createDate: string; // LocalDate in backend, so string in TS
+    heart: number;
+    liked: boolean;
+    replyCommentCount: number;
+    replies?: ReplyCommentList[];
+  }
+
+  interface CommentListResponse {
+    list: CommentList[];
+  }
+
+  interface ReplyCommentList {
+    id: number;
+    userId: number;
+    comment: string;
+    profile: string;
+    writer: string;
+    createDate: string; // LocalDate in backend, so string in TS
+    heart: number;
+    liked: boolean;
+  }
+
+  interface ReplyCommentListResponse {
+    list: ReplyCommentList[];
+  }
   const MOOD_LABEL: Record<MoodKey, string> = {
     JOY: "기쁨", SAD: "슬픔", ANGER: "분노", TIRED: "피곤", LOVE: "사랑", WORRY: "걱정", ETC: "기타",
   }
@@ -681,6 +715,7 @@ export default function Component({ boardId }: { boardId?: string }) {
       if (response.ok) {
         const data: BoardDetailResponse = await response.json();
         setOpenedPost(data);
+        fetchCommentsForPost(id, commentTab); // Fetch comments after successfully loading the post
       } else {
         const errorData = await response.json();
         setAlertInfo({
@@ -700,21 +735,17 @@ export default function Component({ boardId }: { boardId?: string }) {
   };
 
   const [postBookmarked, setPostBookmarked] = useState<Record<string, boolean>>({})
-  const [postComments, setPostComments] = useState<Record<string, CommentItem[]>>({
-    "1": [
-      { id: "c1", nick: "하루", text: "많이 기대 해주세요!", liked: false, likeCount: 2, replies: [{ id: "r1", nick: "bear_is_love", text: "저도요!", liked: false, likeCount: 1 }] },
-      { id: "c2", nick: "노나", text: "빨리 만났으면 좋겠어요😆", liked: false, likeCount: 0, replies: [] },
-    ],
-    "2": [{ id: "c3", nick: "곰돌", text: "그래도 빨리 만들게요!", liked: false, likeCount: 1, replies: [] }],
-    "3": [
-      { id: "c4", nick: "하늘좋아", text: "저는 코딩 할게요..", liked: false, likeCount: 0, replies: [] },
-      { id: "c5", nick: "봄봄", text: "아,, 졸리당", liked: false, likeCount: 0, replies: [{ id: "r2", nick: "곰캠", text: "고마워요 :)", liked: false, likeCount: 0 }] },
-    ],
-  })
+  const [postComments, setPostComments] = useState<Record<string, CommentList[]>>({})
   const [commentInput, setCommentInput] = useState("")
   const [replyInput, setReplyInput] = useState<Record<string, string>>({})
-  const [commentTab, setCommentTab] = useState<"hot" | "new">("hot")
+  const [commentTab, setCommentTab] = useState<"latest" | "popular">("latest")
   const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    if (openedPost) {
+      fetchCommentsForPost(openedPost.id, commentTab);
+    }
+  }, [commentTab, openedPost]);
 
   const filteredPosts = useMemo(() => {
     return posts
@@ -782,6 +813,229 @@ export default function Component({ boardId }: { boardId?: string }) {
   };
   const togglePostBookmark = (postId: number) => setPostBookmarked(prev => ({ ...prev, [postId.toString()]: !prev[postId.toString()] }))
 
+  const fetchCommentsForPost = async (boardId: number, type: 'latest' | 'popular') => {
+    const token = localStorage.getItem('accessToken');
+    const headers: HeadersInit = {};
+    let baseUrl = `https://code.haru2end.dedyn.io/api/comment`;
+    let endpoint = '';
+
+    if (type === 'latest') {
+      endpoint = `/list/${boardId}`;
+    } else if (type === 'popular') {
+      endpoint = `/popular/list/${boardId}`;
+    }
+
+    let url = '';
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      url = `${baseUrl}${endpoint}`;
+    } else {
+      url = `${baseUrl}/guest${endpoint}`;
+    }
+
+    try {
+      const response = await fetch(url, { headers });
+      if (response.ok) {
+        const data: CommentListResponse = await response.json();
+        setPostComments(prev => ({ ...prev, [boardId.toString()]: data.list }));
+      } else {
+        console.error(`Failed to fetch ${type} comments for board ${boardId}`);
+        setPostComments(prev => ({ ...prev, [boardId.toString()]: [] }));
+      }
+    } catch (error) {
+      console.error(`Error fetching ${type} comments for board ${boardId}:`, error);
+      setPostComments(prev => ({ ...prev, [boardId.toString()]: [] }));
+    }
+  };
+
+  const fetchRepliesForComment = async (commentId: number) => {
+    const token = localStorage.getItem('accessToken');
+    const headers: HeadersInit = {};
+    let url = `https://code.haru2end.dedyn.io/api/comment`;
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      url += `/reply/list/${commentId}`;
+    } else {
+      url += `/guest/reply/list/${commentId}`;
+    }
+
+    try {
+      const response = await fetch(url, { headers });
+      if (response.ok) {
+        const data: ReplyCommentListResponse = await response.json();
+        setPostComments(prev => {
+          const updatedComments = (prev[openedPost!.id.toString()] || []).map(comment => {
+            if (comment.id === commentId) {
+              // Assuming ReplyCommentList is compatible with CommentList's replies structure
+              // This might need adjustment if ReplyCommentList has different fields than CommentList
+              return { ...comment, replies: data.list };
+            }
+            return comment;
+          });
+          return { ...prev, [openedPost!.id.toString()]: updatedComments };
+        });
+      } else {
+        console.error(`Failed to fetch replies for comment ${commentId}`);
+      }
+    } catch (error) {
+      console.error(`Error fetching replies for comment ${commentId}:`, error);
+    }
+  };
+
+  const createComment = async (boardId: number, commentText: string) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setAlertInfo({
+        isOpen: true,
+        title: t("auth_error", "인증 오류"),
+        description: t("login_required", "로그인이 필요합니다."),
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://code.haru2end.dedyn.io/api/comment/create/${boardId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ comment: commentText }),
+      });
+
+      if (response.status === 201) {
+        setCommentInput("");
+        fetchCommentsForPost(boardId, commentTab); // Refresh comments
+        setPosts(ps => ps.map(p => (p.id === boardId ? { ...p, commentCount: p.commentCount + 1 } : p)));
+      } else {
+        const errorData = await response.json();
+        setAlertInfo({
+          isOpen: true,
+          title: t("comment_create_failed", "댓글 작성 실패"),
+          description: errorData.message || t("comment_create_error", "댓글 작성 중 오류가 발생했습니다."),
+        });
+      }
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      setAlertInfo({
+        isOpen: true,
+        title: t("network_error", "네트워크 오류"),
+        description: t("comment_network_error", "댓글 작성 중 네트워크 오류가 발생했습니다."),
+      });
+    }
+  };
+
+  const createReplyComment = async (commentId: number, replyText: string) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setAlertInfo({
+        isOpen: true,
+        title: t("auth_error", "인증 오류"),
+        description: t("login_required", "로그인이 필요합니다."),
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://code.haru2end.dedyn.io/api/comment/reply/create/${commentId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ comment: replyText }),
+      });
+
+      if (response.status === 201) {
+        setReplyInput(prev => ({ ...prev, [commentId.toString()]: "" }));
+        fetchRepliesForComment(commentId); // Refresh replies for this comment
+        // Optionally, update the replyCommentCount on the parent comment
+        setPostComments(prev => {
+          const updatedComments = (prev[openedPost!.id.toString()] || []).map(comment => {
+            if (comment.id === commentId) {
+              return { ...comment, replyCommentCount: comment.replyCommentCount + 1 };
+            }
+            return comment;
+          });
+          return { ...prev, [openedPost!.id.toString()]: updatedComments };
+        });
+      } else {
+        const errorData = await response.json();
+        setAlertInfo({
+          isOpen: true,
+          title: t("reply_create_failed", "답글 작성 실패"),
+          description: errorData.message || t("reply_create_error", "답글 작성 중 오류가 발생했습니다."),
+        });
+      }
+    } catch (error) {
+      console.error("Error creating reply comment:", error);
+      setAlertInfo({
+        isOpen: true,
+        title: t("network_error", "네트워크 오류"),
+        description: t("reply_network_error", "답글 작성 중 네트워크 오류가 발생했습니다."),
+      });
+    }
+  };
+
+  const handleToggleCommentLike = async (commentId: number, isCurrentlyLiked: boolean) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setAlertInfo({
+        isOpen: true,
+        title: t("auth_error", "인증 오류"),
+        description: t("login_required", "로그인이 필요합니다."),
+      });
+      return;
+    }
+
+    const method = isCurrentlyLiked ? 'DELETE' : 'POST';
+    const endpoint = isCurrentlyLiked ? `/like/cancel/${commentId}` : `/like/${commentId}`;
+
+    try {
+      const response = await fetch(`https://code.haru2end.dedyn.io/api/comment${endpoint}`, {
+        method: method,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok || response.status === 204) { // 204 for DELETE
+        // Optimistically update UI
+        setPostComments(prev => {
+          const updatedComments = (prev[openedPost!.id.toString()] || []).map(comment => {
+            if (comment.id === commentId) {
+              return { ...comment, liked: !isCurrentlyLiked, heart: comment.heart + (isCurrentlyLiked ? -1 : 1) };
+            }
+
+            const updatedReplies = (comment.replies || []).map((reply) => {
+              if (reply.id === commentId) {
+                return { ...reply, liked: !isCurrentlyLiked, heart: reply.heart + (isCurrentlyLiked ? -1 : 1) };
+              }
+              return reply;
+            });
+            return { ...comment, replies: updatedReplies };
+          });
+          return { ...prev, [openedPost!.id.toString()]: updatedComments };
+        });
+      } else {
+        const errorData = await response.json();
+        setAlertInfo({
+          isOpen: true,
+          title: t("like_action_failed", "좋아요/취소 실패"),
+          description: errorData.message || t("like_action_error", "좋아요/취소 처리 중 오류가 발생했습니다."),
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling comment like:", error);
+      setAlertInfo({
+        isOpen: true,
+        title: t("network_error", "네트워크 오류"),
+        description: t("like_network_error", "좋아요/취소 처리 중 네트워크 오류가 발생했습니다."),
+      });
+    }
+  };
+
   const handleSharePost = async () => {
     if (!openedPost) return;
 
@@ -807,38 +1061,18 @@ export default function Component({ boardId }: { boardId?: string }) {
     }
   };
   const submitComment = (postId: number) => {
-    if (!commentInput.trim()) return
-    const c: CommentItem = { id: `c-${Date.now()}`, nick: "익명", text: commentInput.trim(), liked: false, likeCount: 0, replies: [] }
-    setPostComments(prev => ({ ...prev, [postId.toString()]: [c, ...(prev[postId.toString()] || [])] }))
-    setCommentInput("")
-    setPosts(ps => ps.map(p => (p.id === postId ? { ...p, commentCount: p.commentCount + 1 } : p)))
-  }
-  const toggleCommentLike = (postId: number, commentId: string) => {
-    setPostComments(prev => {
-      const next = (prev[postId.toString()] || []).map(c => c.id !== commentId ? c : { ...c, liked: !c.liked, likeCount: c.likeCount + (!c.liked ? 1 : -1) })
-      return { ...prev, [postId.toString()]: next }
-    })
-  }
-  const submitReply = (postId: number, commentId: string) => {
-    const text = (replyInput[commentId] || "").trim()
-    if (!text) return
-    const r: ReplyItem = { id: `r-${Date.now()}`, nick: "익명", text, liked: false, likeCount: 0 }
-    setPostComments(prev => {
-      const next = (prev[postId.toString()] || []).map(c => c.id !== commentId ? c : { ...c, replies: [...c.replies, r] })
-      return { ...prev, [postId.toString()]: next }
-    })
-    setReplyInput(prev => ({ ...prev, [commentId]: "" }))
-  }
-  const toggleReplyLike = (postId: number, commentId: string, replyId: string) => {
-    setPostComments(prev => {
-      const next = (prev[postId.toString()] || []).map(c => {
-        if (c.id !== commentId) return c
-        const replies = c.replies.map(r => r.id !== replyId ? r : { ...r, liked: !r.liked, likeCount: r.likeCount + (!r.liked ? 1 : -1) })
-        return { ...c, replies }
-      })
-      return { ...prev, [postId.toString()]: next }
-    })
-  }
+    if (!commentInput.trim()) return;
+    createComment(postId, commentInput.trim());
+  };
+  
+  const submitReply = (postId: number, commentId: number) => {
+    const text = (replyInput[commentId.toString()] || "").trim();
+    if (!text) return;
+    createReplyComment(commentId, text);
+  };
+  const toggleReplyLike = (postId: number, commentId: number, replyId: number, isCurrentlyLiked: boolean) => {
+    handleToggleCommentLike(replyId, isCurrentlyLiked); // Assuming reply likes use the same endpoint with replyId as comment_id
+  };
 
   const handleViewDetails = async (id: number) => {
     const token = localStorage.getItem('accessToken');
@@ -1840,16 +2074,16 @@ export default function Component({ boardId }: { boardId?: string }) {
               <div className="px-5 pt-3 pb-4">
                 <div className="flex items-center gap-4 text-sm">
                   <button
-                    onClick={() => setCommentTab("hot")}
-                    className={`${commentTab === "hot" ? (isDarkMode ? "text-white" : "text-gray-800") : (isDarkMode ? "text-gray-400" : "text-gray-500")}`}
-                  >
-                    인기글
-                  </button>
-                  <button
-                    onClick={() => setCommentTab("new")}
-                    className={`${commentTab === "new" ? (isDarkMode ? "text-white" : "text-gray-800") : (isDarkMode ? "text-gray-400" : "text-gray-500")}`}
+                    onClick={() => setCommentTab("latest")}
+                    className={`${commentTab === "latest" ? (isDarkMode ? "text-white" : "text-gray-800") : (isDarkMode ? "text-gray-400" : "text-gray-500")}`}
                   >
                     최신순
+                  </button>
+                  <button
+                    onClick={() => setCommentTab("popular")}
+                    className={`${commentTab === "popular" ? (isDarkMode ? "text-white" : "text-gray-800") : (isDarkMode ? "text-gray-400" : "text-gray-500")}`}
+                  >
+                    인기글
                   </button>
                   <span className={`ml-auto text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
                     총 {(openedPost && postComments[openedPost.id.toString()] || []).length}개
@@ -1863,47 +2097,54 @@ export default function Component({ boardId }: { boardId?: string }) {
                     (openedPost && postComments[openedPost.id.toString()] || []).map((c) => (
                       <div key={c.id}>
                         <div className="flex items-start gap-3">
-                          <img src="/test/user.png" className="w-7 h-7 rounded-full" alt="" />
+                          <img src={c.profile || "/placeholder-user.jpg"} className="w-7 h-7 rounded-full" alt="" />
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
-                              <span className={`text-sm ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{c.nick}</span>
+                              <span className={`text-sm ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{c.writer}</span>
+                              <span className={`text-xs ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}>{formatTimeAgo(c.createDate)}</span>
                             </div>
-                            <p className={`text-sm mt-1 ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>{c.text}</p>
+                            <p className={`text-sm mt-1 ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>{c.comment}</p>
                             <div className={`mt-2 flex items-center gap-4 text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
                               <button
-                                onClick={() => toggleCommentLike(openedPost.id, c.id)}
+                                onClick={() => handleToggleCommentLike(c.id, c.liked)}
                                 className="inline-flex items-center gap-1 hover:text-current"
                               >
                                 <Heart className={`w-4 h-4 ${c.liked ? "fill-current text-pink-500" : (isDarkMode ? "" : "text-black")}`} />
-                                좋아요 {c.likeCount}
+                                좋아요 {c.heart}
                               </button>
                               <button
-                                onClick={() => setExpandedReplies((prev) => ({ ...prev, [c.id]: !prev[c.id] }))}
+                                onClick={() => {
+                                  setExpandedReplies((prev) => ({ ...prev, [c.id]: !prev[c.id] }));
+                                  if (!expandedReplies[c.id]) { // If replies are about to be expanded
+                                    fetchRepliesForComment(c.id);
+                                  }
+                                }}
                                 className={`${isDarkMode ? "hover:text-current" : "hover:text-gray-800"}`}
                               >
-                                답글 {c.replies.length}
+                                답글 {c.replyCommentCount}
                               </button>
                             </div>
 
                             {expandedReplies[c.id] && (
                               <div className="mt-3 space-y-3">
-                                {c.replies.length === 0 ? (
+                                {c.replies && c.replies.length === 0 ? (
                                   <div className={`text-xs ${isDarkMode ? "text-gray-500" : "text-gray-600"}`}>{t("community_no_replies")}</div>
                                 ) : (
-                                  c.replies.map((r) => (
+                                  c.replies && c.replies.map((r: any) => (
                                     <div key={r.id} className="flex items-start gap-3">
-                                      <img src="/images/sample/avatar-2.png" className="w-6 h-6 rounded-full" alt="" />
+                                      <img src={r.profile || "/placeholder-user.jpg"} className="w-6 h-6 rounded-full" alt="" />
                                       <div className="flex-1">
-                                        <div className={`text-xs ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{r.nick}</div>
-                                        <div className={`text-sm ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>{r.text}</div>
-                                        <div className="mt-1">
+                                        <div className={`text-xs ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{r.writer}</div>
+                                        <div className={`text-sm ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>{r.comment}</div>
+                                        <div className={`mt-1 flex items-center gap-2 text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
                                           <button
-                                            onClick={() => toggleReplyLike(openedPost.id, c.id, r.id)}
-                                            className={`text-xs ${isDarkMode ? "text-gray-400 hover:text-current" : "text-gray-600 hover:text-gray-800"} inline-flex items-center gap-1`}
+                                            onClick={() => handleToggleCommentLike(r.id, r.liked)}
+                                            className="inline-flex items-center gap-1 hover:text-current"
                                           >
                                             <Heart className={`w-3.5 h-3.5 ${r.liked ? "fill-current text-pink-500" : (isDarkMode ? "" : "text-black")}`} />
-                                            좋아요 {r.likeCount}
+                                            좋아요 {r.heart}
                                           </button>
+                                          <span className={`text-xs ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}>{formatTimeAgo(r.createDate)}</span>
                                         </div>
                                       </div>
                                     </div>
