@@ -60,7 +60,6 @@ export default function Component({ boardId }: { boardId?: string }) {
   useEffect(() => { setIsClient(true) }, [])
 
   useEffect(() => {
-<<<<<<< HEAD
     if (boardId) {
       const postId = parseInt(boardId, 10);
       if (!isNaN(postId)) {
@@ -69,18 +68,6 @@ export default function Component({ boardId }: { boardId?: string }) {
       }
     }
   }, [boardId]);
-=======
-    const path = window.location.pathname;
-    const match = path.match(/^\/board\/(\d+)/);
-    if (match) {
-        const postId = parseInt(match[1], 10);
-        if (!isNaN(postId)) {
-            setCurrentView("community");
-            handleViewCommunityPostDetails(postId);
-        }
-    }
-  }, []);
->>>>>>> 7e0785b9fadcdf8d7374af46b834ad470c867382
 
   const closeSheet = () => {
     setIsSheetOpen(false);
