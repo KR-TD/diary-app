@@ -24,7 +24,7 @@ const localeMap = {
 
 export function SupporterCard({ name, amount, date, message, tier, isDarkMode }: SupporterCardProps) {
   const { i18n } = useTranslation()
-  const currentLocale = localeMap[i18n.language] || enUS
+  const currentLocale = localeMap[i18n.language as keyof typeof localeMap] || enUS
 
   const formattedDate = formatDistanceToNow(new Date(date), {
     addSuffix: true,

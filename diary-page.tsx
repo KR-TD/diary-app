@@ -22,7 +22,7 @@ import {
 import {
   Moon, Star, Heart, Save, Sun, Play, Pause, Volume2, Music, List as ListIcon, Pencil, Award, Gem, Camera, Smartphone, Mail, Menu,
   // ▼ 커뮤니티 상세용 추가 아이콘
-  Eye, MessageSquare, Share2, Bookmark, ChevronLeft, MoreVertical, Send
+  Eye, MessageSquare, Share2, Bookmark, ChevronLeft, MoreVertical, Send, RefreshCw
 } from "lucide-react"
 import { TopBannerAd, BottomBannerAd, SquareAd } from "@/components/kakao-ads"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -39,6 +39,7 @@ export default function Component() {
   const [diaryContent, setDiaryContent] = useState("")
   const [selectedMood, setSelectedMood] = useState<string | undefined>(undefined)
   const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined)
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const isMobile = useIsMobile()
   const pathname = usePathname()
   const [isSaved, setIsSaved] = useState(false)
@@ -58,6 +59,18 @@ export default function Component() {
 
   useEffect(() => { setIsClient(true) }, [])
 
+  useEffect(() => {
+    const path = window.location.pathname;
+    const match = path.match(/^\/board\/(\d+)/);
+    if (match) {
+        const postId = parseInt(match[1], 10);
+        if (!isNaN(postId)) {
+            setCurrentView("community");
+            handleViewCommunityPostDetails(postId);
+        }
+    }
+  }, []);
+
   const closeSheet = () => {
     setIsSheetOpen(false);
   };
@@ -67,14 +80,43 @@ export default function Component() {
   const dismissAppPromo = () => setShowAppPromo(false);
   const imageInputRef = useRef<HTMLInputElement>(null)
   const { t, i18n, ready } = useTranslation();
-  const { isLoggedIn, isLoading, user, logout } = useAuth();
+  const { isLoggedIn, isLoading, user, login, logout } = useAuth();
+
+  // API-based diary fetching
+  const fetchDiaries = async () => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+
+    try {
+      const response = await fetch('https://code.haru2end.dedyn.io/api/diary/list', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // The API returns { list: [...] }, so we use data.list
+        setDiaryEntries(data.list || []);
+      } else {
+        console.error("Failed to fetch diaries");
+        setDiaryEntries([]);
+      }
+    } catch (error) {
+      console.error("Error fetching diaries:", error);
+      setDiaryEntries([]);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchDiaries();
+    }
+  }, [isLoggedIn]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedMode = localStorage.getItem('isDarkMode');
       if (savedMode !== null) setIsDarkMode(JSON.parse(savedMode));
-      const savedEntries = localStorage.getItem('diaryEntries');
-      if (savedEntries) setDiaryEntries(JSON.parse(savedEntries));
     }
   }, [])
   useEffect(() => {
@@ -108,6 +150,14 @@ export default function Component() {
 
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null)
 
+  const [communityCurrentPage, setCommunityCurrentPage] = useState(0);
+  const [communityTotalPages, setCommunityTotalPages] = useState(1);
+  const communityLimit = 5; // Number of items per page for community
+  const [isCommunityLoading, setIsCommunityLoading] = useState(false);
+  type MoodKey = "JOY" | "SAD" | "ANGER" | "TIRED" | "LOVE" | "WORRY" | "ETC";
+  type Cat = "latest" | "popular" | MoodKey;
+  const [cat, setCat] = useState<Cat>("latest");
+
   const emotionMap: { [key: string]: string } = {
     "😊": t("emotion_joy"),
     "😢": t("emotion_sadness"),
@@ -117,6 +167,26 @@ export default function Component() {
     "🤔": t("emotion_worry"),
     "🫥": t("emotion_etc"),
   }
+
+  const emojiToMoodEnumMap: { [key: string]: string } = {
+    "😊": "JOY",
+    "😢": "SAD",
+    "😡": "ANGER",
+    "😴": "TIRED",
+    "🥰": "LOVE",
+    "🤔": "WORRY",
+    "🫥": "ETC",
+  };
+
+  const moodEnumToEmojiMap: { [key: string]: string } = {
+    "JOY": "😊",
+    "SAD": "😢",
+    "ANGER": "😡",
+    "TIRED": "😴",
+    "LOVE": "🥰",
+    "WORRY": "🤔",
+    "ETC": "🫥",
+  };
 
   useEffect(() => {
     const scriptId = "kakao-adfit-script";
@@ -133,15 +203,54 @@ export default function Component() {
     return () => { clearTimeout(timer) };
   }, [currentView, pathname]);
 
+  // This interface now matches the backend DTO
   interface DiaryEntry {
-    id: string
-    date: string
-    title: string
-    content: string
-    createdAt: Date
-    mood?: string
-    image?: string
-    isShared?: boolean
+    id: number;
+    title: string;
+    content: string;
+    imageUrl: string | null;
+    mood: string; // Assuming Mood enum becomes a string
+    createDate: string; // e.g., "2024-01-01"
+    shared: boolean;
+  }
+
+  interface DiaryDetailResponse {
+    id: number;
+    title: string;
+    content: string;
+    imageUrl: string | null;
+    mood: string;
+    createDate: string;
+  }
+
+  interface BoardList {
+    id: number;
+    title: string;
+    profile: string;
+    thumbnail: string | null;
+    writer: string;
+    view: number;
+    commentCount: number;
+    loveCount: number;
+    mood: string;
+    boardCreateTime: string;
+  }
+
+  interface BoardDetailResponse extends BoardList {
+    content: string;
+    writeTime: string;
+    liked: boolean;
+  }
+
+  interface BoardListResponse {
+    totalPage: number;
+    list: BoardList[];
+  }
+
+  interface ReplyItem { id: string; nick: string; text: string; liked: boolean; likeCount: number }
+  interface CommentItem { id: string; nick: string; text: string; liked: boolean; likeCount: number; replies: ReplyItem[] }
+  const MOOD_LABEL: Record<MoodKey, string> = {
+    JOY: "기쁨", SAD: "슬픔", ANGER: "분노", TIRED: "피곤", LOVE: "사랑", WORRY: "걱정", ETC: "기타",
   }
 
   const handleAudioError = (e: Event | string) => {
@@ -203,7 +312,7 @@ export default function Component() {
   }
   const handleVolumeChange = (newVolume: number) => setVolume(newVolume)
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selectedMood) {
       setAlertInfo({
         isOpen: true,
@@ -229,46 +338,190 @@ export default function Component() {
       return;
     }
 
-    const newEntry: DiaryEntry = {
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      title: diaryTitle,
-      content: diaryContent,
-      createdAt: new Date(),
-      mood: selectedMood,
-      image: selectedImage,
-      isShared: false,
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setAlertInfo({
+        isOpen: true,
+        title: t("auth_error", "인증 오류"),
+        description: t("login_required", "로그인이 필요합니다."),
+      });
+      return;
     }
-    setDiaryEntries((prev) => [newEntry, ...prev])
-    localStorage.setItem("diaryEntries", JSON.stringify([newEntry, ...diaryEntries]))
-    setDiaryTitle("")
-    setDiaryContent("")
-    setSelectedMood(undefined)
-    setSelectedImage(undefined)
-    setIsSaved(true)
-    setTimeout(() => setIsSaved(false), 2000)
-  }
+
+    try {
+      let imageUrl: string | null = null;
+      if (selectedImageFile) {
+        const formData = new FormData();
+        formData.append("images", selectedImageFile);
+
+        const imageResponse = await fetch('https://code.haru2end.dedyn.io/api/image/diary/upload', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formData,
+        });
+
+        if (imageResponse.ok) {
+          const imageData = await imageResponse.json();
+          imageUrl = imageData.url;
+        } else {
+          const errorData = await imageResponse.json();
+          setAlertInfo({
+            isOpen: true,
+            title: t("image_upload_failed", "이미지 업로드 실패"),
+            description: errorData.message || t("image_upload_error", "이미지 업로드 중 오류가 발생했습니다."),
+          });
+          return;
+        }
+      }
+
+      const diaryRequest = {
+        title: diaryTitle,
+        content: diaryContent,
+        imageUrl: imageUrl,
+        mood: selectedMood ? emojiToMoodEnumMap[selectedMood] : undefined, // Convert emoji to enum string
+      };
+
+      const response = await fetch('https://code.haru2end.dedyn.io/api/diary/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(diaryRequest),
+      });
+
+      if (response.status === 201) {
+        setAlertInfo({
+          isOpen: true,
+          title: t("save_success", "일기 저장 성공"),
+          description: t("diary_saved_successfully", "일기가 성공적으로 저장되었습니다."),
+        });
+        fetchDiaries(); // Refresh the list
+        setDiaryTitle("");
+        setDiaryContent("");
+        setSelectedMood(undefined);
+        setSelectedImage(undefined);
+        setSelectedImageFile(null);
+        if (imageInputRef.current) imageInputRef.current.value = ""; // Clear file input
+        setIsSaved(true);
+        setTimeout(() => setIsSaved(false), 2000);
+      } else {
+        const errorData = await response.json();
+        setAlertInfo({
+          isOpen: true,
+          title: t("save_failed", "일기 저장 실패"),
+          description: errorData.message || t("diary_save_error", "일기 저장 중 오류가 발생했습니다."),
+        });
+      }
+    } catch (error) {
+      setAlertInfo({
+        isOpen: true,
+        title: t("network_error", "네트워크 오류"),
+        description: t("save_network_error", "일기 저장 중 네트워크 오류가 발생했습니다."),
+      });
+    }
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText("1000-8490-8014");
     setIsCopied(true); setTimeout(() => setIsCopied(false), 2000);
   };
-  const handleDelete = (id: string) => {
-    const updatedEntries = diaryEntries.filter(entry => entry.id !== id);
-    setDiaryEntries(updatedEntries);
-    localStorage.setItem("diaryEntries", JSON.stringify(updatedEntries));
-    if (selectedEntry && selectedEntry.id === id) setSelectedEntry(null);
+  const handleDelete = async (id: number) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setAlertInfo({
+        isOpen: true,
+        title: t("auth_error", "인증 오류"),
+        description: t("login_required", "로그인이 필요합니다."),
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://code.haru2end.dedyn.io/api/diary/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 204) {
+        const updatedEntries = diaryEntries.filter(entry => entry.id !== id);
+        setDiaryEntries(updatedEntries);
+        localStorage.setItem("diaryEntries", JSON.stringify(updatedEntries));
+        if (selectedEntry && selectedEntry.id === id) setSelectedEntry(null);
+        setAlertInfo({
+          isOpen: true,
+          title: t("delete_success", "삭제 성공"),
+          description: t("diary_deleted_successfully", "일기가 성공적으로 삭제되었습니다."),
+        });
+      } else {
+        const errorData = await response.json();
+        setAlertInfo({
+          isOpen: true,
+          title: t("delete_failed", "삭제 실패"),
+          description: errorData.message || t("diary_delete_error", "일기 삭제 중 오류가 발생했습니다."),
+        });
+      }
+    } catch (error) {
+      setAlertInfo({
+        isOpen: true,
+        title: t("network_error", "네트워크 오류"),
+        description: t("delete_network_error", "일기 삭제 중 네트워크 오류가 발생했습니다."),
+      });
+    }
   };
 
-  const handleShare = (id: string) => {
-    setDiaryEntries((prevEntries) =>
-      prevEntries.map((entry) =>
-        entry.id === id ? { ...entry, isShared: true } : entry
-      )
-    );
-    // Optionally, persist to localStorage here if needed
-    localStorage.setItem("diaryEntries", JSON.stringify(diaryEntries.map(entry => entry.id === id ? { ...entry, isShared: true } : entry)));
-    console.log('Shared entry:', id);
+  const handleShare = async (id: number) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setAlertInfo({
+        isOpen: true,
+        title: t("auth_error", "인증 오류"),
+        description: t("login_required", "로그인이 필요합니다."),
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://code.haru2end.dedyn.io/api/board/create/${id}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 201) {
+        setDiaryEntries((prevEntries) => {
+          const updatedEntries = prevEntries.map((entry) =>
+            entry.id === id ? { ...entry, shared: true } : entry
+          );
+          localStorage.setItem("diaryEntries", JSON.stringify(updatedEntries));
+          return updatedEntries;
+        });
+        setAlertInfo({
+          isOpen: true,
+          title: t("share_success", "공유 성공"),
+          description: t("diary_shared_successfully", "일기가 성공적으로 공유되었습니다."),
+        });
+      } else {
+        const errorData = await response.json();
+        setAlertInfo({
+          isOpen: true,
+          title: t("share_failed", "공유 실패"),
+          description: errorData.message || t("diary_share_error", "일기 공유 중 오류가 발생했습니다."),
+        });
+      }
+    } catch (error) {
+      console.error("Error sharing diary:", error);
+      setAlertInfo({
+        isOpen: true,
+        title: t("network_error", "네트워크 오류"),
+        description: t("share_network_error", "일기 공유 중 네트워크 오류가 발생했습니다."),
+      });
+    }
   };
 
   const formatEntryDate = (dateString: string) => {
@@ -287,12 +540,24 @@ export default function Component() {
     return dateString;
   };
 
+  const formatTimeAgo = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    
+    const locales: { [key: string]: Locale } = { ko, en: enUS, ja, zh: zhCN };
+    const currentLocale = locales[i18n.language] || ko;
+    
+    return formatDistanceToNowStrict(date, { addSuffix: true, locale: currentLocale });
+  };
+
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => setSelectedImage(reader.result as string);
       reader.readAsDataURL(file);
+      setSelectedImageFile(file);
     } else {
       setSelectedImage(undefined);
     }
@@ -314,60 +579,136 @@ export default function Component() {
   };
 
   // ======================= 커뮤니티 영역 추가 =======================
-  type MoodKey = "joy" | "sad" | "anger" | "tired" | "love" | "worry" | "etc"
-  interface CommunityPost {
-    id: string
-    title: string
-    content: string
-    mood?: MoodKey
-    thumb?: string
-    avatar?: string
-    author: string
-    createdAt: string
-    writeDate: string
-    views: number
-    likes: number
-    commentsCount: number
-  }
-  interface ReplyItem { id: string; nick: string; text: string; liked: boolean; likeCount: number }
-  interface CommentItem { id: string; nick: string; text: string; liked: boolean; likeCount: number; replies: ReplyItem[] }
+  const [posts, setPosts] = useState<BoardList[]>([])
 
-  const MOOD_LABEL: Record<MoodKey, string> = {
-    joy: "기쁨", sad: "슬픔", anger: "분노", tired: "피곤", love: "사랑", worry: "걱정", etc: "기타",
-  }
+  const handleCategoryChange = (newCategory: Cat) => {
+    if (newCategory === cat) return;
+    setCat(newCategory);
+    setCommunityCurrentPage(0);
+    setPosts([]);
+  };
 
-  const [posts, setPosts] = useState<CommunityPost[]>([
-    {
-      id: "p1", title: "커뮤니티 개발중에 있습니다!", content: "곧 일기를 공유할 수 있는 커뮤니티 출시 하겠습니다!", mood: "joy",
-      thumb: "/test/logo.png", avatar: "/test/profile.png", author: "곰겜", createdAt: "2025-09-01T13:00:00", writeDate: "2025-09-01T13:00:00", views: 27, likes: 5, commentsCount: 2
-    },
-    {
-      id: "p2", title: "개발 어려워용 엉엉", content: "커뮤니티 개발 너무 어려워요.. ㅠ,ㅠ", mood: "sad",
-      avatar: "/test/profile.png", author: "곰겜", createdAt: "2025-09-01T11:30:00", writeDate: "2025-09-01T11:30:00", views: 9, likes: 1, commentsCount: 1
-    },
-    {
-      id: "p3", title: "다들 잘자요", content: "8월 31일 일요일 저녁에 쓰며,,", mood: "love",
-      thumb: "/test/v.JPG", avatar: "/test/profile.png", author: "곰겜", createdAt: "2025-08-31T23:50:00", writeDate: "2025-08-31T23:50:00", views: 18, likes: 3, commentsCount: 2
-    },
-    {
-      id: "p4", title: "히히 개발 재밌당", content: "사실 즐겁지는 않은데 모르겠다ㅏㅏ.", mood: "joy",
-      thumb: "/test/beer.JPG", avatar: "/test/profile.png", author: "곰겜", createdAt: "2025-09-01T09:05:00", writeDate: "2025-09-01T09:05:00", views: 11, likes: 2, commentsCount: 0
-    },
-    {
-      id: "p5", title: "오류 해결하기 싫다", content: "아ㅏㅏ 오류좀 그만 나라.", mood: "anger",
-      avatar: "/test/profile.png", author: "곰겜", createdAt: "2025-09-01T02:00:00", writeDate: "2025-09-01T02:00:00", views: 18, likes: 1, commentsCount: 3
-    },
-  ])
-  const [openedPost, setOpenedPost] = useState<CommunityPost | null>(null)
-  const [postLiked, setPostLiked] = useState<Record<string, boolean>>({})
+  const handleRefresh = () => {
+    if (isCommunityLoading) return;
+    setCommunityCurrentPage(0);
+    setPosts([]);
+    fetchCommunityPosts(cat, 0, communityLimit);
+  };
+  const fetchCommunityPosts = async (category: Cat, page: number, limit: number) => {
+    if (isCommunityLoading) return;
+    setIsCommunityLoading(true);
+
+    const token = localStorage.getItem('accessToken');
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    let url = `https://code.haru2end.dedyn.io/api/board`;
+    if (category === "latest") {
+      url += `/list?page=${page}&limit=${limit}`;
+    } else if (category === "popular") {
+      url += `/popular/list?page=${page}&limit=${limit}`;
+    } else { // category is MoodKey
+      url += `/mood/list?page=${page}&limit=${limit}&mood=${category}`;
+    }
+
+    try {
+      const response = await fetch(url, { headers });
+
+      if (response.ok) {
+        const data: BoardListResponse = await response.json();
+        if (page === 0) {
+          setPosts(data.list);
+        } else {
+          setPosts(prev => {
+            const existingIds = new Set(prev.map(p => p.id));
+            const newPosts = data.list.filter(p => !existingIds.has(p.id));
+            return [...prev, ...newPosts];
+          });
+        }
+        setCommunityTotalPages(data.totalPage);
+      } else {
+        console.error("Failed to fetch community posts");
+        if (page === 0) setPosts([]);
+      }
+    } catch (error) {
+      console.error("Error fetching community posts:", error);
+      if (page === 0) setPosts([]);
+    } finally {
+      setIsCommunityLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (currentView === "community") {
+      fetchCommunityPosts(cat, communityCurrentPage, communityLimit);
+    }
+  }, [currentView, cat, communityCurrentPage]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        currentView === 'community' &&
+        window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 200 &&
+        !isCommunityLoading &&
+        communityCurrentPage < communityTotalPages - 1
+      ) {
+        setCommunityCurrentPage(prev => prev + 1);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [currentView, isCommunityLoading, communityCurrentPage, communityTotalPages]);
+
+  const [openedPost, setOpenedPost] = useState<BoardDetailResponse | null>(null)
+  const handleViewCommunityPostDetails = async (id: number) => {
+    const token = localStorage.getItem('accessToken');
+    const headers: HeadersInit = {};
+    let url = `https://code.haru2end.dedyn.io/api/board`;
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      url += `/${id}`;
+    } else {
+      url += `/guest/${id}`;
+    }
+
+    try {
+      const response = await fetch(url, {
+        headers,
+      });
+
+      if (response.ok) {
+        const data: BoardDetailResponse = await response.json();
+        setOpenedPost(data);
+      } else {
+        const errorData = await response.json();
+        setAlertInfo({
+          isOpen: true,
+          title: t("fetch_failed", "상세 정보 불러오기 실패"),
+          description: errorData.message || t("community_post_detail_error", "커뮤니티 게시물 상세 정보를 불러오는 중 오류가 발생했습니다."),
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching community post details:", error);
+      setAlertInfo({
+        isOpen: true,
+        title: t("network_error", "네트워크 오류"),
+        description: t("fetch_network_error", "커뮤니티 게시물 상세 정보를 불러오는 중 네트워크 오류가 발생했습니다."),
+      });
+    }
+  };
+
   const [postBookmarked, setPostBookmarked] = useState<Record<string, boolean>>({})
   const [postComments, setPostComments] = useState<Record<string, CommentItem[]>>({
-    p1: [
+    "1": [
       { id: "c1", nick: "하루", text: "많이 기대 해주세요!", liked: false, likeCount: 2, replies: [{ id: "r1", nick: "bear_is_love", text: "저도요!", liked: false, likeCount: 1 }] },
       { id: "c2", nick: "노나", text: "빨리 만났으면 좋겠어요😆", liked: false, likeCount: 0, replies: [] },
     ],
-    p2: [{ id: "c3", nick: "곰돌", text: "그래도 빨리 만들게요!", liked: false, likeCount: 1, replies: [] }],
-    p3: [
+    "2": [{ id: "c3", nick: "곰돌", text: "그래도 빨리 만들게요!", liked: false, likeCount: 1, replies: [] }],
+    "3": [
       { id: "c4", nick: "하늘좋아", text: "저는 코딩 할게요..", liked: false, likeCount: 0, replies: [] },
       { id: "c5", nick: "봄봄", text: "아,, 졸리당", liked: false, likeCount: 0, replies: [{ id: "r2", nick: "곰캠", text: "고마워요 :)", liked: false, likeCount: 0 }] },
     ],
@@ -376,58 +717,178 @@ export default function Component() {
   const [replyInput, setReplyInput] = useState<Record<string, string>>({})
   const [commentTab, setCommentTab] = useState<"hot" | "new">("hot")
   const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({})
-  type Cat = "latest" | "popular" | MoodKey
-  const [cat, setCat] = useState<Cat>("latest")
 
   const filteredPosts = useMemo(() => {
-    let arr = [...posts]
-    if (cat === "popular") arr.sort((a, b) => b.views - a.views)
-    else if (cat === "latest") arr.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    else arr = arr.filter(p => p.mood === cat)
-    return arr
-  }, [posts, cat])
+    return posts
+  }, [posts])
 
-  const togglePostLike = (postId: string) => {
-    setPostLiked(prev => {
-      const now = !prev[postId]
-      setPosts(ps => ps.map(p => (p.id === postId ? { ...p, likes: p.likes + (now ? 1 : -1) } : p)))
-      return { ...prev, [postId]: now }
-    })
-  }
-  const togglePostBookmark = (postId: string) => setPostBookmarked(prev => ({ ...prev, [postId]: !prev[postId] }))
-  const submitComment = (postId: string) => {
+  const togglePostLike = async (postId: number) => {
+    if (!openedPost || openedPost.id !== postId) return;
+
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setAlertInfo({
+        isOpen: true,
+        title: t("auth_error", "인증 오류"),
+        description: t("login_required", "로그인이 필요합니다."),
+      });
+      return;
+    }
+
+    const isCurrentlyLiked = openedPost.liked;
+    const method = isCurrentlyLiked ? 'DELETE' : 'POST';
+    const endpoint = isCurrentlyLiked ? `/like/cancel/${postId}` : `/like/${postId}`;
+
+    try {
+      const response = await fetch(`https://code.haru2end.dedyn.io/api/board${endpoint}`, {
+        method: method,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok || response.status === 204) { // 204 for DELETE
+        const newLiked = !isCurrentlyLiked;
+        const newLoveCount = openedPost.loveCount + (newLiked ? 1 : -1);
+
+        // Update the opened post
+        setOpenedPost(prev => {
+          if (!prev) return null;
+          return { ...prev, liked: newLiked, loveCount: newLoveCount };
+        });
+
+        // Update the loveCount in the main list
+        setPosts(prevPosts =>
+          prevPosts.map(post =>
+            post.id === postId
+              ? { ...post, loveCount: newLoveCount }
+              : post
+          )
+        );
+      } else {
+        const errorData = await response.json();
+        setAlertInfo({
+          isOpen: true,
+          title: t("like_action_failed", "좋아요/취소 실패"),
+          description: errorData.message || t("like_action_error", "좋아요/취소 처리 중 오류가 발생했습니다."),
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling post like:", error);
+      setAlertInfo({
+        isOpen: true,
+        title: t("network_error", "네트워크 오류"),
+        description: t("like_network_error", "좋아요/취소 처리 중 네트워크 오류가 발생했습니다."),
+      });
+    }
+  };
+  const togglePostBookmark = (postId: number) => setPostBookmarked(prev => ({ ...prev, [postId.toString()]: !prev[postId.toString()] }))
+
+  const handleSharePost = async () => {
+    if (!openedPost) return;
+
+    const shareData = {
+      title: openedPost.title,
+      text: `"${openedPost.title}" 글을 확인해보세요!`, 
+      url: `https://haru2end.com/board/${openedPost.id}`
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error("Share failed:", err);
+      }
+    } else {
+      navigator.clipboard.writeText(shareData.url);
+      setAlertInfo({
+        isOpen: true,
+        title: t("share_link_copied", "링크 복사 완료"),
+        description: t("share_link_copied_description", "게시글의 링크가 클립보드에 복사되었습니다."),
+      });
+    }
+  };
+  const submitComment = (postId: number) => {
     if (!commentInput.trim()) return
     const c: CommentItem = { id: `c-${Date.now()}`, nick: "익명", text: commentInput.trim(), liked: false, likeCount: 0, replies: [] }
-    setPostComments(prev => ({ ...prev, [postId]: [c, ...(prev[postId] || [])] }))
+    setPostComments(prev => ({ ...prev, [postId.toString()]: [c, ...(prev[postId.toString()] || [])] }))
     setCommentInput("")
-    setPosts(ps => ps.map(p => (p.id === postId ? { ...p, commentsCount: p.commentsCount + 1 } : p)))
+    setPosts(ps => ps.map(p => (p.id === postId ? { ...p, commentCount: p.commentCount + 1 } : p)))
   }
-  const toggleCommentLike = (postId: string, commentId: string) => {
+  const toggleCommentLike = (postId: number, commentId: string) => {
     setPostComments(prev => {
-      const next = (prev[postId] || []).map(c => c.id !== commentId ? c : { ...c, liked: !c.liked, likeCount: c.likeCount + (!c.liked ? 1 : -1) })
-      return { ...prev, [postId]: next }
+      const next = (prev[postId.toString()] || []).map(c => c.id !== commentId ? c : { ...c, liked: !c.liked, likeCount: c.likeCount + (!c.liked ? 1 : -1) })
+      return { ...prev, [postId.toString()]: next }
     })
   }
-  const submitReply = (postId: string, commentId: string) => {
+  const submitReply = (postId: number, commentId: string) => {
     const text = (replyInput[commentId] || "").trim()
     if (!text) return
     const r: ReplyItem = { id: `r-${Date.now()}`, nick: "익명", text, liked: false, likeCount: 0 }
     setPostComments(prev => {
-      const next = (prev[postId] || []).map(c => c.id !== commentId ? c : { ...c, replies: [...c.replies, r] })
-      return { ...prev, [postId]: next }
+      const next = (prev[postId.toString()] || []).map(c => c.id !== commentId ? c : { ...c, replies: [...c.replies, r] })
+      return { ...prev, [postId.toString()]: next }
     })
     setReplyInput(prev => ({ ...prev, [commentId]: "" }))
   }
-  const toggleReplyLike = (postId: string, commentId: string, replyId: string) => {
+  const toggleReplyLike = (postId: number, commentId: string, replyId: string) => {
     setPostComments(prev => {
-      const next = (prev[postId] || []).map(c => {
+      const next = (prev[postId.toString()] || []).map(c => {
         if (c.id !== commentId) return c
         const replies = c.replies.map(r => r.id !== replyId ? r : { ...r, liked: !r.liked, likeCount: r.likeCount + (!r.liked ? 1 : -1) })
         return { ...c, replies }
       })
-      return { ...prev, [postId]: next }
+      return { ...prev, [postId.toString()]: next }
     })
   }
+
+  const handleViewDetails = async (id: number) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setAlertInfo({
+        isOpen: true,
+        title: t("auth_error", "인증 오류"),
+        description: t("login_required", "로그인이 필요합니다."),
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://code.haru2end.dedyn.io/api/diary/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data: DiaryDetailResponse = await response.json();
+        // Convert DiaryDetailResponse to DiaryEntry for selectedEntry state
+        setSelectedEntry({
+          id: data.id,
+          title: data.title,
+          content: data.content,
+          imageUrl: data.imageUrl,
+          mood: data.mood, // Mood is already string enum
+          createDate: data.createDate, // LocalDate is string in TS
+          shared: false, // Default to false, as it's not in detail response
+        });
+      } else {
+        const errorData = await response.json();
+        setAlertInfo({
+          isOpen: true,
+          title: t("fetch_failed", "상세 정보 불러오기 실패"),
+          description: errorData.message || t("diary_detail_error", "일기 상세 정보를 불러오는 중 오류가 발생했습니다."),
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching diary details:", error);
+      setAlertInfo({
+        isOpen: true,
+        title: t("network_error", "네트워크 오류"),
+        description: t("fetch_network_error", "일기 상세 정보를 불러오는 중 네트워크 오류가 발생했습니다."),
+      });
+    }
+  };
 
   // ======================= 렌더 =======================
   return (
@@ -520,7 +981,7 @@ export default function Component() {
                     ) : (
                       <div className="flex items-center gap-2">
                         <Button variant="ghost" onClick={() => setShowLoginDialog(true)}>{t("login")}</Button>
-                        <Button onClick={() => { console.log('Signup button clicked!'); setShowSignupDialog(true); }}>{t("signup")}</Button>
+                        <Button variant="ghost" onClick={() => setShowSignupDialog(true)}>{t("signup")}</Button>
                       </div>
                     )}
                   </div>
@@ -746,11 +1207,11 @@ export default function Component() {
                   <>
                     {currentItems.map((entry, index) => (
                       <div key={entry.id}>
-                        <div className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md ${isDarkMode ? "border-purple-500/30 bg-slate-700/50 hover:bg-slate-700/70" : "border-purple-100 bg-white/50 hover:bg-white/70"}`} onClick={() => setSelectedEntry(entry)}>
+                        <div className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md ${isDarkMode ? "border-purple-500/30 bg-slate-700/50 hover:bg-slate-700/70" : "border-purple-100 bg-white/50 hover:bg-white/70"}`} onClick={() => handleViewDetails(entry.id)}>
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <h3 className={`text-base sm:text-lg font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>{entry.title}</h3>
-                              <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>{formatEntryDate(entry.date)} {entry.mood && <span className="ml-2 text-base">{entry.mood} {emotionMap[entry.mood]}</span>}</span>
+                              <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>{formatEntryDate(entry.createDate)} {entry.mood && <span className="ml-2 text-base">{moodEnumToEmojiMap[entry.mood]}</span>}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Button
@@ -758,7 +1219,7 @@ export default function Component() {
                                 variant="ghost"
                                 size="sm"
                                 className={`text-xs px-2 py-1 rounded ${isDarkMode ? "text-blue-400 hover:bg-blue-900/20" : "text-blue-600 hover:bg-blue-100"}`}
-                                disabled={entry.isShared}
+                                disabled={entry.shared}
                               >
                                 {t("share_to_community")}
                               </Button>
@@ -771,7 +1232,7 @@ export default function Component() {
                           <div className={`text-right text-xs sm:text-sm mt-2 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
                             {entry.content.length}{t("characters")}
                           </div>
-                          {entry.image && (<div className="mt-3"><img src={entry.image} alt="Diary" className="w-full h-auto max-h-32 object-cover rounded-lg border border-gray-300/50" /></div>)}
+                          {entry.imageUrl && (<div className="mt-3"><img src={entry.imageUrl} alt="Diary" className="w-full h-auto max-h-32 object-cover rounded-lg border border-gray-300/50" /></div>)}
                         </div>
                         {(index + 1) % 5 === 0 && index < diaryEntries.length - 1 && (
                           <div className="my-4 sm:my-6 text-center">
@@ -814,55 +1275,63 @@ export default function Component() {
             <Card className={`backdrop-blur-sm shadow-2xl transition-all duration-500 ${isDarkMode ? "bg-slate-900/80 border border-slate-700/50" : "bg-white/90 border border-rose-200/50"}`}>
               <CardHeader className="pb-2">
                 {/* 상단 탭 */}
-                <div className="flex items-center gap-4 overflow-x-auto no-scrollbar px-1">
-                  {[
-                    { key: "latest", label: t("community_latest") },
-                    { key: "popular", label: t("community_popular") },
-                    { key: "joy", label: t("emotion_joy") },
-                    { key: "sad", label: t("emotion_sadness") },
-                    { key: "anger", label: t("emotion_anger") },
-                    { key: "tired", label: t("emotion_tiredness") },
-                    { key: "love", label: t("emotion_love") },
-                    { key: "worry", label: t("emotion_worry") },
-                    { key: "etc", label: t("emotion_etc") },
-                  ].map(it => (
-                    <button key={it.key} onClick={() => setCat(it.key as any)}
-                      className={`relative pb-2 text-sm whitespace-nowrap ${cat === it.key ? "text-blue-400" : "text-gray-400"}`}>
-                      {it.label}
-                      <span className={`absolute left-0 right-0 -bottom-[1px] h-[2px] rounded ${cat === it.key ? "bg-blue-400" : "bg-transparent"}`} />
-                    </button>
-                  ))}
+                <div className="flex items-center justify-between gap-4 px-1">
+                  <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
+                    {[
+                      { key: "latest", label: t("community_latest") },
+                      { key: "popular", label: t("community_popular") },
+                      { key: "JOY", label: t("emotion_joy") },
+                      { key: "SAD", label: t("emotion_sadness") },
+                      { key: "ANGER", label: t("emotion_anger") },
+                      { key: "TIRED", label: t("emotion_tiredness") },
+                      { key: "LOVE", label: t("emotion_love") },
+                      { key: "WORRY", label: t("emotion_worry") },
+                      { key: "ETC", label: t("emotion_etc") },
+                    ].map(it => (
+                      <button key={it.key} onClick={() => handleCategoryChange(it.key as Cat)}
+                        className={`relative pb-2 text-sm whitespace-nowrap ${cat === it.key ? "text-blue-400" : "text-gray-400"}`}>
+                        {it.label}
+                        <span className={`absolute left-0 right-0 -bottom-[1px] h-[2px] rounded ${cat === it.key ? "bg-blue-400" : "bg-transparent"}`} />
+                      </button>
+                    ))}
+                  </div>
+                  <Button onClick={handleRefresh} variant="ghost" size="icon" className="flex-shrink-0">
+                    <RefreshCw className={`w-4 h-4 ${isCommunityLoading && communityCurrentPage === 0 ? 'animate-spin' : ''}`} />
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
                 <ul className="divide-y divide-white/5">
                   {filteredPosts.map((p) => (
-                    <li key={p.id} className="px-3 sm:px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer" onClick={() => setOpenedPost(p)}>
+                    <li key={p.id} className="px-3 sm:px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer" onClick={() => handleViewCommunityPostDetails(p.id)}>
                       <div className="flex items-start gap-3">
-                        <img src={p.avatar || "/placeholder.svg?height=40&width=40"} alt="avatar" className="w-10 h-10 rounded-full object-cover border border-white/10" />
+                        <img src={p.profile || "/placeholder.svg?height=40&width=40"} alt="avatar" className="w-10 h-10 rounded-full object-cover border border-white/10" />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <h3 className={`text-sm sm:text-base font-semibold truncate ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>{p.title}</h3>
-                            {p.mood && (<span className="text-[11px] px-2 py-[2px] rounded-full bg-white/5 text-gray-300">{MOOD_LABEL[p.mood]}</span>)}
+                            {p.mood && (<span className="text-[11px] px-2 py-[2px] rounded-full bg-white/5 text-gray-300">{MOOD_LABEL[p.mood as MoodKey]}</span>)}
                           </div>
-                          <p className={`text-xs mt-1 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                            [{p.author}]{' '}
-                            {formatDistanceToNowStrict(new Date(p.createdAt), {
-                              addSuffix: true,
-                              locale: { ko, en: enUS, ja, zh: zhCN }[i18n.language] || ko,
-                            })}
-                          </p>
-                          <div className="mt-1 flex items-center gap-3 text-[12px]">
-                            <span className="flex items-center gap-1 text-gray-400"><Eye className="w-4 h-4" /> {p.views}</span>
-                            <span className="flex items-center gap-1 text-gray-400"><MessageSquare className="w-4 h-4" /> {p.commentsCount}</span>
-                            <span className="flex items-center gap-1 text-gray-400"><Heart className="w-4 h-4" /> {p.likes}</span>
+                          <div className={`mt-1 flex items-center gap-2 text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                            <span>{p.writer}</span>
+                            <span className={`${isDarkMode ? "text-gray-600" : "text-gray-400"}`}>·</span>
+                            <span>{formatTimeAgo(p.boardCreateTime)}</span>
+                          </div>
+                          <div className="mt-2 flex items-center gap-3 text-[12px]">
+                            <span className="flex items-center gap-1 text-gray-400"><Eye className="w-4 h-4" /> {p.view}</span>
+                            <span className="flex items-center gap-1 text-gray-400"><MessageSquare className="w-4 h-4" /> {p.commentCount}</span>
+                            <span className="flex items-center gap-1 text-gray-400"><Heart className="w-4 h-4" /> {p.loveCount}</span>
                           </div>
                         </div>
-                        {p.thumb && (<img src={p.thumb} alt="" className="flex-none w-16 h-16 rounded-md object-cover border border-white/10" />)}
+                        {p.thumbnail && (<img src={p.thumbnail} alt="" className="flex-none w-16 h-16 rounded-md object-cover border border-white/10" />)}
                       </div>
                     </li>
                   ))}
                 </ul>
+                {isCommunityLoading && (
+                  <div className="text-center p-4">
+                    <p className={`${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>Loading...</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ) : currentView === "support" ? (
@@ -1229,13 +1698,13 @@ export default function Component() {
                 </div>
                 <div className="flex justify-end items-center mb-4">
                   <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                    {formatEntryDate(selectedEntry.date)} {selectedEntry.mood && <span className="ml-2 text-xl">{selectedEntry.mood}</span>}
+                    {formatEntryDate(selectedEntry.createDate)} {selectedEntry.mood && <span className="ml-2 text-xl">{moodEnumToEmojiMap[selectedEntry.mood]}</span>}
                   </p>
                 </div>
               </CardHeader>
               <CardContent>
-                {selectedEntry.image && (<div className="mb-4 cursor-pointer" onClick={() => setZoomedImage(selectedEntry.image || null)}>
-                  <img src={selectedEntry.image} alt="Diary" className="w-full h-auto max-h-96 object-contain rounded-xl border-2 border-dashed border-gray-400/50" />
+                {selectedEntry.imageUrl && (<div className="mb-4 cursor-pointer" onClick={() => setZoomedImage(selectedEntry.imageUrl || null)}>
+                  <img src={selectedEntry.imageUrl} alt="Diary" className="w-full h-auto max-h-96 object-contain rounded-xl border-2 border-dashed border-gray-400/50" />
                 </div>)}
                 <p className={`text-base leading-relaxed whitespace-pre-wrap ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{selectedEntry.content}</p>
                 <div className={`text-right text-xs sm:text-sm mt-4 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
@@ -1315,17 +1784,17 @@ export default function Component() {
               <div className="px-5 pt-4">
                 <div className="flex items-center gap-2 mb-3">
                   <img
-                    src={openedPost.avatar || "/placeholder.svg"}
+                    src={openedPost.profile || "/placeholder.svg"}
                     className={`w-6 h-6 rounded-full border ${isDarkMode ? "border-white/10" : "border-gray-200"}`}
                     alt="avatar"
                   />
-                  <span className={isDarkMode ? "text-gray-300 text-sm" : "text-gray-700 text-sm"}>{openedPost.author}</span>
+                  <span className={isDarkMode ? "text-gray-300 text-sm" : "text-gray-700 text-sm"}>{openedPost.writer}</span>
                   <span className={`ml-auto text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                    {formatEntryDate(openedPost.writeDate)}
+                    {formatEntryDate(openedPost.writeTime)}
                   </span>
                   {openedPost.mood && (
                     <span className={`ml-2 text-sm ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                      {MOOD_LABEL[openedPost.mood]}
+                      {MOOD_LABEL[openedPost.mood as MoodKey]}
                     </span>
                   )}
                 </div>
@@ -1333,13 +1802,13 @@ export default function Component() {
               </div>
 
               {/* 이미지 */}
-              {openedPost.thumb && (
+              {openedPost.thumbnail && (
                 <div className="px-5 mt-3">
                   <img
-                    src={openedPost.thumb}
+                    src={openedPost.thumbnail}
                     alt="post"
                     className={`w-full rounded-lg border ${isDarkMode ? "border-white/10" : "border-gray-200"} object-cover max-h-56 cursor-pointer`}
-                    onClick={() => setZoomedImage(openedPost.thumb || null)}
+                    onClick={() => setZoomedImage(openedPost.thumbnail || null)}
                   />
                 </div>
               )}
@@ -1355,13 +1824,13 @@ export default function Component() {
               <div className="px-5 mt-5">
                 <div className={`grid grid-cols-3 text-center py-2 border-y ${isDarkMode ? "border-white/10" : "border-gray-200"}`}>
                   <button onClick={() => togglePostLike(openedPost.id)} className="flex items-center justify-center gap-2 py-1">
-                    <Heart className={`w-5 h-5 ${postLiked[openedPost.id] ? "fill-current text-pink-500" : (isDarkMode ? "" : "text-black")}`} />
-                    <span className="text-sm">{openedPost.likes + (postLiked[openedPost.id] ? 1 : 0)} 좋아요</span>
+                    <Heart className={`w-5 h-5 ${openedPost.liked ? "fill-current text-pink-500" : (isDarkMode ? "" : "text-black")}`} />
+                    <span className="text-sm">{openedPost.loveCount} 좋아요</span>
                   </button>
-                  <div className="flex items-center justify-center gap-2 py-1">
+                  <button onClick={handleSharePost} className="flex items-center justify-center gap-2 py-1">
                     <Share2 className={`w-5 h-5 ${isDarkMode ? "text-gray-400" : "text-gray-800"}`} />
                     <span className="text-sm">공유하기</span>
-                  </div>
+                  </button>
                   <button onClick={() => togglePostBookmark(openedPost.id)} className="flex items-center justify-center gap-2 py-1">
                     <Bookmark className={`w-5 h-5 ${postBookmarked[openedPost.id] ? "fill-current text-yellow-500" : (isDarkMode ? "" : "text-black")}`} />
                     <span className="text-sm">{postBookmarked[openedPost.id] ? "저장됨" : "담아두기"}</span>
@@ -1385,15 +1854,15 @@ export default function Component() {
                     최신순
                   </button>
                   <span className={`ml-auto text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                    총 {(postComments[openedPost.id] || []).length}개
+                    총 {(openedPost && postComments[openedPost.id.toString()] || []).length}개
                   </span>
                 </div>
 
                 <div className="mt-3 space-y-5">
-                  {(postComments[openedPost.id] || []).length === 0 ? (
+                  {(openedPost && postComments[openedPost.id.toString()] || []).length === 0 ? (
                     <p className={`text-sm ${isDarkMode ? "text-gray-500" : "text-gray-600"}`}>{t("community_no_comments")}</p>
                   ) : (
-                    (postComments[openedPost.id] || []).map((c) => (
+                    (openedPost && postComments[openedPost.id.toString()] || []).map((c) => (
                       <div key={c.id}>
                         <div className="flex items-start gap-3">
                           <img src="/test/user.png" className="w-7 h-7 rounded-full" alt="" />
@@ -1408,7 +1877,7 @@ export default function Component() {
                                 className="inline-flex items-center gap-1 hover:text-current"
                               >
                                 <Heart className={`w-4 h-4 ${c.liked ? "fill-current text-pink-500" : (isDarkMode ? "" : "text-black")}`} />
-                                좋아요 {c.likeCount + (c.liked ? 1 : 0)}
+                                좋아요 {c.likeCount}
                               </button>
                               <button
                                 onClick={() => setExpandedReplies((prev) => ({ ...prev, [c.id]: !prev[c.id] }))}
@@ -1435,7 +1904,7 @@ export default function Component() {
                                             className={`text-xs ${isDarkMode ? "text-gray-400 hover:text-current" : "text-gray-600 hover:text-gray-800"} inline-flex items-center gap-1`}
                                           >
                                             <Heart className={`w-3.5 h-3.5 ${r.liked ? "fill-current text-pink-500" : (isDarkMode ? "" : "text-black")}`} />
-                                            좋아요 {r.likeCount + (r.liked ? 1 : 0)}
+                                            좋아요 {r.likeCount}
                                           </button>
                                         </div>
                                       </div>

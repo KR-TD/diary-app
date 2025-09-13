@@ -189,6 +189,21 @@ export function SignupDialog({ isOpen, onClose, isDarkMode }: SignupDialogProps)
     }
   };
 
+  const handleSocialLogin = async (provider: 'google' | 'kakao') => {
+    try {
+      const nextUrl = window.location.origin + '/auth/callback';
+      const response = await fetch(`https://code.haru2end.dedyn.io/api/user/${provider}?next=${encodeURIComponent(nextUrl)}`);
+      if (response.ok) {
+        const redirectUrl = await response.text();
+        window.location.href = redirectUrl;
+      } else {
+        setApiError(`소셜 로그인에 실패했습니다. (${provider})`);
+      }
+    } catch (error) {
+      setApiError("소셜 로그인 중 오류가 발생했습니다.");
+    }
+  }
+
   const surfaceBase = isDarkMode
     ? "bg-slate-900/70 text-gray-100 border-white/10"
     : "bg-white/70 text-gray-800 border-slate-200/70";
@@ -332,6 +347,34 @@ export function SignupDialog({ isOpen, onClose, isDarkMode }: SignupDialogProps)
             <Button type="submit" disabled={!formValid || submitting} className={`w-full h-11 font-medium rounded-xl transition shadow-md hover:shadow-lg ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-400 disabled:bg-emerald-700/40" : "bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-300/60"}`}>
               {submitting ? tx("processing", "처리 중...") : tx("signup", "회원가입")}
             </Button>
+
+            {/* OR Separator */}
+            <div className="relative text-center">
+              <div className={`h-px ${isDarkMode ? "bg-white/10" : "bg-slate-200"}`} />
+              <span className={`px-3 text-xs absolute -translate-x-1/2 left-1/2 -top-2 ${isDarkMode ? "bg-slate-900/70 text-slate-300" : "bg-white/70 text-slate-500"}`}>
+                {tx("or", "또는")}
+              </span>
+            </div>
+
+            {/* Social Logins */}
+            <div className="grid gap-2">
+              <button
+                type="button"
+                className={`w-full h-11 rounded-xl border flex items-center justify-center gap-2 transition hover:shadow-sm ${isDarkMode ? "bg-white text-gray-900 border-white/60" : "bg-white text-gray-900 border-slate-300"}`}
+                onClick={() => handleSocialLogin('google')}
+              >
+                <img src="/icons/google.png" alt="Google" className="w-5 h-5" />
+                <span className="text-sm font-medium">{tx("continue_with_google", "Google로 계속하기")}</span>
+              </button>
+              <button
+                type="button"
+                className="w-full h-11 rounded-xl border border-[#E9D502] bg-[#FEE500] text-black flex items-center justify-center gap-2 hover:brightness-95 transition"
+                onClick={() => handleSocialLogin('kakao')}
+              >
+                <img src="/icons/kakao.png" alt="Kakao" className="w-5 h-5" />
+                <span className="text-sm font-medium">{tx("continue_with_kakao", "카카오로 계속하기")}</span>
+              </button>
+            </div>
           </div>
         </form>
       </DialogContent>
