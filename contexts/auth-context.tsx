@@ -44,6 +44,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       if (response.ok) {
         const userData = await response.json();
+        // Fix for Mixed Content error from Kakao CDN
+        if (userData.profileImageUrl && userData.profileImageUrl.startsWith('http://k.kakaocdn.net')) {
+          userData.profileImageUrl = userData.profileImageUrl.replace('http://', 'https://');
+        }
         setUser(userData);
       } else {
         logout();
