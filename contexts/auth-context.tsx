@@ -12,7 +12,7 @@ interface UserResponse {
 interface AuthContextType {
   isLoggedIn: boolean;
   user: UserResponse | null;
-  login: (atk: string, rtk: string) => void;
+  login: (atk: string, rtk: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }

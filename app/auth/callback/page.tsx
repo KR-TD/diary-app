@@ -10,19 +10,23 @@ function CallbackComponent() {
   const { login } = useAuth();
 
   useEffect(() => {
-    const atk = searchParams.get('atk');
-    const rtk = searchParams.get('rtk');
+    const handleLogin = async () => {
+      const atk = searchParams.get('atk');
+      const rtk = searchParams.get('rtk');
 
-    if (atk && rtk) {
-      login(atk, rtk);
-      // Redirect to home page after successful login
-      router.push('/');
-    } else {
-      // Handle cases where tokens are not provided
-      console.error('Social login failed: Tokens not found in URL');
-      alert('소셜 로그인에 실패했습니다.');
-      router.push('/');
-    }
+      if (atk && rtk) {
+        await login(atk, rtk);
+        // Redirect to home page after successful login
+        router.push('/');
+      } else {
+        // Handle cases where tokens are not provided
+        console.error('Social login failed: Tokens not found in URL');
+        alert('소셜 로그인에 실패했습니다.');
+        router.push('/');
+      }
+    };
+
+    handleLogin();
   }, [searchParams, login, router]);
 
   return (
