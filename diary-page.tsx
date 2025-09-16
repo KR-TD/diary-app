@@ -75,6 +75,13 @@ export default function Component({ boardId }: { boardId?: string }) {
 
 
   const [showAppPromo, setShowAppPromo] = useState(true);
+
+  useEffect(() => {
+    if (window.isApp || localStorage.getItem('isApp') === 'true') {
+      setShowAppPromo(false);
+    }
+  }, []);
+
   const dismissAppPromo = () => setShowAppPromo(false);
   const imageInputRef = useRef<HTMLInputElement>(null)
   const { t, i18n, ready } = useTranslation();
