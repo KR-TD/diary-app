@@ -90,7 +90,7 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
     } finally {
       setIsCommunityLoading(false);
     }
-  }, [isCommunityLoading]);
+  }, []);
 
   const fetchCommentsForPost = useCallback(async (boardId: number, type: 'latest' | 'popular') => {
     const token = localStorage.getItem('accessToken');
