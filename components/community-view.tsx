@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Eye, MessageSquare, Share2, Bookmark, ChevronLeft, MoreVertical, Send, 
 import { formatDistanceToNowStrict } from 'date-fns';
 import { ko, enUS, ja, zhCN, Locale } from 'date-fns/locale';
 
-// Types from parent
+// Types
 interface BoardList {
   id: number; title: string; profile: string; thumbnail: string | null; writer: string; view: number;
   commentCount: number; loveCount: number; mood: string; boardCreateTime: string;
@@ -58,16 +58,16 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
     LOVE: t("emotion_love"), WORRY: t("emotion_worry"), ETC: t("emotion_etc"),
   };
 
-  const formatTimeAgo = (dateString: string) => {
+  const formatTimeAgo = useCallback((dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return '';
     const locales: { [key: string]: Locale } = { ko, en: enUS, ja, zh: zhCN };
     return formatDistanceToNowStrict(date, { addSuffix: true, locale: locales[i18n.language] || ko });
-  };
+  }, [i18n.language]);
 
-  const fetchCommunityPosts = async (category: Cat, page: number, limit: number) => {
-    if (isCommunityLoading) return;
+  const fetchCommunityPosts = useCallback(async (category: Cat, page: number, limit: number) => {
+    if (isCommunityLoading && page === 0) return;
     setIsCommunityLoading(true);
     const token = localStorage.getItem('accessToken');
     const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -90,18 +90,29 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
     } finally {
       setIsCommunityLoading(false);
     }
-  };
+  }, [isCommunityLoading]);
 
-  const handleViewCommunityPostDetails = async (id: number) => {
+  const fetchCommentsForPost = useCallback(async (boardId: number, type: 'latest' | 'popular') => {
     const token = localStorage.getItem('accessToken');
-    const headers: HeadersInit = {};
-    let url = `https://code.haru2end.dedyn.io/api/board`;
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-      url += `/${id}`;
-    } else {
-      url += `/guest/${id}`;
+    const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
+    const url = `https://code.haru2end.dedyn.io/api/comment/${token ? '' : 'guest/'}list/${type}/${boardId}`;
+    try {
+      const response = await fetch(url, { headers });
+      if (response.ok) {
+        const data: CommentListResponse = await response.json();
+        setPostComments(prev => ({ ...prev, [boardId.toString()]: data.list || [] }));
+      } else {
+        setPostComments(prev => ({ ...prev, [boardId.toString()]: [] }));
+      }
+    } catch (error) {
+      console.error(`Error fetching comments for board ${boardId}:`, error);
     }
+  }, []);
+
+  const handleViewCommunityPostDetails = useCallback(async (id: number) => {
+    const token = localStorage.getItem('accessToken');
+    const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
+    const url = `https://code.haru2end.dedyn.io/api/board/${token ? id : `guest/${id}`}`;
     try {
       const response = await fetch(url, { headers });
       if (response.ok) {
@@ -114,21 +125,40 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
     } catch (error) {
       setAlertInfo({ isOpen: true, title: t("network_error"), description: t("fetch_network_error") });
     }
-  };
+  }, [commentTab, fetchCommentsForPost, setAlertInfo, t]);
 
-  // Other handlers like togglePostLike, createComment, etc. would be moved or defined here.
-  // For brevity, they are simplified or omitted in this step.
+  const createComment = useCallback(async (boardId: number, commentText: string) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return setAlertInfo({ isOpen: true, title: t("auth_error"), description: t("login_required") });
+    try {
+      const response = await fetch(`https://code.haru2end.dedyn.io/api/comment/create/${boardId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ comment: commentText }),
+      });
+      if (response.status === 201) {
+        setCommentInput("");
+        fetchCommentsForPost(boardId, commentTab);
+        setPosts(ps => ps.map(p => (p.id === boardId ? { ...p, commentCount: p.commentCount + 1 } : p)));
+      } else {
+        const errorData = await response.json();
+        setAlertInfo({ isOpen: true, title: t("comment_create_failed"), description: errorData.message || t("comment_create_error") });
+      }
+    } catch (error) {
+      setAlertInfo({ isOpen: true, title: t("network_error"), description: t("comment_network_error") });
+    }
+  }, [commentTab, fetchCommentsForPost, setAlertInfo, t]);
 
   useEffect(() => {
     if (initialPostId) {
       const postId = parseInt(initialPostId, 10);
       if (!isNaN(postId)) handleViewCommunityPostDetails(postId);
     }
-  }, [initialPostId]);
+  }, [initialPostId, handleViewCommunityPostDetails]);
 
   useEffect(() => {
     fetchCommunityPosts(cat, communityCurrentPage, 10);
-  }, [cat, communityCurrentPage]);
+  }, [cat, communityCurrentPage, fetchCommunityPosts]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -151,11 +181,12 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
     if (isCommunityLoading) return;
     setCommunityCurrentPage(0);
     setPosts([]);
-    fetchCommunityPosts(cat, 0, 10);
   };
 
-  // The full implementations of comment/like/share handlers would be here
-  const placeholderHandler = () => setAlertInfo({ isOpen: true, title: "TBD", description: "Functionality to be implemented." });
+  const submitComment = () => {
+    if (!commentInput.trim() || !openedPost) return;
+    createComment(openedPost.id, commentInput.trim());
+  };
 
   return (
     <>
@@ -182,11 +213,11 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <ul className="divide-y divide-white/5">
+          <ul className="divide-y divide-slate-800">
             {posts.map((p) => (
               <li key={p.id} className="px-3 sm:px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer" onClick={() => handleViewCommunityPostDetails(p.id)}>
                 <div className="flex items-start gap-3">
-                  <img src={p.profile || "/placeholder.svg?height=40&width=40"} alt="avatar" className="w-10 h-10 rounded-full object-cover border border-white/10" />
+                  <Avatar className="w-10 h-10 border border-slate-700"><AvatarImage src={p.profile || undefined} alt="avatar" /><AvatarFallback>{p.writer.charAt(0)}</AvatarFallback></Avatar>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <h3 className={`text-sm sm:text-base font-semibold truncate ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>{p.title}</h3>
@@ -223,13 +254,47 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
                </div>
                <Button variant="ghost" size="icon"><MoreVertical className="w-5 h-5" /></Button>
              </CardHeader>
-            <div className="flex-1 overflow-y-auto">
-              {/* Content and comments would go here */}
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4">
+              <h2 className="text-xl sm:text-2xl font-bold">{openedPost.title}</h2>
+              <div className="flex items-center gap-3 text-xs text-gray-500">
+                <span>{formatTimeAgo(openedPost.writeTime)}</span>
+                <span className="flex items-center gap-1"><Eye className="w-4 h-4" /> {openedPost.view}</span>
+              </div>
+              {openedPost.imageUrl && <div className="my-4"><img src={openedPost.imageUrl} alt={openedPost.title} className="w-full h-auto rounded-lg border" /></div>}
+              <div className={`prose prose-sm dark:prose-invert max-w-none leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{openedPost.content}</div>
+              <div className="p-2 border-y flex items-center justify-around">
+                <Button variant="ghost" onClick={() => {}} className={`flex items-center gap-1.5 text-sm ${openedPost.liked ? 'text-pink-500 font-semibold' : ''}`}><Heart className="w-5 h-5" /> {openedPost.loveCount}</Button>
+                <Button variant="ghost" className="flex items-center gap-1.5 text-sm"><Bookmark className="w-5 h-5" /> {t('bookmark')}</Button>
+                <Button variant="ghost" onClick={() => {}} className="flex items-center gap-1.5 text-sm"><Share2 className="w-5 h-5" /> {t('share')}</Button>
+              </div>
+              <div>
+                <div className="flex items-center gap-4 border-b mb-4">
+                  <button onClick={() => setCommentTab('latest')} className={`pb-2 text-sm ${commentTab === 'latest' ? 'font-semibold border-b-2 border-current' : 'text-gray-500'}`}>{t('comments_latest')}</button>
+                  <button onClick={() => setCommentTab('popular')} className={`pb-2 text-sm ${commentTab === 'popular' ? 'font-semibold border-b-2 border-current' : 'text-gray-500'}`}>{t('comments_popular')}</button>
+                </div>
+                <div className="space-y-4">
+                  {(postComments[openedPost.id.toString()] || []).map(comment => (
+                    <div key={comment.id}>
+                      <div className="flex items-start gap-2">
+                        <Avatar className="w-8 h-8"><AvatarImage src={comment.profile} alt={comment.writer} /><AvatarFallback>{comment.writer.charAt(0)}</AvatarFallback></Avatar>
+                        <div className="flex-1">
+                          <div className="text-sm"><span className="font-semibold">{comment.writer}</span><span className="text-gray-500 ml-2 text-xs">{formatTimeAgo(comment.createDate)}</span></div>
+                          <p className="text-sm mt-1">{comment.comment}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Button variant="ghost" size="sm" onClick={() => {}} className={`text-xs h-auto px-2 py-1 ${comment.liked ? 'text-pink-500' : 'text-gray-500'}`}><Heart className="w-3 h-3 mr-1" /> {comment.heart}</Button>
+                            <Button variant="ghost" size="sm" onClick={() => setExpandedReplies(prev => ({...prev, [comment.id]: !prev[comment.id]}))} className="text-xs h-auto px-2 py-1 text-gray-500">{t('reply')} {comment.replyCommentCount > 0 && comment.replyCommentCount}</Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="p-2 sm:p-3 border-t shrink-0">
               <div className="flex items-center gap-2">
-                <Input placeholder={t('add_comment_placeholder', '댓글을 입력하세요...')} className="h-10" />
-                <Button className="h-10"><Send className="w-4 h-4" /></Button>
+                <Input value={commentInput} onChange={(e) => setCommentInput(e.target.value)} placeholder={t('add_comment_placeholder')} className="h-10" />
+                <Button onClick={submitComment} disabled={!commentInput.trim()} className="h-10"><Send className="w-4 h-4" /></Button>
               </div>
             </div>
           </Card>
