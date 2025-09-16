@@ -140,5 +140,7 @@
   "nickname_hint": "2자 이상 10자 이하로 입력해주세요.",
   "email_hint": "인증에 사용될 유효한 이메일을 입력하세요.",
   "password_hint": "8자 이상, 영문, 숫자, 특수문자를 포함해야 합니다.",
-  "confirm_password_hint": "비밀번호가 일치해야 합니다."
+  "confirm_password_hint": "비밀번호가 일치해야 합니다.",
+  "settings": "설정",
+  "logout": "로그아웃"
 }

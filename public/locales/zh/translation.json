@@ -140,5 +140,7 @@
   "nickname_hint": "请输入2到10个字符。",
   "email_hint": "请输入有效的电子邮件以进行验证。",
   "password_hint": "必须至少8个字符，并包含字母、数字和特殊字符。",
-  "confirm_password_hint": "密码必须匹配。"
+  "confirm_password_hint": "密码必须匹配。",
+  "settings": "设置",
+  "logout": "登出"
 }

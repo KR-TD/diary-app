@@ -140,5 +140,7 @@
   "nickname_hint": "Please enter between 2 and 10 characters.",
   "email_hint": "Enter a valid email for verification.",
   "password_hint": "Must be at least 8 characters and include letters, numbers, and special characters.",
-  "confirm_password_hint": "Passwords must match."
+  "confirm_password_hint": "Passwords must match.",
+  "settings": "Settings",
+  "logout": "Logout"
 }
