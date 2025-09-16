@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
 
 interface UserResponse {
   id: number;
@@ -24,7 +24,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchUser = async () => {
+  const logout = useCallback(() => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setIsLoggedIn(false);
+    setUser(null);
+    window.location.href = '/';
+  }, []);
+
+  const fetchUser = useCallback(async () => {
     const token = localStorage.getItem('accessToken');
     if (!token) return;
 
@@ -38,14 +46,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userData = await response.json();
         setUser(userData);
       } else {
-        // Handle error, maybe logout
         logout();
       }
     } catch (error) {
       console.error("Failed to fetch user info", error);
       logout();
     }
-  };
+  }, [logout]);
 
   useEffect(() => {
     const verifyToken = async () => {
@@ -59,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           });
           if (response.ok && await response.json()) {
             setIsLoggedIn(true);
-            await fetchUser(); // Fetch user info after verifying token
+            await fetchUser();
           } else {
             setIsLoggedIn(false);
             setUser(null);
@@ -76,22 +83,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     };
     verifyToken();
-  }, []);
+  }, [fetchUser]);
 
-  const login = async (atk: string, rtk: string) => {
+  const login = useCallback(async (atk: string, rtk: string) => {
     localStorage.setItem('accessToken', atk);
     localStorage.setItem('refreshToken', rtk);
     setIsLoggedIn(true);
-    await fetchUser(); // Fetch user info on login
-  };
-
-  const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    setIsLoggedIn(false);
-    setUser(null);
-    window.location.href = '/';
-  };
+    await fetchUser();
+  }, [fetchUser]);
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, user, login, logout, isLoading }}>
