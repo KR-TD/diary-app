@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { useTranslation } from "react-i18next"
 import { useAuth } from "@/contexts/auth-context"
+import { Eye, EyeOff } from "lucide-react"
 
 interface LoginDialogProps {
   isOpen: boolean
@@ -27,6 +28,7 @@ export function LoginDialog({
   const { login } = useAuth()
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
+  const [showPw, setShowPw] = React.useState(false)
   const [submitting, setSubmitting] = React.useState(false)
   const [apiError, setApiError] = React.useState<string | null>(null)
 
@@ -120,6 +122,7 @@ export function LoginDialog({
               onChange={(e) => setEmail(e.target.value)}
               className={inputStyle}
               required
+              autoComplete="username"
             />
           </div>
 
@@ -127,15 +130,30 @@ export function LoginDialog({
             <Label htmlFor="password" className="text-sm font-medium">
               {tx("password", "비밀번호")}
             </Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={inputStyle}
-              required
-            />
+            {/* Input만 감싸는 relative 컨테이너 */}
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPw ? "text" : "password"}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`${inputStyle} pr-10`}
+                required
+                autoComplete="current-password"
+              />
+              {/* 비밀번호 입력 시에만 아이콘 표시 */}
+              {password.length > 0 && (
+                <button
+                  type="button"
+                  aria-label={showPw ? tx("hide_password", "비밀번호 숨기기") : tx("show_password", "비밀번호 보기")}
+                  onClick={() => setShowPw(v => !v)}
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md ${isDarkMode ? "hover:bg-slate-700/60" : "hover:bg-slate-200/70"}`}
+                >
+                  {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              )}
+            </div>
           </div>
 
           {apiError && (
@@ -150,35 +168,35 @@ export function LoginDialog({
             {submitting ? tx("logging_in", "로그인 중...") : tx("login", "로그인")}
           </Button>
         </form>
-        
-        <div className="px-6 pb-6 space-y-4">
-            {/* 구분선 */}
-            <div className="relative text-center">
-              <div className={`h-px ${isDarkMode ? "bg-white/10" : "bg-slate-200"}`} />
-              <span className={`px-3 text-xs absolute -translate-x-1/2 left-1/2 -top-2 ${isDarkMode ? "bg-slate-900/70 text-slate-300" : "bg-white/70 text-slate-500"}`}>
-                {tx("or", "또는")}
-              </span>
-            </div>
 
-            {/* 소셜 */}
-            <div className="grid gap-2">
-              <button
-                type="button"
-                className={`w-full h-11 rounded-xl border flex items-center justify-center gap-2 transition hover:shadow-sm ${isDarkMode ? "bg-white text-gray-900 border-white/60" : "bg-white text-gray-900 border-slate-300"}`}
-                onClick={() => handleSocialLogin('google')}
-              >
-                <img src="/icons/google.png" alt="Google" className="w-5 h-5" />
-                <span className="text-sm font-medium">{tx("continue_with_google", "Google로 계속하기")}</span>
-              </button>
-              <button
-                type="button"
-                className="w-full h-11 rounded-xl border border-[#E9D502] bg-[#FEE500] text-black flex items-center justify-center gap-2 hover:brightness-95 transition"
-                onClick={() => handleSocialLogin('kakao')}
-              >
-                <img src="/icons/kakao.png" alt="Kakao" className="w-5 h-5" />
-                <span className="text-sm font-medium">{tx("continue_with_kakao", "카카오로 계속하기")}</span>
-              </button>
-            </div>
+        <div className="px-6 pb-6 space-y-4">
+          {/* 구분선 */}
+          <div className="relative text-center">
+            <div className={`h-px ${isDarkMode ? "bg-white/10" : "bg-slate-200"}`} />
+            <span className={`px-3 text-xs absolute -translate-x-1/2 left-1/2 -top-2 ${isDarkMode ? "bg-slate-900/70 text-slate-300" : "bg-white/70 text-slate-500"}`}>
+              {tx("or", "또는")}
+            </span>
+          </div>
+
+          {/* 소셜 */}
+          <div className="grid gap-2">
+            <button
+              type="button"
+              className={`w-full h-11 rounded-xl border flex items-center justify-center gap-2 transition hover:shadow-sm ${isDarkMode ? "bg-white text-gray-900 border-white/60" : "bg-white text-gray-900 border-slate-300"}`}
+              onClick={() => handleSocialLogin('google')}
+            >
+              <img src="/icons/google.png" alt="Google" className="w-5 h-5" />
+              <span className="text-sm font-medium">{tx("continue_with_google", "Google로 계속하기")}</span>
+            </button>
+            <button
+              type="button"
+              className="w-full h-11 rounded-xl border border-[#E9D502] bg-[#FEE500] text-black flex items-center justify-center gap-2 hover:brightness-95 transition"
+              onClick={() => handleSocialLogin('kakao')}
+            >
+              <img src="/icons/kakao.png" alt="Kakao" className="w-5 h-5" />
+              <span className="text-sm font-medium">{tx("continue_with_kakao", "카카오로 계속하기")}</span>
+            </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
