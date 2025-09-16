@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,6 @@ interface ReplyCommentList {
   id: number; userId: number; comment: string; profile: string; writer: string; createDate: string;
   heart: number; liked: boolean;
 }
-interface ReplyCommentListResponse { list: ReplyCommentList[]; }
 type MoodKey = "JOY" | "SAD" | "ANGER" | "TIRED" | "LOVE" | "WORRY" | "ETC";
 type Cat = "latest" | "popular" | MoodKey;
 
@@ -52,6 +51,7 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
   const [replyInput, setReplyInput] = useState<Record<string, string>>({});
   const [commentTab, setCommentTab] = useState<"latest" | "popular">("latest");
   const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({});
+  const isLoadingRef = useRef(false);
 
   const MOOD_LABEL: Record<MoodKey, string> = {
     JOY: t("emotion_joy"), SAD: t("emotion_sadness"), ANGER: t("emotion_anger"), TIRED: t("emotion_tiredness"),
@@ -67,8 +67,10 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
   }, [i18n.language]);
 
   const fetchCommunityPosts = useCallback(async (category: Cat, page: number, limit: number) => {
-    if (isCommunityLoading && page === 0) return;
+    if (isLoadingRef.current) return;
+    isLoadingRef.current = true;
     setIsCommunityLoading(true);
+
     const token = localStorage.getItem('accessToken');
     const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
     let url = `https://code.haru2end.dedyn.io/api/board`;
@@ -89,6 +91,7 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
       console.error("Error fetching posts:", error);
     } finally {
       setIsCommunityLoading(false);
+      isLoadingRef.current = false;
     }
   }, []);
 
@@ -178,9 +181,10 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
   };
 
   const handleRefresh = () => {
-    if (isCommunityLoading) return;
+    if (isLoadingRef.current) return;
     setCommunityCurrentPage(0);
     setPosts([]);
+    fetchCommunityPosts(cat, 0, 10);
   };
 
   const submitComment = () => {
