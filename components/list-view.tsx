@@ -97,10 +97,7 @@ export function ListView({
                       </Button>
                     </div>
                   </div>
-                  <p className={`text-sm sm:text-base line-clamp-3 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{entry.content}</p>
-                  <div className={`text-right text-xs sm:text-sm mt-2 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                    {entry.content.length}{t("characters")}
-                  </div>
+                  
                   {entry.imageUrl && (<div className="mt-3"><img src={entry.imageUrl} alt="Diary" className="w-full h-auto max-h-32 object-cover rounded-lg border border-gray-300/50" /></div>)}
                 </div>
                 {(index + 1) % 5 === 0 && index < diaryEntries.length - 1 && (

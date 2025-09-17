@@ -95,6 +95,40 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
     LOVE: t("emotion_love"), WORRY: t("emotion_worry"), ETC: t("emotion_etc"),
   };
 
+  const CommunityPostItem = React.memo(({ p, isDarkMode, handleViewCommunityPostDetails, formatTimeAgo, MOOD_LABEL }: {
+    p: BoardList;
+    isDarkMode: boolean;
+    handleViewCommunityPostDetails: (id: number) => void;
+    formatTimeAgo: (dateString: string) => string;
+    MOOD_LABEL: Record<MoodKey, string>;
+  }) => {
+    return (
+      <li key={p.id} className="px-3 sm:px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer"
+        onClick={() => handleViewCommunityPostDetails(p.id)}>
+        <div className="flex items-start gap-3">
+          <Avatar className="w-10 h-10 border border-slate-700"><AvatarImage src={p.profile || undefined} alt="avatar" /><AvatarFallback>{p.writer.charAt(0)}</AvatarFallback></Avatar>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className={`text-sm sm:text-base font-semibold truncate ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>{p.title}</h3>
+              {p.mood && (<span className="text-[11px] px-2 py-[2px] rounded-full bg-white/5 text-gray-300">{MOOD_LABEL[p.mood as MoodKey]}</span>)}
+            </div>
+            <div className={`mt-1 flex items-center gap-2 text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+              <span>{p.writer}</span>
+              <span className={`${isDarkMode ? "text-gray-600" : "text-gray-400"}`}>·</span>
+              <span>{formatTimeAgo(p.boardCreateTime)}</span>
+            </div>
+            <div className="mt-2 flex items-center gap-3 text-[12px]">
+              <span className="flex items-center gap-1 text-gray-400"><Eye className="w-4 h-4" /> {p.view}</span>
+              <span className="flex items-center gap-1 text-gray-400"><MessageSquare className="w-4 h-4" /> {p.commentCount}</span>
+              <span className="flex items-center gap-1 text-gray-400"><Heart className="w-4 h-4" /> {p.loveCount}</span>
+            </div>
+          </div>
+          {p.thumbnail && (<img src={p.thumbnail} alt="" className="flex-none w-16 h-16 rounded-md object-cover border border-white/10" />)}
+        </div>
+      </li>
+    );
+  });
+
   const formatTimeAgo = useCallback((dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -271,6 +305,23 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
   const togglePostLike = useCallback(async (postId: number, isLiked: boolean) => {
     const token = localStorage.getItem('accessToken');
     if (!token) { setAlertInfo({ isOpen: true, title: t('auth_error'), description: t('login_required') }); return }
+
+    // Store previous states for potential rollback
+    const previousOpenedPost = openedPost;
+    const previousPosts = posts;
+
+    // Optimistic UI Update for openedPost
+    setOpenedPost(prev => prev ? ({
+      ...prev,
+      liked: !isLiked,
+      loveCount: prev.loveCount + (isLiked ? -1 : 1),
+    }) : prev);
+
+    // Optimistic UI Update for posts list
+    setPosts(prev => prev.map(p =>
+      p.id === postId ? { ...p, loveCount: p.loveCount + (isLiked ? -1 : 1) } : p
+    ));
+
     const method = isLiked ? 'DELETE' : 'POST';
     const endpoint = isLiked ? `/like/cancel/${postId}` : `/like/${postId}`;
     try {
@@ -278,20 +329,20 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
         method,
         headers: { 'Authorization': `Bearer ${token}` },
       });
-      if (response.ok || response.status === 204) {
-        setOpenedPost(prev => prev ? ({
-          ...prev,
-          liked: !isLiked,
-          loveCount: prev.loveCount + (isLiked ? -1 : 1),
-        }) : prev);
-        setPosts(prev => prev.map(p =>
-          p.id === postId ? { ...p, loveCount: p.loveCount + (isLiked ? -1 : 1) } : p
-        ));
+      if (!response.ok && response.status !== 204) {
+        // If API call fails, revert UI
+        setOpenedPost(previousOpenedPost);
+        setPosts(previousPosts);
+        const errorData = await response.json();
+        setAlertInfo({ isOpen: true, title: t('network_error'), description: errorData.message || t('like_network_error') });
       }
     } catch (e) {
+      // If network error, revert UI
+      setOpenedPost(previousOpenedPost);
+      setPosts(previousPosts);
       setAlertInfo({ isOpen: true, title: t('network_error'), description: t('like_network_error') });
     }
-  }, [t, setAlertInfo]);
+  }, [t, setAlertInfo, openedPost, posts]);
 
   const handleSharePost = useCallback(() => {
     if (!openedPost) return;
@@ -331,6 +382,12 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
       if (!isNaN(postId)) handleViewCommunityPostDetails(postId);
     }
   }, [initialPostId, handleViewCommunityPostDetails]);
+
+  useEffect(() => {
+    if (openedPost?.id) {
+      fetchCommentsForPost(openedPost.id, commentTab);
+    }
+  }, [commentTab, openedPost?.id, fetchCommentsForPost]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -383,29 +440,14 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
         <CardContent className="p-0">
           <ul className="divide-y divide-slate-800">
             {posts.map((p) => (
-              <li key={p.id} className="px-3 sm:px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer"
-                onClick={() => handleViewCommunityPostDetails(p.id)}>
-                <div className="flex items-start gap-3">
-                  <Avatar className="w-10 h-10 border border-slate-700"><AvatarImage src={p.profile || undefined} alt="avatar" /><AvatarFallback>{p.writer.charAt(0)}</AvatarFallback></Avatar>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className={`text-sm sm:text-base font-semibold truncate ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>{p.title}</h3>
-                      {p.mood && (<span className="text-[11px] px-2 py-[2px] rounded-full bg-white/5 text-gray-300">{MOOD_LABEL[p.mood as MoodKey]}</span>)}
-                    </div>
-                    <div className={`mt-1 flex items-center gap-2 text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                      <span>{p.writer}</span>
-                      <span className={`${isDarkMode ? "text-gray-600" : "text-gray-400"}`}>·</span>
-                      <span>{formatTimeAgo(p.boardCreateTime)}</span>
-                    </div>
-                    <div className="mt-2 flex items-center gap-3 text-[12px]">
-                      <span className="flex items-center gap-1 text-gray-400"><Eye className="w-4 h-4" /> {p.view}</span>
-                      <span className="flex items-center gap-1 text-gray-400"><MessageSquare className="w-4 h-4" /> {p.commentCount}</span>
-                      <span className="flex items-center gap-1 text-gray-400"><Heart className="w-4 h-4" /> {p.loveCount}</span>
-                    </div>
-                  </div>
-                  {p.thumbnail && (<img src={p.thumbnail} alt="" className="flex-none w-16 h-16 rounded-md object-cover border border-white/10" />)}
-                </div>
-              </li>
+              <CommunityPostItem
+                key={p.id}
+                p={p}
+                isDarkMode={isDarkMode}
+                handleViewCommunityPostDetails={handleViewCommunityPostDetails}
+                formatTimeAgo={formatTimeAgo}
+                MOOD_LABEL={MOOD_LABEL}
+              />
             ))}
           </ul>
           {isCommunityLoading && <div className="text-center p-4"><p className={`${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>Loading...</p></div>}
