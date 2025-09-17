@@ -26,6 +26,7 @@ import { SignupDialog } from '@/components/signup-dialog'
 import { CustomAlertDialog } from "@/components/custom-alert-dialog";
 import { MusicPlayer } from "@/components/music-player";
 import { WriteView } from "@/components/write-view";
+import { MobileMenuSheet } from "@/components/mobile-menu-sheet";
 import { ListView } from "@/components/list-view";
 import { CommunityView } from "@/components/community-view";
 import { SupportView } from "@/components/support-view";
@@ -169,7 +170,20 @@ export default function Component({ boardId }: { boardId?: string }) {
                   <div className="flex items-center">
                     {isLoading ? <div className="w-20 h-8 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse" /> : isLoggedIn && user ? <UserMenu isDarkMode={isDarkMode} t={t} onLogout={logout} userName={user.name} userEmail={user.email} avatarUrl={user.profileImageUrl} /> : <div className="flex items-center gap-2"><Button variant="ghost" onClick={() => setShowLoginDialog(true)}>{t("login")}</Button><Button variant="ghost" onClick={() => setShowSignupDialog(true)}>{t("signup")}</Button></div>}
                   </div>
-                  <div className="md:hidden"><Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>{/* ... */}</Sheet></div>
+                  {/* 모바일 메뉴 버튼 */}
+                  <MobileMenuSheet
+                    isSheetOpen={isSheetOpen}
+                    setIsSheetOpen={setIsSheetOpen}
+                    isDarkMode={isDarkMode}
+                    setCurrentView={setCurrentView}
+                    isLoggedIn={isLoggedIn}
+                    isLoading={isLoading}
+                    user={user}
+                    logout={logout}
+                    setShowLoginDialog={setShowLoginDialog}
+                    setShowSignupDialog={setShowSignupDialog}
+                    currentView={currentView}
+                  />
                 </div>
               </div>
             </div>

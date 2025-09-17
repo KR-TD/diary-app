@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
 
-interface UserResponse {
+export interface UserResponse {
   id: number;
   name: string;
   email: string;

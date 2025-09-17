@@ -1,6 +1,7 @@
 {
   "app_title": "하루의 끝",
   "app_description": "고요한 밤, 하루를 돌아보며 마음을 정리해보세요",
+  "menu": "메뉴",
   "write_diary": "일기 쓰기",
   "diary_list": "일기 목록",
   "support_developer": "개발자 후원하기",
