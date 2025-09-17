@@ -1,5 +1,6 @@
-'use client'
+'use client';
 
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -10,24 +11,59 @@ import { Eye, MessageSquare, Share2, Bookmark, ChevronLeft, MoreVertical, Send, 
 import { formatDistanceToNowStrict } from 'date-fns';
 import { ko, enUS, ja, zhCN, Locale } from 'date-fns/locale';
 
-// Types
 interface BoardList {
-  id: number; title: string; profile: string; thumbnail: string | null; writer: string; view: number;
-  commentCount: number; loveCount: number; mood: string; boardCreateTime: string;
+  id: number;
+  title: string;
+  profile: string; // 프로필 이미지 url
+  thumbnail: string | null;
+  writer: string;
+  view: number;
+  commentCount: number;
+  loveCount: number;
+  mood: string;
+  boardCreateTime: string;
 }
+
 interface BoardDetailResponse extends BoardList {
-  content: string; writeTime: string; liked: boolean; imageUrl: string | null;
+  content: string;
+  writeTime: string;
+  liked: boolean;
+  thumbnail: string | null;
 }
-interface BoardListResponse { totalPage: number; list: BoardList[]; }
+
+interface BoardListResponse {
+  totalPage: number;
+  list: BoardList[];
+}
+
 interface CommentList {
-  id: number; userId: number; comment: string; profile: string; writer: string; createDate: string;
-  heart: number; liked: boolean; replyCommentCount: number; replies?: ReplyCommentList[];
+  id: number;
+  userId: number;
+  comment: string;
+  profile: string;
+  writer: string;
+  createDate: string;
+  heart: number;
+  liked: boolean;
+  replyCommentCount: number;
+  replies?: ReplyCommentList[];
 }
-interface CommentListResponse { list: CommentList[]; }
+
+interface CommentListResponse {
+  list: CommentList[];
+}
+
 interface ReplyCommentList {
-  id: number; userId: number; comment: string; profile: string; writer: string; createDate: string;
-  heart: number; liked: boolean;
+  id: number;
+  userId: number;
+  comment: string;
+  profile: string;
+  writer: string;
+  createDate: string;
+  heart: number;
+  liked: boolean;
 }
+
 type MoodKey = "JOY" | "SAD" | "ANGER" | "TIRED" | "LOVE" | "WORRY" | "ETC";
 type Cat = "latest" | "popular" | MoodKey;
 
@@ -46,6 +82,7 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
   const [isCommunityLoading, setIsCommunityLoading] = useState(false);
   const [cat, setCat] = useState<Cat>("latest");
   const [openedPost, setOpenedPost] = useState<BoardDetailResponse | null>(null);
+
   const [postComments, setPostComments] = useState<Record<string, CommentList[]>>({});
   const [commentInput, setCommentInput] = useState("");
   const [replyInput, setReplyInput] = useState<Record<string, string>>({});
@@ -70,14 +107,12 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
     setIsCommunityLoading(true);
-
     const token = localStorage.getItem('accessToken');
     const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
     let url = `https://code.haru2end.dedyn.io/api/board`;
     if (category === "latest") url += `/list?page=${page}&limit=${limit}`;
     else if (category === "popular") url += `/popular/list?page=${page}&limit=${limit}`;
     else url += `/mood/list?page=${page}&limit=${limit}&mood=${category}`;
-
     try {
       const response = await fetch(url, { headers });
       if (response.ok) {
@@ -87,9 +122,8 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
       } else {
         if (page === 0) setPosts([]);
       }
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-    } finally {
+    } catch (error) { }
+    finally {
       setIsCommunityLoading(false);
       isLoadingRef.current = false;
     }
@@ -98,7 +132,14 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
   const fetchCommentsForPost = useCallback(async (boardId: number, type: 'latest' | 'popular') => {
     const token = localStorage.getItem('accessToken');
     const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
-    const url = `https://code.haru2end.dedyn.io/api/comment/${token ? '' : 'guest/'}list/${type}/${boardId}`;
+    let url = `https://code.haru2end.dedyn.io/api/comment`;
+    if (token) {
+      url += (type === 'latest')
+        ? `/list/${boardId}` : `/popular/list/${boardId}`;
+    } else {
+      url += (type === 'latest')
+        ? `/guest/list/${boardId}` : `/guest/popular/list/${boardId}`;
+    }
     try {
       const response = await fetch(url, { headers });
       if (response.ok) {
@@ -107,15 +148,14 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
       } else {
         setPostComments(prev => ({ ...prev, [boardId.toString()]: [] }));
       }
-    } catch (error) {
-      console.error(`Error fetching comments for board ${boardId}:`, error);
-    }
+    } catch (error) { }
   }, []);
 
   const handleViewCommunityPostDetails = useCallback(async (id: number) => {
     const token = localStorage.getItem('accessToken');
     const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
-    const url = `https://code.haru2end.dedyn.io/api/board/${token ? id : `guest/${id}`}`;
+    let url = `https://code.haru2end.dedyn.io/api/board`;
+    url += token ? `/${id}` : `/guest/${id}`;
     try {
       const response = await fetch(url, { headers });
       if (response.ok) {
@@ -152,16 +192,145 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
     }
   }, [commentTab, fetchCommentsForPost, setAlertInfo, t]);
 
+  const fetchRepliesForComment = useCallback(async (commentId: number, postId: number) => {
+    const token = localStorage.getItem('accessToken');
+    const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
+    let url = `https://code.haru2end.dedyn.io/api/comment`;
+    url += token ? `/reply/list/${commentId}` : `/guest/reply/list/${commentId}`;
+    try {
+      const response = await fetch(url, { headers });
+      if (response.ok) {
+        const data = await response.json();
+        setPostComments(prev => {
+          const arr = (prev[postId.toString()] || []).map(comment => {
+            if (comment.id === commentId) return { ...comment, replies: data.list || [] };
+            return comment;
+          });
+          return { ...prev, [postId.toString()]: arr }
+        });
+      }
+    } catch (e) { }
+  }, []);
+
+  const createReplyComment = useCallback(async (commentId: number, text: string, postId: number) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return setAlertInfo({ isOpen: true, title: t("auth_error"), description: t("login_required") });
+    try {
+      const response = await fetch(`https://code.haru2end.dedyn.io/api/comment/reply/create/${commentId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ comment: text }),
+      });
+      if (response.status === 201) {
+        setReplyInput(input => ({ ...input, [commentId]: "" }));
+        fetchRepliesForComment(commentId, postId);
+        setPostComments(prev => {
+          const arr = (prev[postId.toString()] || []).map(comment =>
+            comment.id === commentId
+              ? { ...comment, replyCommentCount: comment.replyCommentCount + 1 }
+              : comment
+          );
+          return { ...prev, [postId.toString()]: arr }
+        });
+      }
+    } catch (e) { }
+  }, [fetchRepliesForComment, setAlertInfo, t]);
+
+  const handleToggleCommentLike = useCallback(async (commentId: number, isLiked: boolean, postId: number, isReply = false) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return setAlertInfo({ isOpen: true, title: t("auth_error"), description: t("login_required") });
+    const method = isLiked ? 'DELETE' : 'POST';
+    const endpoint = isLiked ? `/like/cancel/${commentId}` : `/like/${commentId}`;
+    try {
+      const response = await fetch(`https://code.haru2end.dedyn.io/api/comment${endpoint}`, {
+        method, headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (response.ok || response.status === 204) {
+        setPostComments(prev => {
+          const arr = (prev[postId.toString()] || []).map(comment => {
+            if (!isReply && comment.id === commentId) {
+              return { ...comment, liked: !isLiked, heart: comment.heart + (isLiked ? -1 : 1) };
+            }
+            if (isReply && comment.replies) {
+              return {
+                ...comment, replies: comment.replies.map(reply =>
+                  reply.id === commentId
+                    ? { ...reply, liked: !isLiked, heart: reply.heart + (isLiked ? -1 : 1) }
+                    : reply
+                )
+              };
+            }
+            return comment;
+          });
+          return { ...prev, [postId.toString()]: arr }
+        });
+      }
+    } catch (e) { }
+  }, [setAlertInfo, t]);
+
+  const togglePostLike = useCallback(async (postId: number, isLiked: boolean) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) { setAlertInfo({ isOpen: true, title: t('auth_error'), description: t('login_required') }); return }
+    const method = isLiked ? 'DELETE' : 'POST';
+    const endpoint = isLiked ? `/like/cancel/${postId}` : `/like/${postId}`;
+    try {
+      const response = await fetch(`https://code.haru2end.dedyn.io/api/board${endpoint}`, {
+        method,
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (response.ok || response.status === 204) {
+        setOpenedPost(prev => prev ? ({
+          ...prev,
+          liked: !isLiked,
+          loveCount: prev.loveCount + (isLiked ? -1 : 1),
+        }) : prev);
+        setPosts(prev => prev.map(p =>
+          p.id === postId ? { ...p, loveCount: p.loveCount + (isLiked ? -1 : 1) } : p
+        ));
+      }
+    } catch (e) {
+      setAlertInfo({ isOpen: true, title: t('network_error'), description: t('like_network_error') });
+    }
+  }, [t, setAlertInfo]);
+
+  const handleSharePost = useCallback(() => {
+    if (!openedPost) return;
+    const shareData = {
+      title: openedPost.title,
+      text: `"${openedPost.title}" 글을 확인해보세요!`,
+      url: `https://haru2end.com/board/${openedPost.id}`,
+    };
+    if (navigator.share) {
+      navigator.share(shareData).catch(() => { });
+    } else {
+      navigator.clipboard.writeText(shareData.url);
+      setAlertInfo({
+        isOpen: true,
+        title: t('share_link_copied'),
+        description: t('share_link_copied_description')
+      });
+    }
+  }, [openedPost, setAlertInfo, t]);
+
+  const handleToggleReplies = (commentId: number, postId: number, expanded: boolean) => {
+    setExpandedReplies(prev => ({ ...prev, [commentId]: !expanded }));
+    if (!expanded) fetchRepliesForComment(commentId, postId);
+  };
+  const handleSubmitReply = (commentId: number, postId: number) => {
+    const text = (replyInput[commentId] || '').trim();
+    if (text) createReplyComment(commentId, text, postId);
+  };
+
+  useEffect(() => {
+    fetchCommunityPosts(cat, communityCurrentPage, 10);
+  }, [cat, communityCurrentPage, fetchCommunityPosts]);
+
   useEffect(() => {
     if (initialPostId) {
       const postId = parseInt(initialPostId, 10);
       if (!isNaN(postId)) handleViewCommunityPostDetails(postId);
     }
   }, [initialPostId, handleViewCommunityPostDetails]);
-
-  useEffect(() => {
-    fetchCommunityPosts(cat, communityCurrentPage, 10);
-  }, [cat, communityCurrentPage, fetchCommunityPosts]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -185,11 +354,6 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
     setCommunityCurrentPage(0);
     setPosts([]);
     fetchCommunityPosts(cat, 0, 10);
-  };
-
-  const submitComment = () => {
-    if (!commentInput.trim() || !openedPost) return;
-    createComment(openedPost.id, commentInput.trim());
   };
 
   return (
@@ -219,7 +383,8 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
         <CardContent className="p-0">
           <ul className="divide-y divide-slate-800">
             {posts.map((p) => (
-              <li key={p.id} className="px-3 sm:px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer" onClick={() => handleViewCommunityPostDetails(p.id)}>
+              <li key={p.id} className="px-3 sm:px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer"
+                onClick={() => handleViewCommunityPostDetails(p.id)}>
                 <div className="flex items-start gap-3">
                   <Avatar className="w-10 h-10 border border-slate-700"><AvatarImage src={p.profile || undefined} alt="avatar" /><AvatarFallback>{p.writer.charAt(0)}</AvatarFallback></Avatar>
                   <div className="min-w-0 flex-1">
@@ -251,25 +416,52 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
         <div className="fixed inset-0 z-50 flex items-stretch sm:items-center justify-center p-0 sm:p-4 overscroll-contain" onClick={() => setOpenedPost(null)}>
           <Card onClick={(e) => e.stopPropagation()} className={`w-full h-full sm:max-w-2xl sm:h-auto sm:max-h-[90vh] flex flex-col rounded-none sm:rounded-2xl ${isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white"}`}>
             <CardHeader className="flex flex-row items-center justify-between p-2 sm:p-3 border-b shrink-0">
-               <Button variant="ghost" size="icon" onClick={() => setOpenedPost(null)}><ChevronLeft className="w-6 h-6" /></Button>
-               <div className="flex items-center gap-2">
-                 <Avatar className="w-8 h-8"><AvatarImage src={openedPost.profile} alt={openedPost.writer} /><AvatarFallback>{openedPost.writer.charAt(0)}</AvatarFallback></Avatar>
-                 <span className="font-semibold text-sm sm:text-base">{openedPost.writer}</span>
-               </div>
-               <Button variant="ghost" size="icon"><MoreVertical className="w-5 h-5" /></Button>
-             </CardHeader>
+              <Button variant="ghost" size="icon" onClick={() => setOpenedPost(null)}><ChevronLeft className="w-6 h-6" /></Button>
+              <div className="flex items-center gap-2">
+                <Avatar className="w-8 h-8"><AvatarImage src={openedPost.profile} alt={openedPost.writer} /><AvatarFallback>{openedPost.writer.charAt(0)}</AvatarFallback></Avatar>
+                <span className="font-semibold text-sm sm:text-base">{openedPost.writer}</span>
+              </div>
+              <Button variant="ghost" size="icon"><MoreVertical className="w-5 h-5" /></Button>
+            </CardHeader>
             <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4">
               <h2 className="text-xl sm:text-2xl font-bold">{openedPost.title}</h2>
               <div className="flex items-center gap-3 text-xs text-gray-500">
                 <span>{formatTimeAgo(openedPost.writeTime)}</span>
                 <span className="flex items-center gap-1"><Eye className="w-4 h-4" /> {openedPost.view}</span>
               </div>
-              {openedPost.imageUrl && <div className="my-4"><img src={openedPost.imageUrl} alt={openedPost.title} className="w-full h-auto rounded-lg border" /></div>}
+              {openedPost.thumbnail && (
+                <div className="my-4">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <img
+                        src={openedPost.thumbnail}
+                        alt={openedPost.title}
+                        className="w-64 h-64 object-cover rounded-lg border cursor-pointer"
+                      />
+                    </DialogTrigger>
+                    <DialogContent className="max-w-screen-md">
+                      <DialogTitle className="sr-only">{openedPost.title || "Image"}</DialogTitle>
+                      <img
+                        src={openedPost.thumbnail}
+                        alt={openedPost.title}
+                        className="w-full h-auto object-contain"
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              )}
               <div className={`prose prose-sm dark:prose-invert max-w-none leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{openedPost.content}</div>
               <div className="p-2 border-y flex items-center justify-around">
-                <Button variant="ghost" onClick={() => {}} className={`flex items-center gap-1.5 text-sm ${openedPost.liked ? 'text-pink-500 font-semibold' : ''}`}><Heart className="w-5 h-5" /> {openedPost.loveCount}</Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => togglePostLike(openedPost.id, openedPost.liked)}
+                  className={`flex items-center gap-1.5 text-sm ${openedPost.liked ? 'text-pink-500 font-semibold' : ''}`}>
+                  <Heart className="w-5 h-5" /> {openedPost.loveCount}
+                </Button>
                 <Button variant="ghost" className="flex items-center gap-1.5 text-sm"><Bookmark className="w-5 h-5" /> {t('bookmark')}</Button>
-                <Button variant="ghost" onClick={() => {}} className="flex items-center gap-1.5 text-sm"><Share2 className="w-5 h-5" /> {t('share')}</Button>
+                <Button variant="ghost" onClick={handleSharePost} className="flex items-center gap-1.5 text-sm">
+                  <Share2 className="w-5 h-5" /> {t('share')}
+                </Button>
               </div>
               <div>
                 <div className="flex items-center gap-4 border-b mb-4">
@@ -285,9 +477,53 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
                           <div className="text-sm"><span className="font-semibold">{comment.writer}</span><span className="text-gray-500 ml-2 text-xs">{formatTimeAgo(comment.createDate)}</span></div>
                           <p className="text-sm mt-1">{comment.comment}</p>
                           <div className="flex items-center gap-2 mt-1">
-                            <Button variant="ghost" size="sm" onClick={() => {}} className={`text-xs h-auto px-2 py-1 ${comment.liked ? 'text-pink-500' : 'text-gray-500'}`}><Heart className="w-3 h-3 mr-1" /> {comment.heart}</Button>
-                            <Button variant="ghost" size="sm" onClick={() => setExpandedReplies(prev => ({...prev, [comment.id]: !prev[comment.id]}))} className="text-xs h-auto px-2 py-1 text-gray-500">{t('reply')} {comment.replyCommentCount > 0 && comment.replyCommentCount}</Button>
+                            <Button variant="ghost" size="sm"
+                              onClick={() => handleToggleCommentLike(comment.id, comment.liked, openedPost.id, false)}
+                              className={`text-xs h-auto px-2 py-1 ${comment.liked ? 'text-pink-500' : 'text-gray-500'}`}>
+                              <Heart className="w-3 h-3 mr-1" /> {comment.heart}
+                            </Button>
+                            <Button variant="ghost" size="sm"
+                              onClick={() => handleToggleReplies(comment.id, openedPost.id, expandedReplies[comment.id])}
+                              className="text-xs h-auto px-2 py-1 text-gray-500">
+                              {t('reply')} {comment.replyCommentCount > 0 && comment.replyCommentCount}
+                            </Button>
                           </div>
+                          {expandedReplies[comment.id] &&
+                            <div className="pl-10 mt-3 space-y-2">
+                              {comment.replies && comment.replies.length === 0
+                                ? <div className="text-xs text-gray-400">{t("community_no_replies")}</div>
+                                : (comment.replies || []).map(reply =>
+                                  <div key={reply.id} className="flex items-start gap-2">
+                                    <Avatar className="w-7 h-7">
+                                      <AvatarImage src={reply.profile} alt={reply.writer} />
+                                      <AvatarFallback>{reply.writer.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                      <div className="text-xs"><span className="font-semibold">{reply.writer}</span><span className="text-gray-500 ml-2">{formatTimeAgo(reply.createDate)}</span></div>
+                                      <div className="text-sm">{reply.comment}</div>
+                                      <Button variant="ghost" size="sm"
+                                        onClick={() => handleToggleCommentLike(reply.id, reply.liked, openedPost.id, true)}
+                                        className={`text-xs h-auto px-2 py-1 ${reply.liked ? 'text-pink-500' : 'text-gray-500'}`}>
+                                        <Heart className="w-3 h-3 mr-1" /> {reply.heart}
+                                      </Button>
+                                    </div>
+                                  </div>
+                                )
+                              }
+                              <div className="flex items-center gap-2 mt-1">
+                                <Input value={replyInput[comment.id] || ""}
+                                  onChange={e => setReplyInput(prev => ({ ...prev, [comment.id]: e.target.value }))}
+                                  placeholder={t('community_reply_placeholder')}
+                                  className="h-8 text-xs" />
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleSubmitReply(comment.id, openedPost.id)}
+                                  disabled={!(replyInput[comment.id] || '').trim()}>
+                                  <Send className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          }
                         </div>
                       </div>
                     </div>
@@ -298,12 +534,12 @@ export function CommunityView({ isDarkMode, setAlertInfo, initialPostId }: Commu
             <div className="p-2 sm:p-3 border-t shrink-0">
               <div className="flex items-center gap-2">
                 <Input value={commentInput} onChange={(e) => setCommentInput(e.target.value)} placeholder={t('add_comment_placeholder')} className="h-10" />
-                <Button onClick={submitComment} disabled={!commentInput.trim()} className="h-10"><Send className="w-4 h-4" /></Button>
+                <Button onClick={() => openedPost && createComment(openedPost.id, commentInput.trim())} disabled={!commentInput.trim()} className="h-10"><Send className="w-4 h-4" /></Button>
               </div>
             </div>
           </Card>
         </div>
       )}
     </>
-  )
+  );
 }

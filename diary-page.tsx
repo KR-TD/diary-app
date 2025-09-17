@@ -11,6 +11,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import {
   Moon, Star, Heart, Sun, List as ListIcon, Pencil, Award, Gem, Camera, Smartphone, Mail, Menu,
   Eye, MessageSquare, Share2, Bookmark, ChevronLeft, MoreVertical, Send, RefreshCw
@@ -213,7 +214,18 @@ export default function Component({ boardId }: { boardId?: string }) {
       <CustomAlertDialog isOpen={alertInfo.isOpen} onClose={() => setAlertInfo(prev => ({...prev, isOpen: false}))} title={alertInfo.title} description={alertInfo.description} isDarkMode={isDarkMode} />
 
       {showAppPromo && <div className={`fixed z-50 ${isMobile ? "left-3 right-3 bottom-3" : "right-6 bottom-6 w-[360px]"}`}>{/* ... App Promo Banner ... */}</div>}
-      {zoomedImage && <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[9999] p-4" onClick={() => setZoomedImage(null)}>{/* ... Zoomed Image Modal ... */}</div>}
+      {zoomedImage && (
+        <Dialog open={!!zoomedImage} onOpenChange={() => setZoomedImage(null)}>
+          <DialogContent className="max-w-screen-lg p-0">
+            <DialogTitle className="sr-only">Zoomed Image</DialogTitle>
+            <img
+              src={zoomedImage}
+              alt="Zoomed Diary Image"
+              className="w-full h-auto object-contain max-h-[90vh]"
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 }
