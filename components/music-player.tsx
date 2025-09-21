@@ -4,11 +4,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Music, Play, Pause, Volume2 } from "lucide-react";
+import { Music, Play, Pause, Volume2, Upload } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MusicPlayerProps {
   isDarkMode: boolean;
+}
+
+interface MusicTrack {
+  name: string;
+  description: string;
+  url: string;
+  icon: string;
 }
 
 export function MusicPlayer({ isDarkMode }: MusicPlayerProps) {
@@ -22,8 +29,10 @@ export function MusicPlayer({ isDarkMode }: MusicPlayerProps) {
   const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [audioSupported, setAudioSupported] = useState(true);
   const [audioError, setAudioError] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [customMusic, setCustomMusic] = useState<MusicTrack | null>(null);
 
-  const musicTracks = [
+  const musicTracks: MusicTrack[] = [
     { name: t("music_track_rain_name"), description: t("music_track_rain_description"), url: "/music/rain-sounds.mp3", icon: "🌧️" },
     { name: t("music_track_bird_name"), description: t("music_track_bird_description"), url: "/music/bird-sounds.mp3", icon: "🐦" },
     { name: t("music_track_fire_name"), description: t("music_track_fire_description"), url: "/music/fire-sounds.mp3", icon: "🔥" },
@@ -79,8 +88,11 @@ export function MusicPlayer({ isDarkMode }: MusicPlayerProps) {
       audio.pause();
     } else {
       if (!audio.src) {
-        audio.src = musicTracks[currentTrack].url;
-        audio.load();
+        const track = currentTrack === musicTracks.length ? customMusic : musicTracks[currentTrack];
+        if (track) {
+          audio.src = track.url;
+          audio.load();
+        }
       }
       audio.play().catch(handleAudioError);
     }
@@ -91,14 +103,38 @@ export function MusicPlayer({ isDarkMode }: MusicPlayerProps) {
     setCurrentTrack(trackIndex);
     setAudioError(false);
     const audio = audioRef.current;
-    audio.src = musicTracks[trackIndex].url;
-    audio.load();
-    audio.play().catch(handleAudioError);
+    const track = trackIndex === musicTracks.length ? customMusic : musicTracks[trackIndex];
+    if (track) {
+      audio.src = track.url;
+      audio.load();
+      audio.play().catch(handleAudioError);
+    }
   };
 
   const handleVolumeChange = (newVolume: number) => {
     setVolume(newVolume);
   };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const fileURL = URL.createObjectURL(file);
+      const newMusicTrack: MusicTrack = {
+        name: file.name,
+        description: t("custom_track_description"),
+        url: fileURL,
+        icon: "🎵",
+      };
+      setCustomMusic(newMusicTrack);
+      changeTrack(musicTracks.length);
+    }
+  };
+
+  const openFileDialog = () => {
+    fileInputRef.current?.click();
+  };
+
+  const currentTrackDetails = currentTrack === musicTracks.length ? customMusic : musicTracks[currentTrack];
 
   return (
     <Card className={`backdrop-blur-sm border-0 shadow-lg mb-4 sm:mb-6 transition-all duration-500 ${isDarkMode ? "bg-slate-900/70 shadow-purple-500/20 border border-slate-700/50" : "bg-white/80 border border-rose-200/50 shadow-rose-200/20"}`}>
@@ -109,9 +145,11 @@ export function MusicPlayer({ isDarkMode }: MusicPlayerProps) {
             {!isMobile && (
               <div>
                 <h2 className={`font-medium ${isDarkMode ? "text-gray-200" : "text-rose-800"}`}>{t("background_music")}</h2>
-                <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
-                  {musicTracks[currentTrack].name} - {musicTracks[currentTrack].description}
-                </p>
+                {currentTrackDetails && (
+                  <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-rose-600"}`}>
+                    {currentTrackDetails.name} - {currentTrackDetails.description}
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -126,6 +164,21 @@ export function MusicPlayer({ isDarkMode }: MusicPlayerProps) {
                   {track.icon}
                 </Button>
               ))}
+              {customMusic && (
+                <Button onClick={() => changeTrack(musicTracks.length)} disabled={!audioSupported}
+                  className={`w-8 h-8 p-0 text-sm transition-all duration-200 ${!audioSupported ? "opacity-50 cursor-not-allowed" :
+                    currentTrack === musicTracks.length ? (isDarkMode ? "bg-purple-600 hover:bg-purple-700" : "bg-purple-500 hover:bg-purple-600") :
+                      (isDarkMode ? "bg-slate-700 hover:bg-slate-600 text-gray-300" : "bg-gray-200 hover:bg-gray-300 text-gray-600")}`}
+                  title={customMusic.name}>
+                  {customMusic.icon}
+                </Button>
+              )}
+              <input type="file" accept="audio/*" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
+              <Button onClick={openFileDialog} disabled={!audioSupported}
+                className={`w-8 h-8 p-0 text-sm transition-all duration-200 ${isDarkMode ? "bg-slate-700 hover:bg-slate-600 text-gray-300" : "bg-gray-200 hover:bg-gray-300 text-gray-600"}`}
+                title={t("upload_music")}>
+                <Upload className="w-4 h-4" />
+              </Button>
             </div>
             <div className="hidden sm:flex items-center gap-2">
               <Volume2 className={`w-4 h-4 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} />

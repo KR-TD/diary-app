@@ -142,5 +142,7 @@
   "password_hint": "必须至少8个字符，并包含字母、数字和特殊字符。",
   "confirm_password_hint": "密码必须匹配。",
   "settings": "设置",
-  "logout": "登出"
+  "logout": "登出",
+  "custom_track_description": "自定义音轨",
+  "upload_music": "上传音乐"
 }

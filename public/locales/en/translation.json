@@ -142,5 +142,7 @@
   "password_hint": "Must be at least 8 characters and include letters, numbers, and special characters.",
   "confirm_password_hint": "Passwords must match.",
   "settings": "Settings",
-  "logout": "Logout"
+  "logout": "Logout",
+  "custom_track_description": "Custom Track",
+  "upload_music": "Upload Music"
 }
